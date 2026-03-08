@@ -13,7 +13,6 @@ import type * as entities_resolveLeague from "../entities/resolveLeague.js";
 import type * as entities_resolveTeam from "../entities/resolveTeam.js";
 import type * as ingestion_fetchAndNormalizeToday from "../ingestion/fetchAndNormalizeToday.js";
 import type * as ingestion_fetchMatches from "../ingestion/fetchMatches.js";
-import type * as mappings_overrides from "../mappings/overrides.js";
 import type * as normalize_normalizeApi from "../normalize/normalizeApi.js";
 import type * as storage_saveHistoricalMatch from "../storage/saveHistoricalMatch.js";
 import type * as storage_saveTodayMatches from "../storage/saveTodayMatches.js";
@@ -31,7 +30,6 @@ declare const fullApi: ApiFromModules<{
   "entities/resolveTeam": typeof entities_resolveTeam;
   "ingestion/fetchAndNormalizeToday": typeof ingestion_fetchAndNormalizeToday;
   "ingestion/fetchMatches": typeof ingestion_fetchMatches;
-  "mappings/overrides": typeof mappings_overrides;
   "normalize/normalizeApi": typeof normalize_normalizeApi;
   "storage/saveHistoricalMatch": typeof storage_saveHistoricalMatch;
   "storage/saveTodayMatches": typeof storage_saveTodayMatches;

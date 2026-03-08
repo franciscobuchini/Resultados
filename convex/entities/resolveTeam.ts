@@ -1,14 +1,18 @@
-import { overrides } from "../mappings/overrides";
+import { query } from "../_generated/server";
+import { v } from "convex/values";
 
-export function resolveTeam(id: string) {
+// Devuelve tu ID interno de equipo según el api_id
+export const resolveTeam = query({
+  args: { apiId: v.string() },
 
-  const mapped = overrides.teams[id];
+  handler: async (ctx, args) => {
 
-  if (!mapped) {
-    console.log("UNKNOWN team", id);
-    return id;
-  }
+    const team = await ctx.db
+      .query("teams")
+      .withIndex("by_api_id", (q) => q.eq("api_id", args.apiId))
+      .first();
 
-  return mapped;
+    return team?.id ?? args.apiId;
 
-}
+  },
+});

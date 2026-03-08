@@ -1,27 +1,36 @@
-import { resolveCountry } from "../entities/resolveCountry";
-import { resolveLeague } from "../entities/resolveLeague";
+import { resolveCountryHelper } from "../entities/resolveCountry";
+import { resolveLeagueHelper } from "../entities/resolveLeague";
 
-// ahora normalizeApi es async porque consulta la BDD
 export async function normalizeApi(ctx: any, data: any) {
+
+  // 1. cargar todos los equipos una sola vez
+  const teams = await ctx.db.query("teams").collect();
+
+  // 2. crear mapa api_id → team
+  const teamMap = new Map();
+  for (const team of teams) {
+    teamMap.set(team.api_id, team);
+  }
 
   return {
     ...data,
 
-    leagues: await Promise.all(data.leagues.map(async (league: any) => {
+    leagues: await Promise.all(
+      data.leagues.map(async (league: any) => {
 
-      return {
-        ...league,
-        country_id: resolveCountry(league.country_id),
-        id: resolveLeague(league.id),
+        const countryId = await resolveCountryHelper(ctx, {
+          apiCountryId: league.country_id
+        });
 
-        games: await Promise.all(league.games.map(async (game: any) => {
+        const leagueId = await resolveLeagueHelper(ctx, {
+          apiId: league.id
+        });
 
-          const teamsWithData = await Promise.all(game.teams.map(async (team: any) => {
+        const games = league.games.map((game: any) => {
 
-            // buscar el equipo en la BDD por api_id
-            const teamData = await ctx.db.query("teams")
-              .filter((t: any) => t.api_id.eq(team.id))
-              .first();
+          const normalizedTeams = game.teams.map((team: any) => {
+
+            const teamData = teamMap.get(team.id);
 
             if (!teamData) {
               console.log("UNKNOWN team", team.id);
@@ -29,23 +38,29 @@ export async function normalizeApi(ctx: any, data: any) {
 
             return {
               ...team,
-              id: teamData?.id ?? team.id,             // tu ID interno o el original
+              id: teamData?.id ?? team.id,
               name: teamData?.name ?? team.name,
               country_id: teamData?.country_id ?? team.country_id,
-              crest_url: teamData?.crest_url ?? "",
-              extra: teamData?.extra ?? {}
+              crest_url: teamData?.crest_url ?? ""
             };
-          }));
+
+          });
 
           return {
             ...game,
-            teams: teamsWithData
+            teams: normalizedTeams
           };
 
-        }))
-      };
+        });
 
-    }))
+        return {
+          ...league,
+          id: leagueId,
+          country_id: countryId,
+          games
+        };
+
+      })
+    )
   };
-
 }
