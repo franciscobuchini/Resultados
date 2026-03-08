@@ -4,7 +4,7 @@ import { v } from "convex/values";
 
 export const fetchToday = action({
   args: {},
-  handler: async () => {
+  handler: async (ctx) => {
 
     const res = await fetch(
       "https://api.promiedos.com.ar/games/today?nocache=" + Date.now(),
@@ -27,7 +27,7 @@ export const fetchToday = action({
       throw new Error("Promiedos API returned empty data");
     }
 
-    return normalizeApi(data);
+    return normalizeApi(ctx, data);
   },
 });
 

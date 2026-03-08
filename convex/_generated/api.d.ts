@@ -11,6 +11,7 @@
 import type * as entities_resolveCountry from "../entities/resolveCountry.js";
 import type * as entities_resolveLeague from "../entities/resolveLeague.js";
 import type * as entities_resolveTeam from "../entities/resolveTeam.js";
+import type * as ingestion_fetchAndNormalizeToday from "../ingestion/fetchAndNormalizeToday.js";
 import type * as ingestion_fetchMatches from "../ingestion/fetchMatches.js";
 import type * as mappings_overrides from "../mappings/overrides.js";
 import type * as normalize_normalizeApi from "../normalize/normalizeApi.js";
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   "entities/resolveCountry": typeof entities_resolveCountry;
   "entities/resolveLeague": typeof entities_resolveLeague;
   "entities/resolveTeam": typeof entities_resolveTeam;
+  "ingestion/fetchAndNormalizeToday": typeof ingestion_fetchAndNormalizeToday;
   "ingestion/fetchMatches": typeof ingestion_fetchMatches;
   "mappings/overrides": typeof mappings_overrides;
   "normalize/normalizeApi": typeof normalize_normalizeApi;

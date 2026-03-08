@@ -1,42 +1,51 @@
 import { resolveCountry } from "../entities/resolveCountry";
-import { resolveTeam } from "../entities/resolveTeam";
 import { resolveLeague } from "../entities/resolveLeague";
-import { overrides } from "../mappings/overrides";
 
-export function normalizeApi(data: any) {
+// ahora normalizeApi es async porque consulta la BDD
+export async function normalizeApi(ctx: any, data: any) {
 
   return {
-
     ...data,
 
-    leagues: data.leagues.map((league: any) => ({
+    leagues: await Promise.all(data.leagues.map(async (league: any) => {
 
-      ...league,
+      return {
+        ...league,
+        country_id: resolveCountry(league.country_id),
+        id: resolveLeague(league.id),
 
-      country_id: resolveCountry(league.country_id),
+        games: await Promise.all(league.games.map(async (game: any) => {
 
-      id: resolveLeague(league.id),
+          const teamsWithData = await Promise.all(game.teams.map(async (team: any) => {
 
-      games: league.games.map((game: any) => ({
+            // buscar el equipo en la BDD por api_id
+            const teamData = await ctx.db.query("teams")
+              .filter((t: any) => t.api_id.eq(team.id))
+              .first();
 
-        ...game,
+            if (!teamData) {
+              console.log("UNKNOWN team", team.id);
+            }
 
-        id: overrides.games[game.id] ?? game.id,
+            return {
+              ...team,
+              id: teamData?.id ?? team.id,             // tu ID interno o el original
+              name: teamData?.name ?? team.name,
+              country_id: teamData?.country_id ?? team.country_id,
+              crest_url: teamData?.crest_url ?? "",
+              extra: teamData?.extra ?? {}
+            };
+          }));
 
-        teams: game.teams.map((team: any) => ({
-
-          ...team,
-
-          id: resolveTeam(team.id),
-
-          country_id: resolveCountry(team.country_id)
+          return {
+            ...game,
+            teams: teamsWithData
+          };
 
         }))
-
-      }))
+      };
 
     }))
-
   };
 
 }

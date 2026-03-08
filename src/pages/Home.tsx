@@ -1,20 +1,16 @@
 import { useEffect } from "react";
-import { useQuery, useAction, useMutation } from "convex/react";
+import { useQuery, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
 export default function Home() {
 
   const data = useQuery(api.today.getToday);
-
-  const fetchToday = useAction(api.today.fetchToday);
-  const saveToday = useMutation(api.today.saveToday);
+  const fetchAndNormalizeToday = useAction(api.ingestion.fetchAndNormalizeToday.fetchAndNormalizeToday);
 
   useEffect(() => {
     const load = async () => {
-      const result = await fetchToday();
-      await saveToday({ data: result });
+      await fetchAndNormalizeToday();  // hace todo: fetch -> normalize -> save
     };
-
     load();
   }, []);
 
