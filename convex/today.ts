@@ -1,4 +1,5 @@
 import { action, mutation, query } from "./_generated/server";
+import { normalizeApi } from "./normalize/normalizeApi";
 import { v } from "convex/values";
 
 export const fetchToday = action({
@@ -26,7 +27,7 @@ export const fetchToday = action({
       throw new Error("Promiedos API returned empty data");
     }
 
-    return data;
+    return normalizeApi(data);
   },
 });
 
