@@ -17,7 +17,7 @@ export default function Home() {
   if (!data) return <div>Cargando...</div>;
 
   return (
-    <div className="min-h-screen p-8 bg-gray-50">
+    <div className="min-h-screen p-8 bg-gray-500">
       <pre>{JSON.stringify(data, null, 2)}</pre>
     </div>
   );
