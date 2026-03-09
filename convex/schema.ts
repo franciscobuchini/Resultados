@@ -2,7 +2,6 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-
   countries: defineTable({
     id: v.string(),
     api_id: v.optional(v.string()),
@@ -28,7 +27,7 @@ export default defineSchema({
     away_score: v.optional(v.number()),
     stadium: v.optional(v.string()),
     referee: v.optional(v.string()),
-    goals: v.optional(v.string()),
+    goals: v.optional(v.any()),
     savedAt: v.number(),
   })
     .index("by_match_id", ["id"])
