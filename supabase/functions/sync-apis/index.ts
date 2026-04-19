@@ -54,6 +54,52 @@ Deno.serve(async () => {
         const data = await res.json()
         if (data && Object.keys(data).length > 0) {
           await supabase.from('apis').upsert({ id, data })
+          
+          if (data.games && Array.isArray(data.games)) {
+            const matchesProcesados = data.games.map((game: any) => {
+              const homeScore = game.homeCompetitor?.score === -1 ? null : game.homeCompetitor?.score
+              const awayScore = game.awayCompetitor?.score === -1 ? null : game.awayCompetitor?.score
+              const stageName = [game.roundName, game.roundNum, game.stageName].filter(Boolean).join(' ') || null
+              
+              // Formateamos la hora de inicio forzando la zona horaria de Argentina
+              const startTime = new Date(game.startTime);
+              const horaInicio = startTime.toLocaleTimeString('es-AR', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: false, 
+                timeZone: 'America/Argentina/Buenos_Aires' 
+              });
+              
+              return {
+                // NOTA: No enviamos 'match_id' aquí. Supabase generará el UUID alfanumérico automáticamente.
+                match_id_api: game.id,
+                tournament_id: game.competitionId,
+                match_date: game.startTime,
+                stage_name: stageName,
+                match_status: (game.statusGroup === 3 && game.gameTime >= 0) ? `${game.gameTime}'` : 
+                              (game.statusGroup === 2) ? horaInicio : 
+                              (game.statusText === 'Finalizado' ? 'Final' : (game.statusText || 'N/A')),
+                stadium_name: null,
+                home_team_id: game.homeCompetitor?.id,
+                home_team_name: game.homeCompetitor?.name,
+                home_penalty_score: game.homeCompetitor?.penaltyScore ?? null,
+                home_score: homeScore,
+                away_score: awayScore,
+                away_penalty_score: game.awayCompetitor?.penaltyScore ?? null,
+                away_team_name: game.awayCompetitor?.name,
+                away_team_id: game.awayCompetitor?.id
+              }
+            })
+            
+            if (matchesProcesados.length > 0) {
+              // Ordenamos por fecha (más nuevo primero) para que al abrir la tabla en Supabase también se vea ordenado
+              matchesProcesados.sort((a, b) => new Date(b.match_date).getTime() - new Date(a.match_date).getTime());
+
+              // Upsert basado exclusivamente en 'match_id_api' para no duplicar si la API nos contacta con el mismo partido más tarde.
+              const { error } = await supabase.from('matches').upsert(matchesProcesados, { onConflict: 'match_id_api' })
+              if (error) console.error("Error al guardar matches:", error)
+            }
+          }
         }
       }
     } catch {/* Silencio */}

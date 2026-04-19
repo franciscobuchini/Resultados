@@ -17,16 +17,37 @@
  * ==========================================================================================
  */
 
--- [PARA RECREAR LA ESTRUCTURA SI ES NECESARIO]
+-- [TABLA APIS CRUDOS]
 -- CREATE TABLE IF NOT EXISTS public.apis (
 --   id text primary key,
 --   data jsonb,
 --   updated_at timestamp with time zone default now()
 -- );
 
--- [POLÍTICA DE SEGURIDAD PARA FRONTEND]
+-- [TABLA MATCHES (Cruce limpio y unificador)]
+-- CREATE TABLE IF NOT EXISTS public.matches (
+--   match_id uuid primary key default gen_random_uuid(),
+--   match_id_api bigint unique not null,
+--   tournament_id integer,
+--   match_date timestamp with time zone,
+--   stage_name varchar(100),
+--   match_status varchar(50),
+--   stadium_name varchar(100),
+--   home_team_id integer,
+--   home_team_name varchar(100),
+--   home_penalty_score integer,
+--   home_score integer,
+--   away_score integer,
+--   away_penalty_score integer,
+--   away_team_name varchar(100),
+--   away_team_id integer
+-- );
+
+-- [POLÍTICAS DE SEGURIDAD PARA FRONTEND]
 -- ALTER TABLE public.apis ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.matches ENABLE ROW LEVEL SECURITY;
 -- CREATE POLICY "Lectura pública de apis" ON public.apis FOR SELECT USING (true);
+-- CREATE POLICY "Lectura pública de matches" ON public.matches FOR SELECT USING (true);
 
 -- [PROGRAMACIÓN DEL TRABAJO AUTOMÁTICO]
 -- SELECT cron.schedule('fetch-football-data', '* * * * *', $$
