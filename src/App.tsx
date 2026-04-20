@@ -57,7 +57,13 @@ export default function App() {
         ])
   
         if (resGames.data) setGames(resGames.data)
-        if (resSync.data?.[0]) setLastSync(new Date(resSync.data[0].updated_at).toLocaleTimeString())
+        if (resSync.data?.[0]) {
+          setLastSync(new Date(resSync.data[0].updated_at).toLocaleTimeString('es-AR', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: false 
+          }))
+        }
         if (resTeams.data) setTeams(resTeams.data)
       } catch (err) {
         console.error(err)
@@ -112,9 +118,9 @@ export default function App() {
                   <th className="py-1 pr-2 font-bold">FECHA</th>
                   <th className="py-1 pr-2 font-bold">FASE</th>
                   <th className="py-1 px-2 font-bold text-center">ESTADO</th>
-                  <th className="py-1 px-2 font-bold text-right">LOCAL</th>
+                  <th className="py-1 px-2 font-bold text-right pr-4">LOCAL</th>
                   <th className="py-1 px-2 font-bold text-center">SCORE</th>
-                  <th className="py-1 px-2 font-bold text-left">VISITANTE</th>
+                  <th className="py-1 px-2 font-bold text-left pl-4">VISITANTE</th>
                   <th className="py-1 pl-2 font-bold text-right opacity-60">UUID</th>
                 </tr>
               </thead>
@@ -135,21 +141,34 @@ export default function App() {
                     hour12: false 
                   });
 
-                  return (
-                  <tr key={g.match_id} className="hover:bg-zinc-900 transition-colors group">
-                    <td className="py-1 pr-2 text-zinc-500 font-bold">{g.match_id_api}</td>
-                    <td className={`py-1 pr-2 whitespace-nowrap font-bold ${isToday ? 'text-emerald-400' : 'text-zinc-200'}`}>
-                      {fDate(g.match_date)}
-                    </td>
-                    <td className="py-1 pr-2 truncate max-w-[100px] text-zinc-300">{g.stage_name || '-'}</td>
-                    <td className={`py-1 px-2 font-black text-center ${isLive ? 'text-red-500 animate-pulse' : (isToday ? 'text-emerald-400' : 'text-zinc-500')}`}>
-                      {isUpcoming ? localTime : g.match_status}
-                    </td>
-                    <td className={`py-1 px-2 text-right font-bold ${isLive ? 'text-white' : 'text-zinc-100'}`}>{g.home_team_name}</td>
-                    <td className={`py-1 px-2 text-center font-black min-w-[60px] text-[10px] ${isLive ? 'text-red-500' : (isUpcoming ? 'text-zinc-700' : 'text-emerald-400')}`}>
-                      {fScore(g.home_score, g.home_penalty_score)}:{fScore(g.away_score, g.away_penalty_score)}
-                    </td>
-                    <td className={`py-1 px-2 text-left font-bold ${isLive ? 'text-white' : 'text-zinc-100'}`}>{g.away_team_name}</td>
+                    const hCrest = teams.find(t => t.team_id === g.home_team_id)?.team_crest_url;
+                    const aCrest = teams.find(t => t.team_id === g.away_team_id)?.team_crest_url;
+
+                    return (
+                    <tr key={g.match_id} className="hover:bg-zinc-900 transition-colors group">
+                      <td className="py-1 pr-2 text-zinc-500 font-bold">{g.match_id_api}</td>
+                      <td className={`py-1 pr-2 whitespace-nowrap font-bold ${isToday ? 'text-emerald-400' : 'text-zinc-200'}`}>
+                        {fDate(g.match_date)}
+                      </td>
+                      <td className="py-1 pr-2 truncate max-w-[100px] text-zinc-300">{g.stage_name || '-'}</td>
+                      <td className={`py-1 px-2 font-black text-center ${isLive ? 'text-red-500 animate-pulse' : (isToday ? 'text-emerald-400' : 'text-zinc-500')}`}>
+                        {isUpcoming ? localTime : g.match_status}
+                      </td>
+                      <td className={`py-1 px-2 text-right font-bold ${isLive ? 'text-white' : 'text-zinc-100'}`}>
+                        <div className="flex items-center justify-end gap-2">
+                          {g.home_team_name}
+                          {hCrest && <img src={hCrest} className="w-3.5 h-3.5 object-contain" alt="" />}
+                        </div>
+                      </td>
+                      <td className={`py-1 px-2 text-center font-black min-w-[60px] text-[10px] ${isLive ? 'text-red-500' : (isUpcoming ? 'text-zinc-700' : 'text-emerald-400')}`}>
+                        {fScore(g.home_score, g.home_penalty_score)}:{fScore(g.away_score, g.away_penalty_score)}
+                      </td>
+                      <td className={`py-1 px-2 text-left font-bold ${isLive ? 'text-white' : 'text-zinc-100'}`}>
+                        <div className="flex items-center justify-start gap-2">
+                          {aCrest && <img src={aCrest} className="w-3.5 h-3.5 object-contain" alt="" />}
+                          {g.away_team_name}
+                        </div>
+                      </td>
                     <td className="py-1 pl-2 text-right text-zinc-500 text-[7px] italic">{g.match_id.split('-')[0]}</td>
                   </tr>
                   );
