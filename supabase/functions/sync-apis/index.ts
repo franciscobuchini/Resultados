@@ -57,30 +57,53 @@ Deno.serve(async () => {
         else if (isHalftime) status = 'ET'
         else if (g.gameTime > 0) status = `${g.gameTime}'`
         else {
-          // Para partidos programados, extraemos la hora HH:mm
           const date = new Date(g.startTime)
           status = date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })
         }
 
+        // Nuevo formato de ID: YYYYMMDD + HomeID + AwayID + TournamentID
+        const datePart = g.startTime.split('T')[0].replace(/-/g, '')
+        const customId = `${datePart}${g.homeCompetitor.id}${g.awayCompetitor.id}${g.competitionId}`
+
         return {
+          match_id: customId, // Seteamos el ID primario manualmente
           match_id_api: g.id,
           tournament_id: g.competitionId,
           match_date: g.startTime,
           stage_name: [g.roundName, g.roundNum, g.stageName].filter(Boolean).join(' ') || null,
           match_status: status,
-          home_team_id: formatTeamId(g.homeCompetitor.id),
+          home_team_id: String(g.homeCompetitor.id), // Sin padding como pediste
           home_team_name: g.homeCompetitor.name,
           home_score: g.homeCompetitor.score === -1 ? null : g.homeCompetitor.score,
           home_penalty_score: g.homeCompetitor.penaltyScore ?? null,
-          away_team_id: formatTeamId(g.awayCompetitor.id),
+          away_team_id: String(g.awayCompetitor.id), // Sin padding como pediste
           away_team_name: g.awayCompetitor.name,
           away_score: g.awayCompetitor.score === -1 ? null : g.awayCompetitor.score,
           away_penalty_score: g.awayCompetitor.penaltyScore ?? null
         }
       })
 
+      // Sincronizar equipos con el nuevo formato (String simple sin ceros)
+      const teamsToSync = new Map()
+      data.games.forEach((g: Game) => {
+        teamsToSync.set(String(g.homeCompetitor.id), {
+          team_id: String(g.homeCompetitor.id),
+          team_id_api: g.homeCompetitor.id,
+          team_name: g.homeCompetitor.name
+        })
+        teamsToSync.set(String(g.awayCompetitor.id), {
+          team_id: String(g.awayCompetitor.id),
+          team_id_api: g.awayCompetitor.id,
+          team_name: g.awayCompetitor.name
+        })
+      })
+
+      if (teamsToSync.size > 0) {
+        await supabase.from('teams').upsert(Array.from(teamsToSync.values()), { onConflict: 'team_id' })
+      }
+
       if (matches.length > 0) {
-        await supabase.from('matches').upsert(matches, { onConflict: 'match_id_api' })
+        await supabase.from('matches').upsert(matches, { onConflict: 'match_id' })
       }
     } catch (e) {
       console.error(`Error en API ${id}:`, e)

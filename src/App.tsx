@@ -185,20 +185,19 @@ export default function App() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="text-zinc-600 uppercase text-[8px] border-b border-zinc-900">
-                  <th className="py-1 pr-2 font-bold w-12">ID</th>
+                  <th className="py-1 pr-2 font-bold w-16">ID_SYS</th>
                   <th className="py-1 pr-2 font-bold w-6"></th>
                   <th className="py-1 pr-2 font-bold">NOMBRE</th>
                   <th className="py-1 px-2 font-bold text-center w-10">CLR</th>
                   <th className="py-1 px-2 font-bold text-center w-12">SHORT</th>
                   <th className="py-1 px-2 font-bold">ESTADIO</th>
                   <th className="py-1 px-2 font-bold">CIUDAD</th>
-                  <th className="py-1 pl-2 font-bold text-right opacity-60">UUID</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-900">
                 {teams.map(t => (
                   <tr key={t.team_id} className="hover:bg-zinc-900 transition-colors">
-                    <td className="py-1 pr-2 text-zinc-600 font-bold">{t.team_id_api}</td>
+                    <td className="py-1 pr-2 text-zinc-600 font-bold">{t.team_id}</td>
                     <td className="py-1 pr-2">
                       {t.team_crest_url ? (
                         <img src={t.team_crest_url} alt="" className="w-4 h-4 object-contain brightness-110" />
@@ -213,7 +212,6 @@ export default function App() {
                     <td className="py-1 px-2 text-center font-black text-white">{t.team_shortname}</td>
                     <td className="py-1 px-2 text-zinc-400">{t.team_stadium || '-'}</td>
                     <td className="py-1 px-2 text-zinc-500">{t.team_city || '-'}</td>
-                    <td className="py-1 pl-2 text-right text-zinc-500 text-[7px] italic">{t.team_id.split('-')[0]}</td>
                   </tr>
                 ))}
               </tbody>
