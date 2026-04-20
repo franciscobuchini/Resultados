@@ -159,14 +159,15 @@ export default function App() {
           </div>
         </section>
 
-        {/* TABLA DE EQUIPOS - VUELVE A SER TABLA NORMAL */}
-        <section className="pt-4">
+        {/* TABLA DE EQUIPOS */}
+        <section className="pt-4 pb-20">
           <h2 className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest mb-2">Directorio_Equipos</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="text-zinc-600 uppercase text-[8px] border-b border-zinc-900">
                   <th className="py-1 pr-2 font-bold w-12">ID</th>
+                  <th className="py-1 pr-2 font-bold w-6"></th>
                   <th className="py-1 pr-2 font-bold">NOMBRE</th>
                   <th className="py-1 px-2 font-bold text-center w-10">CLR</th>
                   <th className="py-1 px-2 font-bold text-center w-12">SHORT</th>
@@ -179,6 +180,13 @@ export default function App() {
                 {teams.map(t => (
                   <tr key={t.team_id} className="hover:bg-zinc-900 transition-colors">
                     <td className="py-1 pr-2 text-zinc-600 font-bold">{t.team_id_api}</td>
+                    <td className="py-1 pr-2">
+                      {t.team_crest_url ? (
+                        <img src={t.team_crest_url} alt="" className="w-4 h-4 object-contain brightness-110" />
+                      ) : (
+                        <div className="w-4 h-4 bg-zinc-800 rounded-sm" />
+                      )}
+                    </td>
                     <td className="py-1 pr-2 text-zinc-100 font-bold tracking-tight">{t.team_name}</td>
                     <td className="py-1 px-2 text-center">
                       <div className="w-2 h-2 mx-auto rounded-sm border border-white/10" style={{ backgroundColor: t.team_color || '#111' }} />
