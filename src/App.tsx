@@ -44,28 +44,32 @@ export default function App() {
   const [page, setPage] = useState(0)
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
+    const fetchData = async (isSilent = false) => {
+      if (!isSilent) setLoading(true)
       const from = page * PAGE_SIZE
       const to = from + PAGE_SIZE - 1
-
+  
       try {
         const [resGames, resSync, resTeams] = await Promise.all([
           supabase.from('matches').select('*').order('match_date', { ascending: false }).range(from, to),
           supabase.from('apis').select('updated_at').order('updated_at', { ascending: false }).limit(1),
           supabase.from('teams').select('*').order('team_name', { ascending: true })
         ])
-
+  
         if (resGames.data) setGames(resGames.data)
         if (resSync.data?.[0]) setLastSync(new Date(resSync.data[0].updated_at).toLocaleTimeString())
         if (resTeams.data) setTeams(resTeams.data)
       } catch (err) {
         console.error(err)
       } finally {
-        setLoading(false)
+        if (!isSilent) setLoading(false)
       }
     }
+
     fetchData()
+    const interval = setInterval(() => fetchData(true), 60000) // Refresca cada 60 segundos en silencio
+
+    return () => clearInterval(interval)
   }, [page])
 
   const fDate = (d: string) => new Date(d).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, ' ')
@@ -117,11 +121,19 @@ export default function App() {
               <tbody className="divide-y divide-zinc-900">
                 {games.map(g => {
                   const isLive = g.match_status.includes("'") || g.match_status === 'ET';
+                  const isUpcoming = g.home_score === null && g.away_score === null && g.match_status !== 'Final';
                   const matchDate = new Date(g.match_date);
                   const today = new Date();
                   const isToday = matchDate.getDate() === today.getDate() && 
                                   matchDate.getMonth() === today.getMonth() && 
                                   matchDate.getFullYear() === today.getFullYear();
+
+                  // Calculamos la hora local del cliente si el partido no ha empezado
+                  const localTime = matchDate.toLocaleTimeString(undefined, { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    hour12: false 
+                  });
 
                   return (
                   <tr key={g.match_id} className="hover:bg-zinc-900 transition-colors group">
@@ -131,10 +143,10 @@ export default function App() {
                     </td>
                     <td className="py-1 pr-2 truncate max-w-[100px] text-zinc-300">{g.stage_name || '-'}</td>
                     <td className={`py-1 px-2 font-black text-center ${isLive ? 'text-red-500 animate-pulse' : (isToday ? 'text-emerald-400' : 'text-zinc-500')}`}>
-                      {g.match_status}
+                      {isUpcoming ? localTime : g.match_status}
                     </td>
                     <td className={`py-1 px-2 text-right font-bold ${isLive ? 'text-white' : 'text-zinc-100'}`}>{g.home_team_name}</td>
-                    <td className={`py-1 px-2 text-center font-black min-w-[60px] text-[10px] ${isLive ? 'text-red-500' : 'text-emerald-400'}`}>
+                    <td className={`py-1 px-2 text-center font-black min-w-[60px] text-[10px] ${isLive ? 'text-red-500' : (isUpcoming ? 'text-zinc-700' : 'text-emerald-400')}`}>
                       {fScore(g.home_score, g.home_penalty_score)}:{fScore(g.away_score, g.away_penalty_score)}
                     </td>
                     <td className={`py-1 px-2 text-left font-bold ${isLive ? 'text-white' : 'text-zinc-100'}`}>{g.away_team_name}</td>
