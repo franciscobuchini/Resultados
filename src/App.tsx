@@ -96,7 +96,7 @@ export default function App() {
                   <th className="p-2 border-r border-zinc-800 w-20">ID (API)</th>
                   <th className="p-2 border-r border-zinc-800 text-emerald-400 w-24">Fecha</th>
                   <th className="p-2 border-r border-zinc-800">Fase</th>
-                  <th className="p-2 border-r border-zinc-800 w-20">Estado</th>
+                  <th className="p-2 border-r border-zinc-800 w-20 text-center">Estado</th>
                   <th className="p-2 border-r border-zinc-800 text-right">Local</th>
                   <th className="p-2 border-r border-zinc-800 text-center bg-zinc-800 text-white min-w-[70px]">Score</th>
                   <th className="p-2 border-r border-zinc-800">Visitante</th>
@@ -106,14 +106,26 @@ export default function App() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-900">
-                {games.map(g => (
+                {games.map(g => {
+                  const isLive = g.match_status.includes("'") || g.match_status === 'ET';
+                  const matchDate = new Date(g.match_date);
+                  const today = new Date();
+                  const isToday = matchDate.getDate() === today.getDate() && 
+                                  matchDate.getMonth() === today.getMonth() && 
+                                  matchDate.getFullYear() === today.getFullYear();
+
+                  return (
                   <tr key={g.match_id} className="hover:bg-zinc-900/50 transition-colors group text-zinc-400">
                     <td className="p-2 border-r border-zinc-900 font-bold text-white bg-zinc-900/20">{g.match_id_api}</td>
-                    <td className="p-2 border-r border-zinc-900 text-zinc-100 font-bold whitespace-nowrap">{fDate(g.match_date)}</td>
+                    <td className={`p-2 border-r border-zinc-900 font-bold whitespace-nowrap ${isToday ? 'text-emerald-400' : 'text-zinc-100'}`}>
+                      {fDate(g.match_date)}
+                    </td>
                     <td className="p-2 border-r border-zinc-900 truncate max-w-[100px]">{g.stage_name || '-'}</td>
-                    <td className={`p-2 border-r border-zinc-900 font-black ${g.match_status.includes("'") ? 'text-emerald-400' : 'text-zinc-500'}`}>{g.match_status}</td>
+                    <td className={`p-2 border-r border-zinc-900 font-black text-center ${isLive ? 'text-red-500 animate-pulse' : (isToday ? 'text-emerald-400' : 'text-zinc-500')}`}>
+                      {g.match_status}
+                    </td>
                     <td className="p-2 border-r border-zinc-900 text-right font-bold text-white ">{g.home_team_name}</td>
-                    <td className="p-2 border-r border-zinc-900 text-center bg-zinc-800/10 text-emerald-400 font-black text-[11px]">
+                    <td className={`p-2 border-r border-zinc-900 text-center bg-zinc-800/10 font-black text-[11px] ${isLive ? 'text-red-500' : 'text-emerald-400'}`}>
                       {fScore(g.home_score, g.home_penalty_score)} : {fScore(g.away_score, g.away_penalty_score)}
                     </td>
                     <td className="p-2 border-r border-zinc-900 font-bold text-white ">{g.away_team_name}</td>
@@ -121,7 +133,8 @@ export default function App() {
                     <td className="p-2 border-r border-zinc-900 text-zinc-700">{g.tournament_id}</td>
                     <td className="p-2 text-zinc-800 italic">{g.match_id.split('-')[0]}</td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

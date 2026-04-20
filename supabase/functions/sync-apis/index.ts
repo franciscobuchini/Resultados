@@ -50,9 +50,17 @@ Deno.serve(async () => {
 
       const matches = data.games.map((g: Game) => {
         const isFinal = g.statusGroup === 4 || g.statusGroup === 5 || g.statusText === 'Finalizado'
-        const status = (!isFinal && g.gameTime > 0)
-          ? `${g.gameTime}'`
-          : isFinal ? 'Final' : (g.statusText || 'N/A')
+        const isHalftime = g.statusText === 'Entretiempo' || g.statusText === 'Descanso' || g.statusText === 'Medio Tiempo'
+
+        let status = g.statusText || 'N/A'
+        if (isFinal) status = 'Final'
+        else if (isHalftime) status = 'ET'
+        else if (g.gameTime > 0) status = `${g.gameTime}'`
+        else {
+          // Para partidos programados, extraemos la hora HH:mm
+          const date = new Date(g.startTime)
+          status = date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })
+        }
 
         return {
           match_id_api: g.id,
