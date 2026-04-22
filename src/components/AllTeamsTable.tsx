@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../functions/supabaseClient'
 
+interface Team {
+  team_id: string;
+  team_id_api: number;
+  team_color?: string | null;
+  team_crest_url?: string | null;
+  team_country_id?: string | null;
+  [key: string]: string | number | null | undefined;
+}
+
 export default function AllTeamsTable() {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -46,8 +55,8 @@ export default function AllTeamsTable() {
                     <td key={col} className="border border-zinc-800 p-1">
                       <div 
                         className="w-full h-6 rounded-sm shadow-inner" 
-                        style={{ backgroundColor: value }}
-                        title={value}
+                        style={{ backgroundColor: value as string }}
+                        title={value as string}
                       />
                     </td>
                   )
@@ -59,7 +68,7 @@ export default function AllTeamsTable() {
                     <td key={col} className="border border-zinc-800 p-1">
                       <div className="flex justify-center">
                         <img 
-                          src={value} 
+                          src={value as string} 
                           alt="crest" 
                           className="h-6 w-auto object-contain"
                           onError={(e) => (e.currentTarget.style.display = 'none')} 

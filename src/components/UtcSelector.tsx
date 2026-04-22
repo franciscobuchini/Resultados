@@ -5,19 +5,6 @@ interface UtcSelectorProps {
   onOffsetChange: (offset: number) => void;
 }
 
-// Lógica de conversión universal exportada para todo el proyecto
-export const formatTimeWithOffset = (timeStr: string, offset: number) => {
-  if (!timeStr) return '--:--'
-  try {
-    const [h, m] = timeStr.split(':').map(Number)
-    let newH = (h + offset) % 24
-    if (newH < 0) newH += 24
-    const hh = String(newH).padStart(2, '0')
-    const mm = String(m).padStart(2, '0')
-    return `${hh}:${mm}`
-  } catch (e) { return timeStr }
-}
-
 const OFFSETS = [
   { label: 'USW (UTC-8)', value: -8 },
   { label: 'USE (UTC-5)', value: -5 },
@@ -34,7 +21,7 @@ export default function UtcSelector({ currentOffset, onOffsetChange }: UtcSelect
     <div className="relative inline-block text-left">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-zinc-900 border border-zinc-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2 hover:border-zinc-500 transition-colors shadow-2xl"
+        className="bg-zinc-900 border border-zinc-700 px-3 sm:px-4 h-8 sm:h-10 rounded-full flex items-center gap-1 sm:gap-2 hover:border-zinc-500 transition-colors shadow-2xl"
       >
         <span className="text-[10px] sm:text-xs text-zinc-400 hidden sm:inline">Zona:</span>
         <span className="text-[10px] sm:text-xs text-white font-bold">

@@ -1,13 +1,30 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../functions/supabaseClient'
-import { formatTimeWithOffset } from './UtcSelector'
+import { formatTimeWithOffset } from '../utils/time'
 
 interface AllMatchesTableProps {
   utcOffset: number;
 }
 
+interface Match {
+  match_id: string;
+  match_date: string;
+  match_time_utc: string;
+  match_status: string;
+  game_time: number;
+  home_id: string;
+  home_name: string;
+  home_score: number | null;
+  away_id: string;
+  away_name: string;
+  away_score: number | null;
+  tournament_id: string;
+  match_round: string;
+  [key: string]: string | number | null; // Tipos específicos permitidos
+}
+
 export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -24,7 +41,7 @@ export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
     fetchData()
   }, [])
 
-  const getMatchInfo = (row: any) => {
+  const getMatchInfo = (row: Match) => {
     const status = row.match_status?.toLowerCase() || ''
     const gameTime = row.game_time
     const matchDate = row.match_date
@@ -35,7 +52,7 @@ export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
 
     const time = formatTimeWithOffset(row.match_time_utc, utcOffset)
     if (matchDate === today) return time
-    const [_, mm, dd] = matchDate.split('-')
+    const [, mm, dd] = matchDate.split('-')
     return `${dd}/${mm} ${time}`
   }
 

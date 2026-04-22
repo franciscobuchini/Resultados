@@ -34,7 +34,7 @@ export default function SyncStatus() {
   }, [])
 
   return (
-    <div className="bg-zinc-900 border border-zinc-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2 sm:gap-3 shadow-2xl">
+    <div className="bg-zinc-900 border border-zinc-700 px-3 sm:px-4 h-8 sm:h-10 rounded-full flex items-center gap-2 sm:gap-3 shadow-2xl">
       <div className="flex items-center">
         <span className="text-[10px] sm:text-sm text-green-400">
           {loading ? '...' : (
