@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../functions/supabaseClient'
+import { formatTimeWithOffset } from './UtcSelector'
 
 interface AllMatchesTableProps {
   utcOffset: number;
@@ -22,17 +23,6 @@ export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
     }
     fetchData()
   }, [])
-
-  const formatTimeWithOffset = (timeStr: string, offset: number) => {
-    if (!timeStr) return '--:--'
-    try {
-      const [h, m] = timeStr.split(':').map(Number)
-      const date = new Date()
-      date.setUTCHours(h, m, 0)
-      date.setHours(date.getHours() + offset)
-      return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })
-    } catch (e) { return timeStr }
-  }
 
   const getMatchInfo = (row: any) => {
     const status = row.match_status?.toLowerCase() || ''
