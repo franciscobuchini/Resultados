@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import SyncStatus from './components/SyncStatus'
-import AllMatchTable from './components/AllMatchTable'
+import AllMatchesTable from './components/AllMatchesTable'
+import AllTeamsTable from './components/AllTeamsTable'
 import UtcSelector from './components/UtcSelector'
 
 export default function App() {
@@ -14,7 +15,7 @@ export default function App() {
   }, [utcOffset])
 
   return (
-    <div className="bg-neutral-900 min-h-screen">
+    <div className="bg-neutral-900 min-h-screen pb-20">
       {/* Header flotante con los controles */}
       <div className="fixed bottom-6 right-6 flex items-center gap-3 z-50">
         <UtcSelector currentOffset={utcOffset} onOffsetChange={setUtcOffset} />
@@ -22,7 +23,11 @@ export default function App() {
       </div>
 
       <div className="pt-2">
-        <AllMatchTable utcOffset={utcOffset} />
+        {/* Tabla de Equipos */}
+        <AllTeamsTable />
+        
+        {/* Tabla de Partidos */}
+        <AllMatchesTable utcOffset={utcOffset} />
       </div>
     </div>
   )
