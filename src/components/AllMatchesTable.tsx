@@ -32,7 +32,6 @@ export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
 
   useEffect(() => {
     const fetchData = async () => {
-  
       const from = page * PAGE_SIZE
       const to = from + PAGE_SIZE - 1
 
@@ -44,8 +43,30 @@ export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
       
       if (matches) setData(matches)
       if (count !== null) setTotal(count)
+      setLoading(false)
     }
+
     fetchData()
+
+    // Suscribirse a cambios en tiempo real
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'matches' },
+        () => {
+          fetchData() // Recargar datos cuando algo cambie
+        }
+      )
+      .subscribe()
+
+    // 2. Polling de respaldo cada 60s
+    const interval = setInterval(fetchData, 60000)
+
+    return () => {
+      supabase.removeChannel(channel)
+      clearInterval(interval)
+    }
   }, [page])
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
