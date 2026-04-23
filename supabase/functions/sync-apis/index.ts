@@ -6,13 +6,22 @@ Deno.serve(async () => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   )
 
-  const apis: Record<string, string> = {
-    results: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
-    fixtures: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=346&competitions=72&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`
-  }
-
   try {
-    for (const [id, url] of Object.entries(apis)) {
+    // Intentar leer el tipo de la petición (por defecto ambos)
+    let type = 'all';
+    try {
+      const body = await req.json();
+      type = body.type || 'all';
+    } catch (e) { /* ignore */ }
+
+    const allApis: Record<string, string> = {
+      results: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      fixtures: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=346&competitions=72&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`
+    }
+
+    const toSync = type === 'all' ? Object.entries(allApis) : Object.entries(allApis).filter(([id]) => id === type);
+
+    for (const [id, url] of toSync) {
       const res = await fetch(url, { 
         headers: { 
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', 
@@ -28,7 +37,6 @@ Deno.serve(async () => {
       if (!res.ok) continue
       const data = await res.json()
 
-      // Guardamos únicamente el JSON bruto en la tabla 'apis'
       await supabase.from('apis').upsert({ 
         id, 
         data, 

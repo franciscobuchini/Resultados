@@ -77,7 +77,19 @@ export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
     const today = new Date().toISOString().split('T')[0]
     
     if (status.includes('final') || status.includes('term')) return row.match_status
-    if (gameTime > 0 && !status.includes('final')) return `${gameTime}'`
+    if (status.includes('descanso') || status.includes('entretiempo') || status.includes('half time')) return 'Entretiempo'
+
+    if (gameTime > 0) {
+      // Formato 45+X' para el primer tiempo
+      if (gameTime > 45 && (status.includes('1') || status.includes('primero') || status.includes('1st'))) {
+        return `45'+${gameTime - 45}'`
+      }
+      // Formato 90+X' para el segundo tiempo
+      if (gameTime > 90 && (status.includes('2') || status.includes('segundo') || status.includes('2nd'))) {
+        return `90'+${gameTime - 90}'`
+      }
+      return `${gameTime}'`
+    }
 
     const time = formatTimeWithOffset(row.match_time_utc, utcOffset)
     if (matchDate === today) return time
