@@ -43,7 +43,6 @@ export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
       
       if (matches) setData(matches)
       if (count !== null) setTotal(count)
-      setLoading(false)
     }
 
     fetchData()
