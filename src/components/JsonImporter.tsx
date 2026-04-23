@@ -26,6 +26,7 @@ interface MappedMatch {
   match_status: string; game_time: number
   home_id: string; home_name: string; home_score: number | null
   away_id: string; away_name: string; away_score: number | null
+  home_penalty: number | null; away_penalty: number | null
   tournament_id: string; match_round: string
   stadium_name: string | null; match_notes: string | null
 }
@@ -66,6 +67,25 @@ function parseGoals(str: string, matchId: string, teamId: string, side: 'H'|'A')
     goals.push({ goal_id: `${matchId}_${side}${i+1}`, match_id: matchId, team_id: teamId, goal_minute: minute, player_name: player, goal_type: gtype })
   }
   return goals
+}
+
+function parsePenalties(notes: string, home: string, away: string) {
+  if (!notes || !/penal/i.test(notes)) return { hp: null, ap: null }
+  const m = notes.match(/(\d+)\s*-\s*(\d+)/)
+  if (!m) return { hp: null, ap: null }
+  
+  const s1 = parseInt(m[1]), s2 = parseInt(m[2])
+  const win = Math.max(s1, s2), los = Math.min(s1, s2)
+  
+  // Fuzzy Match: buscamos palabras significativas del equipo en la nota
+  const check = (name: string) => {
+    const words = name.toLowerCase().split(/\s+/).filter(w => w.length > 3)
+    return words.some(w => notes.toLowerCase().includes(w))
+  }
+
+  if (check(home)) return { hp: win, ap: los }
+  if (check(away)) return { hp: los, ap: win }
+  return { hp: null, ap: null }
 }
 
 // ── Componente ─────────────────────────────────────────
@@ -182,11 +202,14 @@ export default function JsonImporter() {
         const datePart = matchDate.replace(/-/g, '')
         const matchId = (homeId && awayId) ? `${datePart}${homeId}${awayId}` : ''
 
+        const penalties = parsePenalties(r.Notas, r.Equipo1, r.Equipo2)
+
         const match: MappedMatch = {
           match_id: matchId, match_date: matchDate, match_time_utc: '00:00:00',
           match_status: 'Finalizado', game_time: 0,
           home_id: homeId, home_name: r.Equipo1, home_score: r.Goles1 ?? null,
           away_id: awayId, away_name: r.Equipo2, away_score: r.Goles2 ?? null,
+          home_penalty: penalties.hp, away_penalty: penalties.ap,
           tournament_id: gid, match_round: /^\d+$/.test(String(r.N_Fecha || '').trim()) ? `Fecha ${String(r.N_Fecha).trim()}` : (r.N_Fecha || 'Fase Regular'),
           stadium_name: r.Estadio || null, match_notes: r.Notas || null,
         }
@@ -486,7 +509,14 @@ export default function JsonImporter() {
                       </div>
                     </td>
                     <td className={`border border-zinc-800 p-2 whitespace-nowrap font-bold ${hOk ? 'text-zinc-100' : 'text-red-300'}`}>{row.home_name}</td>
-                    <td className="border border-zinc-800 p-2 text-center text-zinc-100 font-bold whitespace-nowrap">{row.home_score ?? '-'} - {row.away_score ?? '-'}</td>
+                    <td className="border border-zinc-800 p-2 text-center text-zinc-100 font-bold whitespace-nowrap">
+                      {row.home_score ?? '-'} - {row.away_score ?? '-'}
+                      {(row.home_penalty !== null || row.away_penalty !== null) && (
+                        <div className="text-[8px] text-amber-500 font-normal mt-0.5">
+                          ({row.home_penalty ?? '?'}-{row.away_penalty ?? '?'})
+                        </div>
+                      )}
+                    </td>
                     <td className={`border border-zinc-800 p-2 whitespace-nowrap font-bold ${aOk ? 'text-zinc-100' : 'text-red-300'}`}>{row.away_name}</td>
                     <td className="border border-zinc-800 p-0">
                       <div className="flex items-center">

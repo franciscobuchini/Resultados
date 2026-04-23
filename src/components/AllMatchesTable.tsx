@@ -15,6 +15,8 @@ interface Match {
   away_id: string;
   away_name: string;
   away_score: number | null;
+  home_penalty: number | null;
+  away_penalty: number | null;
   tournament_id: string;
   match_round: string;
   [key: string]: string | number | null; // Tipos específicos permitidos
@@ -142,9 +144,15 @@ export default function AllMatchesTable() {
                 if (col === 'status') {
                   displayValue = getMatchInfo(row)
                 }
+                if (col === 'home_score' && row.home_penalty !== null) {
+                  displayValue = `(${row.home_penalty}) ${row.home_score ?? 0}`
+                }
+                if (col === 'away_score' && row.away_penalty !== null) {
+                  displayValue = `${row.away_score ?? 0} (${row.away_penalty})`
+                }
 
                 return (
-                  <td key={col} className={`border border-zinc-800 p-2 whitespace-nowrap text-zinc-300 ${col === 'status' ? 'text-green-400 font-bold' : ''}`}>
+                  <td key={col} className={`border border-zinc-800 p-2 whitespace-nowrap text-zinc-300 ${col === 'status' ? 'text-green-400 font-bold' : (col === 'home_score' || col === 'away_score') ? 'text-zinc-100 font-bold' : ''}`}>
                     <div className="flex items-center justify-center gap-2">
                       {displayValue === null ? <span className="text-zinc-700">null</span> : String(displayValue)}
                       {col === 'match_id' && row.match_notes && (
