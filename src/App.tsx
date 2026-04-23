@@ -4,6 +4,7 @@ import AllMatchesTable from './components/AllMatchesTable'
 import AllTeamsTable from './components/AllTeamsTable'
 import UtcSelector from './components/UtcSelector'
 import JsonImporter from './components/JsonImporter'
+import ReadmeViewer from './components/ReadmeViewer'
 
 export default function App() {
   const [utcOffset, setUtcOffset] = useState<number>(() => {
@@ -33,7 +34,8 @@ export default function App() {
         {/* Tabla de Equipos */}
         <AllTeamsTable />
         
-
+        {/* Visualizador de README */}
+        <ReadmeViewer />
       </div>
     </div>
   )
