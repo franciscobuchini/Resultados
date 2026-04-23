@@ -10,3 +10,8 @@ export const formatTimeWithOffset = (timeStr: string, offset: number) => {
     return `${hh}:${mm}`
   } catch { return timeStr }
 }
+
+export const adjustDateWithOffset = (date: Date, offset: number) => {
+  // Simplemente sumamos las horas al timestamp UTC
+  return new Date(date.getTime() + (offset * 3600000));
+}

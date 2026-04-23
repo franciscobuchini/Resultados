@@ -12,7 +12,10 @@ export default function ReadmeViewer() {
     <br/> - Tabla de usuarios (inicio de sesión)
     <br/> - Completar tabla de equipos.
     <br/> - Normalizacion de nombres de los equipos. (Resolver problema de Central Córdoba, etc) 
-    <br/> - sincronizador ligado al UTC
+    <br/> - Zonas: zona A zona B
+    <br/> - Hay partidos unicos entre campeonatos
+    <br/> - FALTA Copa de la superliga 2019.
+    
     </div>
   )
 }

@@ -1,9 +1,5 @@
 import { useState } from 'react'
-
-interface UtcSelectorProps {
-  currentOffset: number;
-  onOffsetChange: (offset: number) => void;
-}
+import { useTime } from '../contexts/TimeContext'
 
 const OFFSETS = [
   { label: 'USW (UTC-7)', value: -7 },
@@ -14,7 +10,8 @@ const OFFSETS = [
   { label: 'UTC+2 (EUR)', value: 2 },
 ]
 
-export default function UtcSelector({ currentOffset, onOffsetChange }: UtcSelectorProps) {
+export default function UtcSelector() {
+  const { utcOffset: currentOffset, setUtcOffset: onOffsetChange } = useTime()
   const [isOpen, setIsOpen] = useState(false)
 
   return (

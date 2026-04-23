@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../functions/supabaseClient'
 import { formatTimeWithOffset } from '../utils/time'
-
-interface AllMatchesTableProps {
-  utcOffset: number;
-}
+import { useTime } from '../contexts/TimeContext'
 
 interface Match {
   match_id: string;
@@ -25,7 +22,8 @@ interface Match {
 
 const PAGE_SIZE = 100
 
-export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
+export default function AllMatchesTable() {
+  const { utcOffset } = useTime()
   const [data, setData] = useState<Match[]>([])
   const [page, setPage] = useState(0)
   const [total, setTotal] = useState(0)

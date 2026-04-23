@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../functions/supabaseClient'
+import { useTime } from '../contexts/TimeContext'
+import { adjustDateWithOffset } from '../utils/time'
 
 export default function SyncStatus() {
   const [lastSync, setLastSync] = useState('')
   const [loading, setLoading] = useState(false)
+  const { utcOffset } = useTime()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -16,9 +19,12 @@ export default function SyncStatus() {
           .limit(1)
 
         if (data?.[0]) {
-          const date = new Date(data[0].updated_at)
-          const dateStr = date.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' })
-          const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })
+          const rawDate = new Date(data[0].updated_at)
+          // Ajustamos la fecha al offset global
+          const adjustedDate = adjustDateWithOffset(rawDate, utcOffset)
+          
+          const dateStr = adjustedDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', timeZone: 'UTC' })
+          const timeStr = adjustedDate.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' })
           setLastSync(`${dateStr} ${timeStr}`)
         }
       } catch (err) {
@@ -31,7 +37,7 @@ export default function SyncStatus() {
     fetchData()
     const interval = setInterval(fetchData, 60000)
     return () => clearInterval(interval)
-  }, [])
+  }, [utcOffset]) // Dependemos del offset para refrescar el string
 
   return (
     <div className="bg-zinc-900 border border-zinc-700 px-3 sm:px-4 h-8 sm:h-10 rounded-full flex items-center gap-2 sm:gap-3 shadow-2xl">
