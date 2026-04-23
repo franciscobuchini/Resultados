@@ -6,7 +6,7 @@ interface UtcSelectorProps {
 }
 
 const OFFSETS = [
-  { label: 'USW (UTC-8)', value: -8 },
+  { label: 'USW (UTC-7)', value: -7 },
   { label: 'USE (UTC-5)', value: -5 },
   { label: 'UTC-3 (ARG)', value: -3 },
   { label: 'UTC+0 (GMT)', value: 0 },

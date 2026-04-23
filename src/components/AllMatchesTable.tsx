@@ -23,23 +23,32 @@ interface Match {
   [key: string]: string | number | null; // Tipos específicos permitidos
 }
 
+const PAGE_SIZE = 100
+
 export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
   const [data, setData] = useState<Match[]>([])
-  const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(0)
+  const [total, setTotal] = useState(0)
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true)
-      const { data: matches } = await supabase
+  
+      const from = page * PAGE_SIZE
+      const to = from + PAGE_SIZE - 1
+
+      const { data: matches, count } = await supabase
         .from('matches')
-        .select('*')
+        .select('*', { count: 'exact' })
         .order('match_date', { ascending: false })
+        .range(from, to)
       
       if (matches) setData(matches)
-      setLoading(false)
+      if (count !== null) setTotal(count)
     }
     fetchData()
-  }, [])
+  }, [page])
+
+  const totalPages = Math.ceil(total / PAGE_SIZE)
 
   const getMatchInfo = (row: Match) => {
     const status = row.match_status?.toLowerCase() || ''
@@ -56,8 +65,6 @@ export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
     return `${dd}/${mm} ${time}`
   }
 
-  if (loading) return <div className="p-4 text-zinc-100">Cargando partidos...</div>
-
   const columns = [
     'tournament_id',
     'match_round',
@@ -73,7 +80,21 @@ export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
 
   return (
     <div className="p-4 overflow-x-auto pb-8 text-center">
-      <h2 className="text-zinc-500 text-xs font-mono uppercase mb-4 text-left px-2">Partidos</h2>
+      <div className="flex items-center justify-between mb-4 px-2">
+        <h2 className="text-zinc-500 text-xs font-mono uppercase">Partidos</h2>
+        <div className="flex items-center gap-3">
+          <span className="text-zinc-600 text-[10px] font-mono">{total} total</span>
+          <button onClick={() => setPage(p => p - 1)} disabled={page === 0}
+            className="px-2 py-1 text-[10px] font-mono bg-zinc-800 text-zinc-400 rounded hover:bg-zinc-700 disabled:text-zinc-700 disabled:cursor-not-allowed transition-colors">
+            ← Prev
+          </button>
+          <span className="text-[10px] font-mono text-zinc-500">{page + 1}/{totalPages}</span>
+          <button onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}
+            className="px-2 py-1 text-[10px] font-mono bg-zinc-800 text-zinc-400 rounded hover:bg-zinc-700 disabled:text-zinc-700 disabled:cursor-not-allowed transition-colors">
+            Next →
+          </button>
+        </div>
+      </div>
       <table className="w-full border-collapse text-[10px] font-mono bg-black text-zinc-400 min-w-max">
         <thead>
           <tr className="bg-neutral-950 sticky top-0">

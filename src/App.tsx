@@ -3,6 +3,7 @@ import SyncStatus from './components/SyncStatus'
 import AllMatchesTable from './components/AllMatchesTable'
 import AllTeamsTable from './components/AllTeamsTable'
 import UtcSelector from './components/UtcSelector'
+import JsonImporter from './components/JsonImporter'
 
 export default function App() {
   const [utcOffset, setUtcOffset] = useState<number>(() => {
@@ -23,11 +24,16 @@ export default function App() {
       </div>
 
       <div className="pt-2">
+        {/* Importador de JSON */}
+        <JsonImporter />
+
+        {/* Tabla de Partidos */}
+        <AllMatchesTable utcOffset={utcOffset} />
+        
         {/* Tabla de Equipos */}
         <AllTeamsTable />
         
-        {/* Tabla de Partidos */}
-        <AllMatchesTable utcOffset={utcOffset} />
+
       </div>
     </div>
   )
