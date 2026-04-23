@@ -135,7 +135,17 @@ export default function AllMatchesTable({ utcOffset }: AllMatchesTableProps) {
 
                 return (
                   <td key={col} className={`border border-zinc-800 p-2 whitespace-nowrap text-zinc-300 ${col === 'status' ? 'text-green-400 font-bold' : ''}`}>
-                    {displayValue === null ? <span className="text-zinc-700">null</span> : String(displayValue)}
+                    <div className="flex items-center justify-center gap-2">
+                      {displayValue === null ? <span className="text-zinc-700">null</span> : String(displayValue)}
+                      {col === 'match_id' && row.match_notes && (
+                        <span 
+                          className="text-amber-400 cursor-help font-bold animate-pulse" 
+                          title={String(row.match_notes)}
+                        >
+                          !
+                        </span>
+                      )}
+                    </div>
                   </td>
                 )
               })}

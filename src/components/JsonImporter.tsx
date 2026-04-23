@@ -156,8 +156,7 @@ export default function JsonImporter() {
       const countryId = countryByName.get(paisName.toLowerCase().trim()) || 'ARG'
       const tier = parseTier(first.Categoria?.[0] || '')
       const torneoRaw = first.Torneo?.[0] || ''
-      const edition = torneoRaw.replace(/^Torneo\s+/i, '').trim()
-      // Extraer año de Temporada (se mantiene el valor completo, ej: "2024/25")
+      const edition = "" // Edición vacía por defecto
       const yearRaw = first.Temporada?.[0]
       const year = yearRaw ? String(yearRaw).trim() : ''
       
@@ -275,7 +274,9 @@ export default function JsonImporter() {
   }
 
   // Importar
-  const allComplete = mapped.length > 0 && mapped.every(m => m.match_id !== '')
+  const tourneyComplete = tourney && tourney.tournament_edition.trim() !== ''
+  const matchesComplete = mapped.length > 0 && mapped.every(m => m.match_id !== '')
+  const allComplete = tourneyComplete && matchesComplete
   const incompleteCount = mapped.filter(m => m.match_id === '').length
 
   const handleImport = async () => {
@@ -412,7 +413,9 @@ export default function JsonImporter() {
               { label: 'Año', field: 'tournament_year', val: tourney.tournament_year },
             ].map(({ label, field, val, select }) => (
               <div key={field}>
-                <label className="text-[9px] font-mono text-zinc-600 uppercase block mb-1">{label}</label>
+                <label className="text-[9px] font-mono text-zinc-600 uppercase block mb-1">
+                  {label} {field === 'tournament_edition' && <span className="text-red-500">*</span>}
+                </label>
                 {select ? (
                   <select value={val} onChange={e => updateTourney(field, e.target.value)}
                     className="w-full bg-black border border-zinc-800 rounded px-2 py-1.5 text-[10px] font-mono text-zinc-200 outline-none">
@@ -421,7 +424,13 @@ export default function JsonImporter() {
                   </select>
                 ) : (
                   <input value={val} onChange={e => updateTourney(field, field === 'tournament_tier' ? (parseInt(e.target.value) || null) : e.target.value)}
-                    className="w-full bg-black border border-zinc-800 rounded px-2 py-1.5 text-[10px] font-mono text-zinc-200 outline-none focus:border-zinc-600" />
+                    className={`w-full bg-black border rounded px-2 py-1.5 text-[10px] font-mono text-zinc-200 outline-none transition-colors ${
+                      field === 'tournament_edition' && !val 
+                        ? 'border-red-900 focus:border-red-600' 
+                        : 'border-zinc-800 focus:border-zinc-600'
+                    }`} 
+                    placeholder={field === 'tournament_edition' ? 'Obligatorio...' : ''}
+                  />
                 )}
               </div>
             ))}
