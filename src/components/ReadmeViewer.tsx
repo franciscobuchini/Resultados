@@ -15,6 +15,8 @@ export default function ReadmeViewer() {
     <br/> - Hay partidos unicos entre campeonatos (J)
     <br/> - FALTA Copa de la superliga 2019. (J)
     <br/> - Cargar todos los campeonatos que faltan (J)
+    <br/> - Definir tournament_edition de la manera mas logica posible (J y F)
+    <br/> - Completar torneo apertura 2026, solo cargue las ultimas fechas (J)
     </div>
   )
 }
