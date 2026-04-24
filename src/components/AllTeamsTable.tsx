@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../functions/supabaseClient'
+import { supabase } from '../functions/supabase'
 
 interface Team {
   team_id: string;

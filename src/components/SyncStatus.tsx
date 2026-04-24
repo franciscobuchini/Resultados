@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../functions/supabaseClient'
-import { useTime } from '../contexts/TimeContext'
-import { adjustDateWithOffset } from '../utils/time'
+import { supabase } from '../functions/supabase'
+import { adjustDateWithOffset, useTime } from '../functions/time'
 
 export default function SyncStatus() {
   const [lastSync, setLastSync] = useState('')

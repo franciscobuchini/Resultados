@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../functions/supabaseClient'
-import { formatTimeWithOffset } from '../utils/time'
-import { useTime } from '../contexts/TimeContext'
+import { supabase } from '../functions/supabase'
+import { formatTimeWithOffset, useTime } from '../functions/time'
 
 interface Match {
   match_id: string;

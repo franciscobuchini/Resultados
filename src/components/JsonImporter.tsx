@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
-import { supabase } from '../functions/supabaseClient'
+import { supabase } from '../functions/supabase'
 
 // ── Tipos ──────────────────────────────────────────────
 interface RawMatch {

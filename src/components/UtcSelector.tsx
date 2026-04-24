@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useTime } from '../contexts/TimeContext'
+import { useTime } from '../functions/time'
 
 const OFFSETS = [
   { label: 'USW (UTC-7)', value: -7 },

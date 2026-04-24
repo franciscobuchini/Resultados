@@ -17,7 +17,7 @@ export default function ReadmeViewer() {
     <br/> - Definir tournament_edition de la manera mas logica posible y asegurarse de que cumpla un orden cronologico (J y F)
     <br/> - Completar torneo apertura 2026, solo cargue las ultimas fechas (J)
     <br/> - Armar la logica y bbdd para otras competiciones del futbol argentino (Copa Argentina, B Nacional, etc) Desp de terminar 1ra div (F)
-    <br/> - 
+    <br/> - Mail de confirmacion al registrarse. (F)
     </div>
   )
 }
