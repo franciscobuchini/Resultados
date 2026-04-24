@@ -21,7 +21,7 @@ interface Match {
   [key: string]: string | number | null; // Tipos específicos permitidos
 }
 
-const PAGE_SIZE = 100
+const PAGE_SIZE = 15
 
 export default function AllMatchesTable() {
   const { utcOffset } = useTime()
@@ -40,7 +40,31 @@ export default function AllMatchesTable() {
         .order('match_date', { ascending: false })
         .range(from, to)
       
-      if (matches) setData(matches)
+      if (matches) {
+        // Ordenar en memoria para arreglar el cruce de medianoche en UTC
+        matches.sort((a, b) => {
+          if (a.match_date !== b.match_date) {
+            return a.match_date < b.match_date ? 1 : -1
+          }
+          
+          const timeA = a.match_time_utc || '00:00:00'
+          const timeB = b.match_time_utc || '00:00:00'
+          
+          // Los horarios menores a las 10:00 UTC (ej: 00:30) en realidad son partidos tardíos del día anterior (ej: 21:30 local).
+          // Les sumamos 24hs lógicamente para que queden arriba de todo al ordenar descendente.
+          const getAdjustedTime = (t: string) => {
+            const hours = parseInt(t.substring(0, 2))
+            return hours < 10 ? (hours + 24).toString() + t.substring(2) : t
+          }
+          
+          const adjA = getAdjustedTime(timeA)
+          const adjB = getAdjustedTime(timeB)
+          
+          // Ordenar del más tarde al más temprano (DESC)
+          return adjA < adjB ? 1 : -1
+        })
+        setData(matches)
+      }
       if (count !== null) setTotal(count)
     }
 

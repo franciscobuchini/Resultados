@@ -33,12 +33,12 @@ Deno.serve(async (_req) => {
     // PASO 2: Construir matches
     const [tRes, teRes, apiRes] = await Promise.all([
       supabase.from('tournaments').select('tournament_id, tournament_id_api'),
-      supabase.from('teams').select('team_id, team_id_api'),
+      supabase.from('teams').select('team_id, team_id_api, team_name'),
       supabase.from('apis').select('*')
     ])
 
     const tournamentLookup = new Map((tRes.data || []).map((t: any) => [Number(t.tournament_id_api), t.tournament_id]))
-    const teamLookup = new Map((teRes.data || []).map((t: any) => [Number(t.team_id_api), t.team_id]))
+    const teamLookup = new Map((teRes.data || []).map((t: any) => [Number(t.team_id_api), { id: t.team_id, name: t.team_name }]))
     const matchMap: Record<string, any> = {}
 
     for (const apiEntry of apiRes.data || []) {
@@ -52,8 +52,11 @@ Deno.serve(async (_req) => {
           if (!gameId || !startTime) continue;
 
           const datePart = startTime.split('T')[0].replace(/-/g, '')
-          const homeId = teamLookup.get(Number(g.homeCompetitor?.id || g.home_team_id)) || String(g.homeCompetitor?.id || '');
-          const awayId = teamLookup.get(Number(g.awayCompetitor?.id || g.away_team_id)) || String(g.awayCompetitor?.id || '');
+          const homeTeamInfo = teamLookup.get(Number(g.homeCompetitor?.id || g.home_team_id));
+          const awayTeamInfo = teamLookup.get(Number(g.awayCompetitor?.id || g.away_team_id));
+          
+          const homeId = homeTeamInfo?.id || String(g.homeCompetitor?.id || '');
+          const awayId = awayTeamInfo?.id || String(g.awayCompetitor?.id || '');
           const tourId = tournamentLookup.get(Number(g.competitionId || g.tournamentId)) || String(g.competitionId || '');
           
           const matchId = `${datePart}${homeId}${awayId}`;
@@ -70,12 +73,12 @@ Deno.serve(async (_req) => {
             game_time: gameTime,
             home_id: homeId,
             home_id_api: g.homeCompetitor?.id || null,
-            home_name: g.homeCompetitor?.name || 'Local',
+            home_name: homeTeamInfo?.name || g.homeCompetitor?.name || 'Local',
             home_score: (g.homeCompetitor?.score === -1 || g.homeCompetitor?.score === undefined) ? null : g.homeCompetitor.score,
             home_penalty: g.homeCompetitor?.penaltyScore || null,
             away_id: awayId,
             away_id_api: g.awayCompetitor?.id || null,
-            away_name: g.awayCompetitor?.name || 'Visitante',
+            away_name: awayTeamInfo?.name || g.awayCompetitor?.name || 'Visitante',
             away_score: (g.awayCompetitor?.score === -1 || g.awayCompetitor?.score === undefined) ? null : g.awayCompetitor.score,
             away_penalty: g.awayCompetitor?.penaltyScore || null,
             tournament_id: tourId,
