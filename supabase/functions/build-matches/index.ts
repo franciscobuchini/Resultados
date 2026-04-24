@@ -1,13 +1,13 @@
 import { createClient } from 'supabase'
 
-Deno.serve(async (req) => {
+Deno.serve(async (_req) => {
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   )
 
   try {
-    console.log("--- Inicio de build-matches (v2 - Diagnóstico) ---");
+    console.log("--- Inicio de build-matches (v3 - Dedup) ---");
 
     const [tRes, teRes, apiRes] = await Promise.all([
       supabase.from('tournaments').select('tournament_id, tournament_id_api'),
@@ -15,89 +15,77 @@ Deno.serve(async (req) => {
       supabase.from('apis').select('*')
     ])
     
-    const tournamentLookup = new Map((tRes.data || []).map(t => [Number(t.tournament_id_api), t.tournament_id]))
-    const teamLookup = new Map((teRes.data || []).map(t => [Number(t.team_id_api), t.team_id]))
+    const tournamentLookup = new Map((tRes.data || []).map((t: any) => [Number(t.tournament_id_api), t.tournament_id]))
+    const teamLookup = new Map((teRes.data || []).map((t: any) => [Number(t.team_id_api), t.team_id]))
 
     if (!apiRes.data || apiRes.data.length === 0) {
       console.log("No hay datos en la tabla 'apis'");
       return new Response(JSON.stringify({ success: true, built: 0, message: 'No hay datos en apis' }))
     }
 
-    const allMatches: any[] = []
+    // Usar un Map para deduplicar por match_id, quedándose siempre con el gameTime más alto
+    const matchMap: Record<string, any> = {}
 
     for (const apiEntry of apiRes.data) {
-      // DIAGNÓSTICO: Ver qué tiene el JSON realmente
       const rawData = apiEntry.data;
-      const keys = rawData ? Object.keys(rawData) : [];
-      console.log(`Analizando entrada API '${apiEntry.id}':`);
-      console.log(`- Keys encontradas: ${keys.join(', ')}`);
+      console.log(`Procesando API '${apiEntry.id}'`);
 
-      // Intentar encontrar la lista de juegos en distintos formatos comunes
-      let games = [];
-      if (Array.isArray(rawData)) {
-        games = rawData;
-      } else if (rawData?.games && Array.isArray(rawData.games)) {
-        games = rawData.games;
-      } else if (rawData?.Games && Array.isArray(rawData.Games)) {
-        games = rawData.Games;
-      } else if (rawData?.matches && Array.isArray(rawData.matches)) {
-        games = rawData.matches;
-      }
+      let games: any[] = [];
+      if (Array.isArray(rawData)) games = rawData;
+      else if (rawData?.games && Array.isArray(rawData.games)) games = rawData.games;
+      else if (rawData?.Games && Array.isArray(rawData.Games)) games = rawData.Games;
+      else if (rawData?.matches && Array.isArray(rawData.matches)) games = rawData.matches;
 
-      console.log(`- Juegos detectados: ${games.length}`);
-      
-      if (games.length === 0 && rawData) {
-         console.log("- Muestra del JSON (primeros 200 caracteres):", JSON.stringify(rawData).substring(0, 200));
-      }
+      console.log(`- Juegos: ${games.length}`);
 
-      const processed = games.map((g: any) => {
+      for (const g of games) {
         try {
-          // Algunos campos pueden venir con nombres distintos (id vs ID, startTime vs StartTime)
           const gameId = g.id || g.ID || g.gameId;
           const startTime = g.startTime || g.StartTime || g.start_time;
-          
-          if (!gameId || !startTime) return null;
+          if (!gameId || !startTime) continue;
 
           const datePart = startTime.split('T')[0].replace(/-/g, '')
-          
           const homeId = teamLookup.get(Number(g.homeCompetitor?.id || g.home_team_id)) || String(g.homeCompetitor?.id || '');
           const awayId = teamLookup.get(Number(g.awayCompetitor?.id || g.away_team_id)) || String(g.awayCompetitor?.id || '');
           const tourId = tournamentLookup.get(Number(g.competitionId || g.tournamentId)) || String(g.competitionId || '');
           
-          return {
-            match_id: `${datePart}${homeId}${awayId}`,
+          const matchId = `${datePart}${homeId}${awayId}`;
+          const gameTime = g.gameTime ?? g.game_time ?? 0;
+
+          // Si ya existe, solo reemplazar si el nuevo tiene gameTime mayor
+          const existing = matchMap[matchId];
+          if (existing && existing.game_time >= gameTime) continue;
+
+          matchMap[matchId] = {
+            match_id: matchId,
             match_id_api: gameId,
             match_date: startTime.split('T')[0],
             match_time_utc: new Date(startTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }),
             match_status: g.statusText || g.status_text || 'Desconocido',
-            game_time: g.gameTime || g.game_time || 0,
-            
+            game_time: gameTime,
             home_id: homeId,
             home_id_api: g.homeCompetitor?.id || null,
             home_name: g.homeCompetitor?.name || 'Local',
             home_score: (g.homeCompetitor?.score === -1 || g.homeCompetitor?.score === undefined) ? null : g.homeCompetitor.score,
             home_penalty: g.homeCompetitor?.penaltyScore || null,
-            
             away_id: awayId,
             away_id_api: g.awayCompetitor?.id || null,
             away_name: g.awayCompetitor?.name || 'Visitante',
             away_score: (g.awayCompetitor?.score === -1 || g.awayCompetitor?.score === undefined) ? null : g.awayCompetitor.score,
             away_penalty: g.awayCompetitor?.penaltyScore || null,
-            
             tournament_id: tourId,
             tournament_id_api: g.competitionId || null,
             match_round: (g.roundName && g.roundNum) ? `${g.roundName} ${g.roundNum}` : (g.roundName || g.roundNum || 'Fase Regular'),
             stadium_name: g.venue?.name || null
           }
-        } catch (e) {
-          return null;
+        } catch (_e) {
+          // skip
         }
-      }).filter((m: any) => m !== null)
-
-      allMatches.push(...processed)
+      }
     }
 
-    console.log(`Total de partidos procesados: ${allMatches.length}`);
+    const allMatches = Object.values(matchMap);
+    console.log(`Total de partidos únicos: ${allMatches.length}`);
 
     if (allMatches.length > 0) {
       const { error: upsertError } = await supabase
@@ -112,7 +100,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({ success: true, built: allMatches.length }))
 
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error crítico en build-matches:", err);
     return new Response(JSON.stringify({ error: err.message }), { status: 500 })
   }
