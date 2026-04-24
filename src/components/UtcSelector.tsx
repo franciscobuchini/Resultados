@@ -18,7 +18,7 @@ export default function UtcSelector() {
     <div className="relative inline-block text-left">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-zinc-900 border border-zinc-700 px-3 sm:px-4 h-8 sm:h-10 rounded-full flex items-center gap-1 sm:gap-2 hover:border-zinc-500 transition-colors shadow-2xl"
+        className="bg-zinc-900 border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800 px-3 sm:px-4 h-8 sm:h-10 rounded-full flex items-center gap-2 transition-all shadow-2xl cursor-pointer font-mono"
       >
         <span className="text-[10px] sm:text-xs text-zinc-400 hidden sm:inline">Zona:</span>
         <span className="text-[10px] sm:text-xs text-white font-bold">

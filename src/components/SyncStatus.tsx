@@ -40,9 +40,9 @@ export default function SyncStatus() {
   }, [utcOffset]) // Dependemos del offset para refrescar el string
 
   return (
-    <div className="bg-zinc-900 border border-zinc-700 px-3 sm:px-4 h-8 sm:h-10 rounded-full flex items-center gap-2 sm:gap-3 shadow-2xl">
+    <div className="bg-zinc-900 border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800 px-3 sm:px-4 h-8 sm:h-10 rounded-full flex items-center gap-2 transition-all shadow-2xl cursor-default font-mono">
       <div className="flex items-center">
-        <span className="text-[10px] sm:text-sm text-green-400">
+        <span className="text-[10px] sm:text-xs text-green-400">
           {loading ? '...' : (
             <>
               <span className="hidden sm:inline">Sincronizado</span>
@@ -52,7 +52,7 @@ export default function SyncStatus() {
         </span>
         <span className="ml-1.5 sm:ml-2 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-400 animate-pulse"></span>
       </div>
-      <span className="text-[10px] sm:text-sm text-white font-bold">{lastSync || '--/-- --:--'}</span>
+      <span className="text-[10px] sm:text-xs text-white font-bold">{lastSync || '--/-- --:--'}</span>
     </div>
   )
 }
