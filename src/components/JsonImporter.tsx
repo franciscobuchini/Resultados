@@ -33,7 +33,7 @@ interface MappedMatch {
 
 interface GoalRow {
   goal_id: string; match_id: string; team_id: string
-  goal_minute: number; player_name: string; goal_type: string
+  goal_minute: number | null; player_name: string; goal_type: string
 }
 
 // ── Helpers ────────────────────────────────────────────
@@ -57,14 +57,35 @@ function parseGoals(str: string, matchId: string, teamId: string, side: 'H'|'A')
   const goals: GoalRow[] = []
   const parts = str.split(/[,;\n]/).map(s => s.trim()).filter(Boolean)
   for (let i = 0; i < parts.length; i++) {
-    const m = parts[i].match(/^(\d+)(?:\+(\d+))?[''´']\s*(.+)$/)
-    if (!m) continue
-    const minute = parseInt(m[1]) + (m[2] ? parseInt(m[2]) : 0)
-    let player = m[3].trim()
+    const raw = parts[i]
+    const m = raw.match(/^(\d+)(?:\+(\d+))?[''´']\s*(.+)$/)
+    
+    let minute: number | null = null
+    let player = raw
+    
+    if (m) {
+      minute = parseInt(m[1]) + (m[2] ? parseInt(m[2]) : 0)
+      player = m[3].trim()
+    }
+
     let gtype = 'G'
-    if (/\(p(?:enal)?\)/i.test(player)) { gtype = 'P'; player = player.replace(/\s*\(p(?:enal)?\)/i, '').trim() }
-    else if (/\(e\.?c\.?\)/i.test(player)) { gtype = 'C'; player = player.replace(/\s*\(e\.?c\.?\)/i, '').trim() }
-    goals.push({ goal_id: `${matchId}_${side}${i+1}`, match_id: matchId, team_id: teamId, goal_minute: minute, player_name: player, goal_type: gtype })
+    if (/\(p(?:enal)?\)/i.test(player)) { 
+      gtype = 'P'
+      player = player.replace(/\s*\(p(?:enal)?\)/i, '').trim() 
+    }
+    else if (/\(e\.?c\.?\)/i.test(player)) { 
+      gtype = 'C'
+      player = player.replace(/\s*\(e\.?c\.?\)/i, '').trim() 
+    }
+    
+    goals.push({ 
+      goal_id: `${matchId}_${side}${i+1}`, 
+      match_id: matchId, 
+      team_id: teamId, 
+      goal_minute: minute, 
+      player_name: player, 
+      goal_type: gtype 
+    })
   }
   return goals
 }
@@ -532,7 +553,7 @@ export default function JsonImporter() {
                     <td className="border border-zinc-800 p-2 text-zinc-500 max-w-[150px] truncate" title={row.match_notes || ''}>{row.match_notes || '—'}</td>
                     <td className="border border-zinc-800 p-2 text-zinc-500 whitespace-nowrap">
                       {rowGoals.length > 0
-                        ? rowGoals.map(g => `${g.goal_minute}' ${g.player_name}`).join(', ')
+                        ? rowGoals.map(g => `${g.goal_minute !== null ? g.goal_minute + "' " : ""}${g.player_name}`).join(', ')
                         : '—'}
                     </td>
                   </tr>
