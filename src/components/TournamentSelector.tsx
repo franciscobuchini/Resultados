@@ -4,8 +4,7 @@ import { supabase } from '../functions/supabase'
 export interface Tournament {
   tournament_id: string;
   tournament_name: string;
-  tournament_year?: string;
-  tournament_fullname?: string;
+  tournament_season?: string[];
 }
 
 interface Props {
@@ -20,7 +19,7 @@ export default function TournamentSelector({ selectedTournament, onSelect }: Pro
     const fetchTournaments = async () => {
       const { data } = await supabase
         .from('tournaments')
-        .select('tournament_id, tournament_name, tournament_year, tournament_fullname')
+        .select('tournament_id, tournament_name, tournament_season')
         .order('tournament_id')
       
       if (data) setTournaments(data)
@@ -39,7 +38,7 @@ export default function TournamentSelector({ selectedTournament, onSelect }: Pro
         <option value="">-- Seleccionar Torneo --</option>
         {tournaments.map(t => (
           <option key={t.tournament_id} value={t.tournament_id}>
-            {t.tournament_fullname || `${t.tournament_name} ${t.tournament_year || ''}`}
+            {t.tournament_name} {t.tournament_season ? `(${t.tournament_season.join('-')})` : ''}
           </option>
         ))}
         </select>

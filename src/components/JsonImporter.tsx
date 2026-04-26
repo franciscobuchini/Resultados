@@ -16,7 +16,7 @@ interface DbTournament { tournament_id: string; tournament_name: string | null }
 
 interface TournamentConfig {
   tournament_name: string; tournament_tier: number | null
-  tournament_edition: string; tournament_year: string
+  tournament_edition: string; tournament_season: string[]
   tournament_country_id: string; generatedId: string
   exists: boolean
 }
@@ -48,8 +48,10 @@ function parseTier(cat: string): number | null {
   const m = cat.match(/(\d+)/); return m ? parseInt(m[1]) : null
 }
 
-function genTournamentId(cid: string, tier: number | null, ed: string, yr: string) {
-  return `${t(cid)}${tier ?? ''}${t(ed)}${t(yr)}`
+function genTournamentId(cid: string, tier: number | null, ed: string, season: string[]) {
+  // Nueva lógica: country.tier.edition.season
+  const sStr = season.join('-') // Asumimos join con guion para el ID frontend
+  return `${t(cid)}.${tier ?? ''}.${t(ed)}.${sStr}`
 }
 
 function parseGoals(str: string, matchId: string, teamId: string, side: 'H'|'A'): GoalRow[] {
@@ -201,14 +203,14 @@ export default function JsonImporter() {
       const yearRaw = first.Temporada?.[0]
       const year = yearRaw ? String(yearRaw).trim() : ''
       
-      const gid = genTournamentId(countryId, tier, edition, year)
+      const gid = genTournamentId(countryId, tier, edition, [year])
       const exists = existingTournaments.some(et => t(et.tournament_id) === gid)
 
       setTourney({ 
         tournament_name: torneoRaw, 
         tournament_tier: tier, 
         tournament_edition: edition, 
-        tournament_year: year, 
+        tournament_season: [year], 
         tournament_country_id: countryId, 
         generatedId: gid, 
         exists 
@@ -310,7 +312,13 @@ export default function JsonImporter() {
   const updateTourney = (field: string, val: string | number | null) => {
     if (!tourney) return
     const u = { ...tourney, [field]: val }
-    u.generatedId = genTournamentId(u.tournament_country_id, u.tournament_tier, u.tournament_edition, u.tournament_year)
+    
+    // Si editamos año, lo convertimos a array
+    if (field === 'tournament_season' && typeof val === 'string') {
+      u.tournament_season = val.split(/[,-]/).map(s => s.trim()).filter(Boolean)
+    }
+
+    u.generatedId = genTournamentId(u.tournament_country_id, u.tournament_tier, u.tournament_edition, u.tournament_season)
     u.exists = existingTournaments.some(et => t(et.tournament_id) === u.generatedId)
     setTourney(u)
     // Actualizar tournament_id en todos los matches
@@ -333,7 +341,7 @@ export default function JsonImporter() {
           tournament_name: tourney.tournament_name,
           tournament_tier: tourney.tournament_tier,
           tournament_edition: tourney.tournament_edition,
-          tournament_year: tourney.tournament_year,
+          tournament_season: tourney.tournament_season,
           tournament_country_id: tourney.tournament_country_id || null,
         })
         if (tErr && !tErr.message.includes('duplicate')) throw tErr
@@ -454,7 +462,7 @@ export default function JsonImporter() {
               { label: 'País', field: 'tournament_country_id', val: tourney.tournament_country_id, select: countries.map(c => ({ v: c.country_id, l: `${c.country_id} - ${c.country_name}` })) },
               { label: 'Tier', field: 'tournament_tier', val: String(tourney.tournament_tier ?? '') },
               { label: 'Edición', field: 'tournament_edition', val: tourney.tournament_edition },
-              { label: 'Año', field: 'tournament_year', val: tourney.tournament_year },
+              { label: 'Temporada', field: 'tournament_season', val: tourney.tournament_season.join(', ') },
             ].map(({ label, field, val, select }) => (
               <div key={field}>
                 <label className="text-[9px] font-mono text-zinc-600 uppercase block mb-1">
