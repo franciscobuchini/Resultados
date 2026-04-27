@@ -48,29 +48,48 @@ interface ImportEntry {
 
 // ── Helpers de Normalización ───────────────────────────
 function normalizeRawData(data: Record<string, unknown>[]): RawMatch[] {
+  const find = (item: any, keys: string[]) => {
+    const itemKeys = Object.keys(item);
+    for (const k of keys) {
+      const match = itemKeys.find(ik => ik.toLowerCase().trim() === k.toLowerCase());
+      if (match) return item[match];
+    }
+    return '';
+  }
+
   return data.map(item => ({
-    Fecha: String(item.Fecha || ''),
-    Lugar: String(item.Lugar || ''),
-    Equipo1: String(item.Equipo1 || ''),
-    Goles1: Number(item.Goles1 ?? 0),
-    Goleadores1: String(item.Goleadores1 || ''),
-    Equipo2: String(item.Equipo2 || ''),
-    Goles2: Number(item.Goles2 ?? 0),
-    Goleadores2: String(item.Goleadores2 || ''),
-    Notas: String(item.Notas || ''),
-    N_Fecha: String(item.N_Fecha || ''),
-    Estadio: String(item.Estadio || ''),
-    Estadio_Wikiname: String(item.Estadio_Wikiname || ''),
-    Pais: Array.isArray(item.Pais) ? item.Pais : [String(item.Pais || '')].filter(Boolean),
-    Temporada: Array.isArray(item.Temporada) ? item.Temporada : [String(item.Temporada || '')].filter(Boolean),
-    Categoria: Array.isArray(item.Categoria) ? item.Categoria : [String(item.Categoria || '')].filter(Boolean),
-    Torneo: Array.isArray(item.Torneo) ? item.Torneo : [String(item.Torneo || '')].filter(Boolean),
-    Subdivision: Array.isArray(item.Subdivision) ? item.Subdivision : [String(item.Subdivision || '')].filter(Boolean),
+    Fecha: String(find(item, ['Fecha', 'Date', 'Day']) || ''),
+    Lugar: String(find(item, ['Lugar', 'Place', 'City']) || ''),
+    Equipo1: String(find(item, ['Equipo1', 'Local', 'Home', 'Team1']) || ''),
+    Goles1: Number(find(item, ['Goles1', 'Goles Local', 'Home Goals', 'Goals1']) ?? 0),
+    Goleadores1: String(find(item, ['Goleadores1', 'Goles1_Jugadores', 'Home Scorers']) || ''),
+    Equipo2: String(find(item, ['Equipo2', 'Visitante', 'Away', 'Team2', 'Visita']) || ''),
+    Goles2: Number(find(item, ['Goles2', 'Goles Visitante', 'Away Goals', 'Goals2', 'Goles Visita']) ?? 0),
+    Goleadores2: String(find(item, ['Goleadores2', 'Goles2_Jugadores', 'Away Scorers']) || ''),
+    Notas: String(find(item, ['Notas', 'Notes', 'Comment']) || ''),
+    N_Fecha: String(find(item, ['N_Fecha', 'Round', 'Jornada', 'Fecha_N']) || ''),
+    Estadio: String(find(item, ['Estadio', 'Stadium', 'Venue']) || ''),
+    Estadio_Wikiname: String(find(item, ['Estadio_Wikiname', 'Stadium_Wiki']) || ''),
+    Pais: Array.isArray(item.Pais) ? item.Pais : [String(find(item, ['Pais', 'Country']) || '')].filter(Boolean),
+    Temporada: Array.isArray(item.Temporada) ? item.Temporada : [String(find(item, ['Temporada', 'Season', 'Year']) || '')].filter(Boolean),
+    Categoria: Array.isArray(item.Categoria) ? item.Categoria : [String(find(item, ['Categoria', 'Category', 'Tier']) || '')].filter(Boolean),
+    Torneo: Array.isArray(item.Torneo) ? item.Torneo : [String(find(item, ['Torneo', 'Tournament', 'League']) || '')].filter(Boolean),
+    Subdivision: Array.isArray(item.Subdivision) ? item.Subdivision : [String(find(item, ['Subdivision', 'Group', 'Zona']) || '')].filter(Boolean),
   }))
 }
 
 function parseDate(f: string): string {
-  const [dd, mm, yyyy] = f.split('/');
+  if (!f || typeof f !== 'string') return '1900-01-01';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(f)) return f;
+  const parts = f.split(/[/-]/);
+  if (parts.length < 3) return '1900-01-01';
+  
+  let dd = parts[0], mm = parts[1], yyyy = parts[2];
+  // Si el año está al principio (YYYY/MM/DD)
+  if (dd.length === 4) {
+    yyyy = parts[0]; mm = parts[1]; dd = parts[2];
+  }
+  
   return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`
 }
 
@@ -165,6 +184,7 @@ export default function FileImporter() {
   const [entries, setEntries] = useState<ImportEntry[]>([])
   const [uploading, setUploading] = useState(false)
   const [result, setResult] = useState<{ok: boolean; msg: string} | null>(null)
+  const [fileError, setFileError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -212,13 +232,27 @@ export default function FileImporter() {
     const isCsv = fileName.toLowerCase().endsWith('.csv')
     let raw: Record<string, unknown>[] = []
     if (isCsv) {
-      const parsed = Papa.parse<Record<string, unknown>>(text, { header: true, skipEmptyLines: true })
+      const parsed = Papa.parse<Record<string, unknown>>(text, { 
+        header: true, 
+        skipEmptyLines: 'greedy',
+        transformHeader: (h) => h.trim()
+      })
       raw = parsed.data
+      if (raw.length === 0) {
+        console.warn('CSV parse result is empty:', parsed)
+        throw new Error('El archivo CSV está vacío o no se pudo procesar.')
+      }
+      console.log('CSV Parsed (first 2 rows):', raw.slice(0, 2))
     } else {
-      if (!text.toLowerCase().trim().endsWith('ok')) return null
-      raw = JSON.parse(text.trim().slice(0, -2).trim()) as Record<string, unknown>[]
+      try {
+        raw = JSON.parse(text.trim()) as Record<string, unknown>[]
+      } catch (err) {
+        throw new Error('Error al parsear el JSON. Asegúrate de que el formato sea correcto.')
+      }
     }
-    if (!Array.isArray(raw) || raw.length === 0) return null
+    if (!Array.isArray(raw) || raw.length === 0) {
+      throw new Error('No se encontraron datos válidos en el archivo.')
+    }
     
     const normalized = normalizeRawData(raw)
     const first = normalized[0]
@@ -264,11 +298,16 @@ export default function FileImporter() {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
+    setFileError(null)
     const newEntries: ImportEntry[] = []
     for (const file of files) {
-      const text = await file.text()
-      const entry = createEntry(file.name, text)
-      if (entry) newEntries.push(entry)
+      try {
+        const text = await file.text()
+        const entry = createEntry(file.name, text)
+        if (entry) newEntries.push(entry)
+      } catch (err) {
+        setFileError(`Error en ${file.name}: ${(err as Error).message}`)
+      }
     }
     setEntries(prev => [...prev, ...newEntries])
     if (fileInputRef.current) fileInputRef.current.value = ''
@@ -407,6 +446,16 @@ export default function FileImporter() {
             <span className="text-lg">{result.ok ? '✓' : '⚠'}</span>
             {result.msg}
             <button onClick={() => setResult(null)} className="ml-auto opacity-50 hover:opacity-100">✕</button>
+          </div>
+        </div>
+      )}
+
+      {fileError && (
+        <div className="mb-6 p-4 rounded-xl text-xs font-mono border bg-amber-900/20 border-amber-800/50 text-amber-400">
+          <div className="flex items-center gap-3">
+            <span className="text-lg">⚠</span>
+            {fileError}
+            <button onClick={() => setFileError(null)} className="ml-auto opacity-50 hover:opacity-100">✕</button>
           </div>
         </div>
       )}
