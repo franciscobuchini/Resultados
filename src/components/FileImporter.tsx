@@ -17,7 +17,7 @@ interface DbTournament { tournament_id: string; tournament_name: string | null }
 
 interface TournamentConfig {
   tournament_name: string; tournament_tier: number | null
-  tournament_edition: string; tournament_season: string[]
+  tournament_edition: string; tournament_season: string
   tournament_country_id: string; generatedId: string
   exists: boolean
 }
@@ -80,9 +80,8 @@ function parseTier(cat: string): number | null {
   const m = cat.match(/(\d+)/); return m ? parseInt(m[1]) : null
 }
 
-function genTournamentId(cid: string, tier: number | null, ed: string, season: string[]) {
-  const sStr = season.join('-')
-  return `${t(cid)}.${tier ?? ''}.${t(ed)}.${sStr}`
+function genTournamentId(cid: string, tier: number | null, ed: string, season: string) {
+  return `${t(cid)}.${tier ?? ''}.${season}.${t(ed)}`
 }
 
 function expandScorers(str: string): string[] {
@@ -127,14 +126,20 @@ function parseGoals(rawList: string[], matchId: string, homeId: string, awayId: 
       player = player.replace(/\(?(e\/?c|autogol)\)?/i, '').trim()
     }
     player = player.replace(/^[y,e\s]+|[y,e\s]+$/g, '').trim()
-    if (teamId) {
-      goals.push({ 
-        goal_id: `${matchId}_${side}${i+1}`, match_id: matchId, team_id: teamId, 
-        goal_minute: minute, player_name: player.substring(0, 50), goal_type: gtype 
-      })
-    }
+    goals.push({ 
+      goal_id: `${matchId}_${side}${i+1}`, match_id: matchId, team_id: teamId, 
+      goal_minute: minute, player_name: player.substring(0, 50), goal_type: gtype 
+    })
   })
   return goals
+}
+
+function formatGoal(g: GoalRow): string {
+  let s = g.player_name
+  if (g.goal_type === 'P') s += ' (p)'
+  else if (g.goal_type === 'C') s += ' (ec)'
+  if (g.goal_minute) s = `${g.goal_minute}' ${s}`
+  return s
 }
 
 function parsePenalties(notes: string, home: string, away: string) {
@@ -220,23 +225,24 @@ export default function FileImporter() {
     const countryId = countryByName.get((first.Pais?.[0] || '').toLowerCase().trim()) || 'ARG'
     const tier = parseTier(first.Categoria?.[0] || '')
     const year = first.Temporada?.[0] ? String(first.Temporada[0]).trim() : ''
-    const gid = genTournamentId(countryId, tier, "", [year])
+    const gid = genTournamentId(countryId, tier, "", year)
     
     const tourney: TournamentConfig = {
       tournament_name: first.Torneo?.[0] || '',
       tournament_tier: tier,
       tournament_edition: "",
-      tournament_season: [year],
+      tournament_season: year,
       tournament_country_id: 'ARG',
       generatedId: gid,
       exists: existingTournaments.some(et => t(et.tournament_id) === gid)
     }
 
     const allGoals: GoalRow[] = []
-    const mapped = normalized.map(r => {
+    const mapped = normalized.map((r, i) => {
       const matchDate = parseDate(r.Fecha)
       const homeId = resolveTeam(r.Equipo1), awayId = resolveTeam(r.Equipo2)
-      const matchId = (homeId && awayId) ? `${matchDate.replace(/-/g, '')}${homeId}${awayId}` : ''
+      const realMatchId = (homeId && awayId) ? `${matchDate.replace(/-/g, '')}${homeId}${awayId}` : ''
+      const matchId = realMatchId || `TEMP_${i}`
       const penalties = parsePenalties(r.Notas, r.Equipo1, r.Equipo2)
       const match: MappedMatch = {
         match_id: matchId, match_date: matchDate, match_time_utc: '00:00:00',
@@ -246,7 +252,7 @@ export default function FileImporter() {
         stadium_name: r.Estadio || null, match_notes: r.Notas || null,
       }
       const scorersRaw = (r.Goleadores1 || '') + (r.Goleadores2 ? '; ' + r.Goleadores2 : '')
-      if (matchId && scorersRaw) {
+      if (scorersRaw) {
         allGoals.push(...parseGoals(expandScorers(scorersRaw), matchId, homeId, awayId, r.Goles1 || 0))
       }
       return match
@@ -273,7 +279,7 @@ export default function FileImporter() {
       if (e.id !== id) return e
       const u = { ...e.tourney, [field]: val }
       if (field === 'tournament_season' && typeof val === 'string') {
-        u.tournament_season = val.split(/[,-]/).map(s => s.trim()).filter(Boolean)
+        u.tournament_season = val.trim()
       }
       u.generatedId = genTournamentId(u.tournament_country_id, u.tournament_tier, u.tournament_edition, u.tournament_season)
       u.exists = existingTournaments.some(et => t(et.tournament_id) === u.generatedId)
@@ -294,7 +300,7 @@ export default function FileImporter() {
           if (r.home_name === teamName && !r.home_id) r.home_id = val
           if (r.away_name === teamName && !r.away_id) r.away_id = val
         }
-        r.match_id = (r.home_id && r.away_id) ? `${r.match_date.replace(/-/g,'')}${r.home_id}${r.away_id}` : ''
+        r.match_id = (r.home_id && r.away_id) ? `${r.match_date.replace(/-/g,'')}${r.home_id}${r.away_id}` : row.match_id
         return r
       })
 
@@ -302,7 +308,7 @@ export default function FileImporter() {
       const updatedGoals = e.goals.map(g => {
         const match = updatedMapped.find((_, idx) => {
           const oldId = e.mapped[idx].match_id
-          return g.match_id === oldId || (oldId === '' && g.match_id === '')
+          return g.match_id === oldId
         })
         if (match && match.match_id !== g.match_id) {
           return { ...g, match_id: match.match_id, team_id: g.goal_id.includes('_H') ? match.home_id : match.away_id,
@@ -331,18 +337,37 @@ export default function FileImporter() {
   const handleImportEntry = async (entry: ImportEntry) => {
     setUploading(true)
     try {
-      if (!entry.tourney.exists) {
-        await supabase.from('tournaments').insert({
+      // 1. Upsert tournament
+      if (entry.tourney.exists) {
+        const { error: uErr } = await supabase.from('tournaments').update({
+          tournament_name: entry.tourney.tournament_name, tournament_tier: entry.tourney.tournament_tier,
+          tournament_edition: entry.tourney.tournament_edition, tournament_season: entry.tourney.tournament_season,
+          tournament_country_id: entry.tourney.tournament_country_id || null,
+        }).eq('tournament_id', entry.tourney.generatedId)
+        if (uErr) throw uErr
+      } else {
+        const { error: iErr } = await supabase.from('tournaments').insert({
           tournament_name: entry.tourney.tournament_name, tournament_tier: entry.tourney.tournament_tier,
           tournament_edition: entry.tourney.tournament_edition, tournament_season: entry.tourney.tournament_season,
           tournament_country_id: entry.tourney.tournament_country_id || null,
         })
+        // If it still fails with duplicate (race condition), we ignore or assume it's fine
+        if (iErr && !iErr.message.includes('unique_constraint')) throw iErr
       }
-      await supabase.from('matches').upsert(entry.mapped, { onConflict: 'match_id' })
+      // 1.5 Deduplicate matches (Postgres upsert doesn't allow same row twice in one call)
+      const uniqueMapped = entry.mapped.filter((m, idx, self) => 
+        idx === self.findIndex(x => x.match_id === m.match_id)
+      )
+      const { error: mErr } = await supabase.from('matches').upsert(uniqueMapped, { onConflict: 'match_id' })
+      if (mErr) throw mErr
       if (entry.goals.length > 0) {
-        const ids = [...new Set(entry.goals.map(g => g.match_id))]
+        const uniqueGoals = entry.goals.filter((g, idx, self) => 
+          idx === self.findIndex(x => x.goal_id === g.goal_id)
+        )
+        const ids = [...new Set(uniqueGoals.map(g => g.match_id))]
         await supabase.from('goals').delete().in('match_id', ids)
-        await supabase.from('goals').insert(entry.goals)
+        const { error: gErr } = await supabase.from('goals').insert(uniqueGoals)
+        if (gErr) throw gErr
       }
       setEntries(prev => prev.filter(e => e.id !== entry.id))
       setResult({ ok: true, msg: `✓ Torneo ${entry.tourney.tournament_name} importado.` })
@@ -352,7 +377,7 @@ export default function FileImporter() {
   }
 
   const handleImportAll = async () => {
-    const ready = entries.filter(e => e.tourney.tournament_edition !== '' && e.mapped.every(m => m.match_id !== ''))
+    const ready = entries.filter(e => e.tourney.tournament_edition !== '' && e.mapped.every(m => m.match_id && !m.match_id.startsWith('TEMP_')))
     if (ready.length === 0) return
     for (const entry of ready) await handleImportEntry(entry)
   }
@@ -402,7 +427,7 @@ export default function FileImporter() {
       {/* Entries List */}
       <div className="space-y-4">
         {entries.map(entry => {
-          const red = entry.mapped.filter(m => m.home_id==='' || m.away_id==='').length
+          const red = entry.mapped.filter(m => m.home_id==='' || m.away_id==='' || m.match_id.startsWith('TEMP_')).length
           const yellow = entry.mapped.filter(m => {
             const score = (m.home_score||0)+(m.away_score||0)
             const goalsCount = entry.goals.filter(g => g.match_id === m.match_id).length
@@ -453,7 +478,7 @@ export default function FileImporter() {
                     { label: 'Nombre', field: 'tournament_name', val: entry.tourney.tournament_name, w: 'flex-[2]' },
                     { label: 'Tier', field: 'tournament_tier', val: String(entry.tourney.tournament_tier ?? ''), w: 'w-8' },
                     { label: 'Edición', field: 'tournament_edition', val: entry.tourney.tournament_edition, w: 'w-16' },
-                    { label: 'Temporada', field: 'tournament_season', val: entry.tourney.tournament_season.join(', '), w: 'flex-[1]' },
+                    { label: 'Temporada', field: 'tournament_season', val: entry.tourney.tournament_season, w: 'flex-[1]' },
                   ].map(({ label, field, val, w }) => (
                     <div key={field} className={w}>
                       <label className="text-[7px] font-mono text-zinc-600 uppercase block mb-1">{label}</label>
@@ -482,7 +507,14 @@ export default function FileImporter() {
                    <div className="border border-zinc-800 rounded-xl overflow-hidden max-h-[400px] overflow-y-auto">
                     <table className="w-full border-collapse text-[10px] font-mono text-zinc-400">
                       <thead className="bg-zinc-950 sticky top-0">
-                        <tr>{['round','id','local','score','visita','goles'].map(h => <th key={h} className="p-3 text-left text-zinc-500 uppercase font-bold">{h}</th>)}</tr>
+                        <tr>
+                          <th className="p-3 text-left text-zinc-500 uppercase font-bold w-20">round</th>
+                          <th className="p-3 text-left text-zinc-500 uppercase font-bold w-16">fecha</th>
+                          <th className="p-3 text-left text-zinc-500 uppercase font-bold">local</th>
+                          <th className="p-3 text-center text-zinc-500 uppercase font-bold w-12">score</th>
+                          <th className="p-3 text-right text-zinc-500 uppercase font-bold">visita</th>
+                          <th className="p-3 text-left text-zinc-500 uppercase font-bold min-w-[350px]">goles</th>
+                        </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-900">
                         {entry.mapped.map((row, i) => {
@@ -490,10 +522,11 @@ export default function FileImporter() {
                           const rowGoals = entry.goals.filter(g => g.match_id === row.match_id)
                           const score = (row.home_score||0)+(row.away_score||0)
                           const isWarn = score > 0 && rowGoals.length < score
+                          const displayDate = row.match_date.split('-').reverse().slice(0,2).join('/')
                           return (
                             <tr key={i} className={`group ${!hOk||!aOk?'bg-red-950/20':isWarn?'bg-amber-950/20':'hover:bg-zinc-900/50'}`}>
                               <td className="p-3 text-zinc-500">{row.match_round}</td>
-                              <td className="p-3 text-zinc-700">{row.match_id ? row.match_id.substring(row.match_id.length-8) : 'PEND'}</td>
+                              <td className="p-3 text-zinc-600">{displayDate}</td>
                               <td className="p-3">
                                 {!hOk ? (
                                   <select value={row.home_id} onChange={e => handleTeamChange(entry.id, i, 'home', e.target.value)}
@@ -514,16 +547,18 @@ export default function FileImporter() {
                                 ) : <span className="text-zinc-100 font-bold"><span className="text-zinc-600">[{row.away_id}]</span> {row.away_name}</span>}
                               </td>
                               <td className="p-3 text-zinc-500 italic text-[9px]">
-                                {isWarn ? (
+                                {score > 0 ? (
                                   <input 
-                                    value={rowGoals.map(g => g.player_name).join('; ')}
+                                    value={rowGoals.map(formatGoal).join('; ')}
                                     onChange={e => handleGoalsChange(entry.id, i, e.target.value)}
-                                    className="w-full bg-amber-500/10 border-b border-amber-500/30 focus:border-amber-500 outline-none text-[9px] text-amber-200 placeholder:text-zinc-800 px-1 py-0.5 rounded"
-                                    placeholder="Corregir goleadores..."
+                                    className={`w-full bg-transparent border-b outline-none text-[9px] px-1 py-0.5 rounded transition-all ${
+                                      isWarn 
+                                        ? 'bg-amber-500/10 border-amber-500/30 text-amber-200 focus:border-amber-500' 
+                                        : 'border-zinc-800/50 text-zinc-400 focus:border-zinc-600 focus:bg-zinc-800/30'
+                                    }`}
+                                    placeholder="Goleadores..."
                                   />
-                                ) : (
-                                  rowGoals.map(g => g.player_name).join(', ') || '—'
-                                )}
+                                ) : '—'}
                               </td>
                             </tr>
                           )
