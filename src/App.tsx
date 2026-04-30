@@ -8,6 +8,7 @@ export default function App() {
       <div className="fixed bottom-6 right-6 flex items-center gap-3 z-50">
         <UtcSelector />
         <SyncStatus />
+
       </div>
 
       <div className="pt-2">

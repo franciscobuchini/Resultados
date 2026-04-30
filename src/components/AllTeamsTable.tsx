@@ -37,6 +37,7 @@ export default function AllTeamsTable() {
         <thead>
           <tr className="bg-neutral-950 sticky top-0">
             <th className="border border-zinc-800 p-2 text-center text-sm text-zinc-100 uppercase">Team ID</th>
+            <th className="border border-zinc-800 p-2 text-center text-sm text-zinc-100 uppercase">Escudo</th>
             <th className="border border-zinc-800 p-2 text-center text-sm text-zinc-100 uppercase">Nombre</th>
           </tr>
         </thead>
@@ -44,6 +45,18 @@ export default function AllTeamsTable() {
           {data.map((row, i) => (
             <tr key={i} className="hover:bg-zinc-900 transition-colors">
               <td className="border border-zinc-800 p-2 whitespace-nowrap text-zinc-500">{row.team_id}</td>
+              <td className="border border-zinc-800 p-2">
+                {row.team_crest_url ? (
+                  <img
+                    src={row.team_crest_url}
+                    alt={`${row.team_name || row.team_id}`}
+                    className="w-6 h-6 object-contain mx-auto"
+                    loading="lazy"
+                  />
+                ) : (
+                  <span className="text-zinc-700 text-[10px]">—</span>
+                )}
+              </td>
               <td className="border border-zinc-800 p-2 whitespace-nowrap text-zinc-300 font-bold">{row.team_name}</td>
             </tr>
           ))}

@@ -8,16 +8,42 @@ Deno.serve(async (_req) => {
 
   try {
     const allApis: Record<string, string> = {
-      results: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
-      fixtures: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
-      live: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&t=${Date.now()}`
+      results_72: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      fixtures_72: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
+      live_72: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&t=${Date.now()}`,
+      results_419: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=419&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      live_419: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=419&showOdds=true&t=${Date.now()}`,
+      results_5077: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5077&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      fixtures_5077: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5077&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
+      live_5077: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5077&showOdds=true&t=${Date.now()}`,
+      results_640: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=640&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      fixtures_640: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=640&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
+      live_640: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=640&showOdds=true&t=${Date.now()}`,
+      results_5078: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5078&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      fixtures_5078: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5078&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
+      live_5078: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5078&showOdds=true&t=${Date.now()}`,
+      results_5591: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5591&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      fixtures_5591: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5591&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
+      live_5591: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5591&showOdds=true&t=${Date.now()}`
     }
 
     const headers = { 
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36', 
       'Referer': 'https://www.365scores.com/',
-      'Origin': 'https://www.365scores.com'
+      'Origin': 'https://www.365scores.com',
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'es-AR,es;q=0.9,en;q=0.8',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Sec-Fetch-Dest': 'empty',
+      'Sec-Fetch-Mode': 'cors',
+      'Sec-Fetch-Site': 'same-site',
+      'Sec-Ch-Ua': '"Chromium";v="131", "Not_A Brand";v="24"',
+      'Sec-Ch-Ua-Mobile': '?0',
+      'Sec-Ch-Ua-Platform': '"Windows"'
     }
+
+    // Helper: delay aleatorio entre requests para simular navegación humana
+    const randomDelay = () => new Promise(r => setTimeout(r, 800 + Math.random() * 1700))
 
     // PASO 1: Descargar APIs SIEMPRE (ignoramos el body del cron para asegurar que 'live' y 'fixtures' se bajen)
     for (const [id, url] of Object.entries(allApis)) {
@@ -28,6 +54,7 @@ Deno.serve(async (_req) => {
           await supabase.from('apis').upsert({ id, data, updated_at: new Date().toISOString() })
         }
       } catch (e) { /* ignorar errores individuales */ }
+      await randomDelay() // Esperar entre 800ms y 2500ms entre cada request
     }
 
     // PASO 2: Construir matches
@@ -95,7 +122,35 @@ Deno.serve(async (_req) => {
       await supabase.from('matches').upsert(allMatches, { onConflict: 'match_id' })
     }
 
-    return new Response(JSON.stringify({ success: true, built: allMatches.length }), { headers: { 'Content-Type': 'application/json' } })
+    // PASO 3: Actualizar crest_url de equipos
+    // 365scores construye las imágenes así: https://imagecache.365scores.com/image/upload/f_png,w_72,h_72,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v{imageVersion}/Competitors/{id}
+    const crestUpdates: Record<number, string> = {} // team_id_api → crest_url
+
+    for (const apiEntry of apiRes.data || []) {
+      const games = Array.isArray(apiEntry.data) ? apiEntry.data :
+                    apiEntry.data?.games || apiEntry.data?.Games || apiEntry.data?.matches || []
+
+      for (const g of games) {
+        for (const competitor of [g.homeCompetitor, g.awayCompetitor]) {
+          if (!competitor?.id || !competitor?.imageVersion) continue
+          const teamApiId = Number(competitor.id)
+          if (crestUpdates[teamApiId]) continue // ya lo tenemos
+          crestUpdates[teamApiId] = `https://imagecache.365scores.com/image/upload/f_png,w_72,h_72,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v${competitor.imageVersion}/Competitors/${competitor.id}`
+        }
+      }
+    }
+
+    // Actualizar solo equipos que ya existen en la tabla teams (matcheados por team_id_api)
+    let crestCount = 0
+    for (const [teamApiId, crestUrl] of Object.entries(crestUpdates)) {
+      const { error } = await supabase
+        .from('teams')
+        .update({ team_crest_url: crestUrl })
+        .eq('team_id_api', Number(teamApiId))
+      if (!error) crestCount++
+    }
+
+    return new Response(JSON.stringify({ success: true, built: allMatches.length, crests_updated: crestCount }), { headers: { 'Content-Type': 'application/json' } })
   } catch (err: any) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } })
   }
