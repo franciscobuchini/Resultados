@@ -1,4 +1,4 @@
-import { createClient } from 'supabase'
+import { createClient } from '@supabase/supabase-js'
 
 Deno.serve(async (_req) => {
   const supabase = createClient(
@@ -8,23 +8,27 @@ Deno.serve(async (_req) => {
 
   try {
     const allApis: Record<string, string> = {
-      results_72: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
-      fixtures_72: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
-      live_72: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&t=${Date.now()}`,
-      results_419: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=419&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
-      live_419: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=419&showOdds=true&t=${Date.now()}`,
-      results_5077: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5077&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
-      fixtures_5077: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5077&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
-      live_5077: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5077&showOdds=true&t=${Date.now()}`,
-      results_640: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=640&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
-      fixtures_640: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=640&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
-      live_640: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=640&showOdds=true&t=${Date.now()}`,
-      results_5078: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5078&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
-      fixtures_5078: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5078&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
-      live_5078: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5078&showOdds=true&t=${Date.now()}`,
-      results_5591: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5591&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
-      fixtures_5591: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5591&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
-      live_5591: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5591&showOdds=true&t=${Date.now()}`
+      // results_72: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      // fixtures_72: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
+      // live_72: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&t=${Date.now()}`,
+      // results_419: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=419&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      // live_419: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=419&showOdds=true&t=${Date.now()}`,
+      // results_5077: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5077&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      // fixtures_5077: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5077&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
+      // live_5077: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5077&showOdds=true&t=${Date.now()}`,
+      // results_640: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=640&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      // fixtures_640: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=640&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
+      // live_640: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=640&showOdds=true&t=${Date.now()}`,
+      // results_5078: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5078&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      // fixtures_5078: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5078&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
+      // live_5078: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5078&showOdds=true&t=${Date.now()}`,
+      // results_5591: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5591&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      // fixtures_5591: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5591&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
+      // live_5591: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5591&showOdds=true&t=${Date.now()}`
+      
+      results_5930: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5930&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      fixtures_5930: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5930&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
+      live_5930: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5930&showOdds=true&t=${Date.now()}`
     }
 
     const headers = { 

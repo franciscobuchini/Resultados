@@ -1,4 +1,4 @@
-import { createClient } from 'supabase'
+import { createClient } from '@supabase/supabase-js'
 
 Deno.serve(async (_req) => {
   const supabase = createClient(
