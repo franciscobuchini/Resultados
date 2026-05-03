@@ -25,14 +25,14 @@ Deno.serve(async (_req) => {
       // results_5591: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5591&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
       // fixtures_5591: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5591&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
       // live_5591: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5591&showOdds=true&t=${Date.now()}`
-      
-      results_5930: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5930&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
-      fixtures_5930: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5930&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
-      live_5930: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5930&showOdds=true&t=${Date.now()}`
+
+      wc_5930_results: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5930&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
+      wc_5930_fixtures: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5930&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
+      wc_5930_live: `https://webws.365scores.com/web/games/current/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=5930&showOdds=true&t=${Date.now()}`
     }
 
-    const headers = { 
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36', 
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
       'Referer': 'https://www.365scores.com/',
       'Origin': 'https://www.365scores.com',
       'Accept': 'application/json, text/plain, */*',
@@ -73,8 +73,8 @@ Deno.serve(async (_req) => {
     const matchMap: Record<string, any> = {}
 
     for (const apiEntry of apiRes.data || []) {
-      const games = Array.isArray(apiEntry.data) ? apiEntry.data : 
-                    apiEntry.data?.games || apiEntry.data?.Games || apiEntry.data?.matches || []
+      const games = Array.isArray(apiEntry.data) ? apiEntry.data :
+        apiEntry.data?.games || apiEntry.data?.Games || apiEntry.data?.matches || []
 
       for (const g of games) {
         try {
@@ -85,11 +85,11 @@ Deno.serve(async (_req) => {
           const datePart = startTime.split('T')[0].replace(/-/g, '')
           const homeTeamInfo = teamLookup.get(Number(g.homeCompetitor?.id || g.home_team_id));
           const awayTeamInfo = teamLookup.get(Number(g.awayCompetitor?.id || g.away_team_id));
-          
+
           const homeId = homeTeamInfo?.id || String(g.homeCompetitor?.id || '');
           const awayId = awayTeamInfo?.id || String(g.awayCompetitor?.id || '');
           const tourId = tournamentLookup.get(Number(g.competitionId || g.tournamentId)) || String(g.competitionId || '');
-          
+
           const matchId = `${datePart}${homeId}${awayId}`;
           const gameTime = g.gameTime ?? g.game_time ?? 0;
 
@@ -132,7 +132,7 @@ Deno.serve(async (_req) => {
 
     for (const apiEntry of apiRes.data || []) {
       const games = Array.isArray(apiEntry.data) ? apiEntry.data :
-                    apiEntry.data?.games || apiEntry.data?.Games || apiEntry.data?.matches || []
+        apiEntry.data?.games || apiEntry.data?.Games || apiEntry.data?.matches || []
 
       for (const g of games) {
         for (const competitor of [g.homeCompetitor, g.awayCompetitor]) {
