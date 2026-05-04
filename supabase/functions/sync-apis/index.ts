@@ -70,6 +70,13 @@ Deno.serve(async (_req) => {
 
     const tournamentLookup = new Map((tRes.data || []).map((t: any) => [Number(t.tournament_id_api), t.tournament_id]))
     const teamLookup = new Map((teRes.data || []).map((t: any) => [Number(t.team_id_api), { id: t.team_id, name: t.team_name }]))
+    // Extraer IDs de competencias activas desde las URLs de allApis
+    const allowedCompetitions = new Set<number>()
+    for (const url of Object.values(allApis)) {
+      const m = url.match(/competitions=(\d+)/)
+      if (m) allowedCompetitions.add(Number(m[1]))
+    }
+
     const matchMap: Record<string, any> = {}
 
     for (const apiEntry of apiRes.data || []) {
@@ -81,6 +88,10 @@ Deno.serve(async (_req) => {
           const gameId = g.id || g.ID || g.gameId;
           const startTime = g.startTime || g.StartTime || g.start_time;
           if (!gameId || !startTime) continue;
+
+          // Filtrar: solo procesar partidos de las competencias activas
+          const compId = Number(g.competitionId || g.tournamentId || 0)
+          if (compId && !allowedCompetitions.has(compId)) continue;
 
           const datePart = startTime.split('T')[0].replace(/-/g, '')
           const homeTeamInfo = teamLookup.get(Number(g.homeCompetitor?.id || g.home_team_id));

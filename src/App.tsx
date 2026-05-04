@@ -1,6 +1,7 @@
 import SyncStatus from './components/SyncStatus'
 import UtcSelector from './components/UtcSelector'
 import FileImporter from './components/FileImporter'
+import WorldCupFixture from './components/WorldCupFixture'
 
 export default function App() {
   return (
@@ -8,12 +9,12 @@ export default function App() {
       <div className="fixed bottom-6 right-6 flex items-center gap-3 z-50">
         <UtcSelector />
         <SyncStatus />
-
       </div>
 
       <div className="pt-2">
         <FileImporter />
       </div>
+      <WorldCupFixture />
     </div>
   )
 }
