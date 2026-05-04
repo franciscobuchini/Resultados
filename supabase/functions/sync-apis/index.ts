@@ -7,6 +7,18 @@ Deno.serve(async (_req) => {
   )
 
   try {
+    // 1. Determinar el tipo de sincronización (live, fixtures, results, o all)
+    let reqData: any = {};
+    if (_req.method === 'POST') {
+      try { reqData = await _req.json(); } catch (e) { /* ignore */ }
+    } else if (_req.method === 'GET') {
+      const url = new URL(_req.url);
+      reqData.type = url.searchParams.get('type');
+    }
+    
+    const syncType = reqData.type || 'all';
+    console.log(`[SYNC] Iniciando sincronización. Tipo: ${syncType}`);
+
     const allApis: Record<string, string> = {
       // results_72: `https://webws.365scores.com/web/games/results/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&includeTopBettingOpportunity=1&topBookmaker=14&t=${Date.now()}`,
       // fixtures_72: `https://webws.365scores.com/web/games/fixtures/?appTypeId=5&langId=14&timezoneName=America%2FBuenos_Aires&userCountryId=10&competitions=72&showOdds=true&includeTopBettingOpportunity=1&t=${Date.now()}`,
@@ -49,37 +61,58 @@ Deno.serve(async (_req) => {
     // Helper: delay aleatorio entre requests para simular navegación humana
     const randomDelay = () => new Promise(r => setTimeout(r, 800 + Math.random() * 1700))
 
-    // PASO 1: Descargar APIs SIEMPRE (ignoramos el body del cron para asegurar que 'live' y 'fixtures' se bajen)
-    for (const [id, url] of Object.entries(allApis)) {
+    // Filtrar APIs según el tipo solicitado
+    const apisToFetch = Object.entries(allApis).filter(([id]) => {
+      if (syncType === 'all') return true;
+      return id.endsWith(`_${syncType}`);
+    });
+
+    if (apisToFetch.length === 0) {
+      console.log(`[SYNC] No hay APIs para el tipo: ${syncType}`);
+      return new Response(JSON.stringify({ success: true, message: `No hay APIs para el tipo: ${syncType}` }), { headers: { 'Content-Type': 'application/json' } })
+    }
+
+    // PASO 1: Descargar APIs solicitadas
+    for (const [id, url] of apisToFetch) {
       try {
+        console.log(`[SYNC] Descargando: ${id}`);
         const res = await fetch(url, { headers })
         if (res.ok) {
           const data = await res.json()
           await supabase.from('apis').upsert({ id, data, updated_at: new Date().toISOString() })
         }
-      } catch (e) { /* ignorar errores individuales */ }
+      } catch (e) { console.error(`[SYNC] Error en ${id}:`, e) }
       await randomDelay() // Esperar entre 800ms y 2500ms entre cada request
     }
 
     // PASO 2: Construir matches
     const [tRes, teRes, apiRes] = await Promise.all([
       supabase.from('tournaments').select('tournament_id, tournament_id_api'),
-      supabase.from('teams').select('team_id, team_id_api, team_name'),
+      supabase.from('teams').select('team_id, team_id_api, team_name, team_crest_url'),
       supabase.from('apis').select('*')
     ])
 
     const tournamentLookup = new Map((tRes.data || []).map((t: any) => [Number(t.tournament_id_api), t.tournament_id]))
-    const teamLookup = new Map((teRes.data || []).map((t: any) => [Number(t.team_id_api), { id: t.team_id, name: t.team_name }]))
-    // Extraer IDs de competencias activas desde las URLs de allApis
+    const teamLookup = new Map((teRes.data || []).map((t: any) => [Number(t.team_id_api), { id: t.team_id, name: t.team_name, crest: t.team_crest_url }]))
+    
+    // Extraer IDs de competencias activas basándose solo en las APIs que estamos procesando en este ciclo
     const allowedCompetitions = new Set<number>()
-    for (const url of Object.values(allApis)) {
+    for (const [id, url] of apisToFetch) {
       const m = url.match(/competitions=(\d+)/)
       if (m) allowedCompetitions.add(Number(m[1]))
     }
 
     const matchMap: Record<string, any> = {}
 
-    for (const apiEntry of apiRes.data || []) {
+    // Filtramos apiRes para procesar ÚNICAMENTE los datos de la categoría que descargamos
+    // (Ej: si bajamos 'live', solo actualizamos matches usando los datos 'live' cacheados).
+    // Esto evita procesar fixtures pasados o sobreescribir estados incorrectamente y hace la función muy rápida.
+    const apisToProcess = (apiRes.data || []).filter(entry => {
+      if (syncType === 'all') return true;
+      return entry.id.endsWith(`_${syncType}`);
+    });
+
+    for (const apiEntry of apisToProcess) {
       const games = Array.isArray(apiEntry.data) ? apiEntry.data :
         apiEntry.data?.games || apiEntry.data?.Games || apiEntry.data?.matches || []
 
@@ -137,32 +170,49 @@ Deno.serve(async (_req) => {
       await supabase.from('matches').upsert(allMatches, { onConflict: 'match_id' })
     }
 
-    // PASO 3: Actualizar crest_url de equipos
-    // 365scores construye las imágenes así: https://imagecache.365scores.com/image/upload/f_png,w_72,h_72,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v{imageVersion}/Competitors/{id}
-    const crestUpdates: Record<number, string> = {} // team_id_api → crest_url
+    let crestCount = 0;
 
-    for (const apiEntry of apiRes.data || []) {
-      const games = Array.isArray(apiEntry.data) ? apiEntry.data :
-        apiEntry.data?.games || apiEntry.data?.Games || apiEntry.data?.matches || []
+    // PASO 3: Actualizar crest_url de equipos (Solo lo hacemos 1 vez al día con fixtures, no en live)
+    if (syncType === 'fixtures' || syncType === 'all') {
+      // 365scores construye las imágenes así: https://imagecache.365scores.com/image/upload/...
+      const crestUpdates: Record<number, string> = {} 
 
-      for (const g of games) {
-        for (const competitor of [g.homeCompetitor, g.awayCompetitor]) {
-          if (!competitor?.id || !competitor?.imageVersion) continue
-          const teamApiId = Number(competitor.id)
-          if (crestUpdates[teamApiId]) continue // ya lo tenemos
-          crestUpdates[teamApiId] = `https://imagecache.365scores.com/image/upload/f_png,w_72,h_72,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v${competitor.imageVersion}/Competitors/${competitor.id}`
+      for (const apiEntry of apisToProcess) {
+        const games = Array.isArray(apiEntry.data) ? apiEntry.data :
+          apiEntry.data?.games || apiEntry.data?.Games || apiEntry.data?.matches || []
+
+        for (const g of games) {
+          for (const competitor of [g.homeCompetitor, g.awayCompetitor]) {
+            if (!competitor?.id || !competitor?.imageVersion) continue
+            const teamApiId = Number(competitor.id)
+            if (crestUpdates[teamApiId]) continue // ya lo tenemos
+            crestUpdates[teamApiId] = `https://imagecache.365scores.com/image/upload/f_png,w_72,h_72,c_limit,q_auto:eco,dpr_2,d_Competitors:default1.png/v${competitor.imageVersion}/Competitors/${competitor.id}`
+          }
         }
       }
-    }
 
-    // Actualizar solo equipos que ya existen en la tabla teams (matcheados por team_id_api)
-    let crestCount = 0
-    for (const [teamApiId, crestUrl] of Object.entries(crestUpdates)) {
-      const { error } = await supabase
-        .from('teams')
-        .update({ team_crest_url: crestUrl })
-        .eq('team_id_api', Number(teamApiId))
-      if (!error) crestCount++
+      // Actualizar solo equipos que ya existen en la tabla teams (matcheados por team_id_api)
+      for (const [teamApiId, crestUrl] of Object.entries(crestUpdates)) {
+        const teamIdApiNum = Number(teamApiId);
+        const existingTeam = teamLookup.get(teamIdApiNum);
+        
+        // Solo actualizar si el equipo existe
+        if (existingTeam) {
+          const hasCustomCrest = existingTeam.crest && existingTeam.crest.trim() !== "";
+          
+          if (!hasCustomCrest) {
+            console.log(`[CrestSync] Actualizando escudo para: ${existingTeam.name} (${teamIdApiNum})`);
+            const { error } = await supabase
+              .from('teams')
+              .update({ team_crest_url: crestUrl })
+              .eq('team_id_api', teamIdApiNum)
+            if (!error) crestCount++
+          } else {
+            // Comentamos este log para no ensuciar la consola con cientos de mensajes de "Saltando..."
+            // console.log(`[CrestSync] Saltando ${existingTeam.name}: Ya tiene URL personalizada`);
+          }
+        }
+      }
     }
 
     return new Response(JSON.stringify({ success: true, built: allMatches.length, crests_updated: crestCount }), { headers: { 'Content-Type': 'application/json' } })
