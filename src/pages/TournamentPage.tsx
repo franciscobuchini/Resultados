@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../functions/supabase'
 import PageHeader from '../layout/PageHeader'
+import StandingsTable from '../components/tournament/StandingsTable'
 import { computeStandings } from '../../shared/tournament/computeStandings'
 import type { TournamentSystem } from '../../shared/tournament/tournamentTypes'
 import type { Match } from '../../shared/tournament/matchTypes'
@@ -210,62 +211,16 @@ export default function TournamentPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
           {/* Tabla de posiciones */}
-          <div className="lg:col-span-6 space-y-12">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-10">
-              {groupKeys.map(group => {
-                const groupStandings = standings[group] ?? []
-
-                return (
-                  <div key={group} className="space-y-4">
-                    <div className="flex items-center gap-2 px-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_white]" />
-                      <span className="text-zinc-100 font-black uppercase tracking-[0.2em] text-[10px]">
-                        {group}
-                      </span>
-                    </div>
-
-                    <div className="bg-neutral-950 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
-                      <table className="w-full text-[9px] font-mono text-zinc-400 border-collapse table-fixed">
-                        <thead>
-                          <tr className="bg-zinc-900/50 text-zinc-600 border-b border-zinc-800">
-                            <th className="p-2 text-center w-[10%]">#</th>
-                            <th className="p-2 text-left w-[45%]">EQUIPO</th>
-                            <th className="p-2 text-center font-bold text-zinc-400 w-[15%]">PTS</th>
-                            <th className="p-2 text-center w-[15%]">J</th>
-                            <th className="p-2 text-center w-[15%]">+/-</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-zinc-900">
-                          {groupStandings.map((team, idx) => {
-                            const info = teamLookup[team.team_id]
-                            return (
-                              <tr key={team.team_id} className="hover:bg-zinc-900/30 transition-colors h-9">
-                                <td className="p-2 text-center text-zinc-600 font-bold">{idx + 1}</td>
-                                <td className="p-2 overflow-hidden">
-                                  <div className="flex items-center gap-2 overflow-hidden">
-                                    {info?.team_crest_url
-                                      ? <img src={info.team_crest_url} className="w-3.5 h-3.5 object-contain flex-shrink-0" alt="" />
-                                      : <div className="w-3.5 h-3.5 bg-zinc-800 rounded-full flex-shrink-0" />
-                                    }
-                                    <span className="text-zinc-100 font-bold truncate">
-                                      {info?.team_name ?? team.team_name}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="p-2 text-center font-black text-white bg-white/5">{team.points}</td>
-                                <td className="p-2 text-center">{team.played}</td>
-                                <td className="p-2 text-center font-bold text-zinc-500">
-                                  {team.goal_difference > 0 ? `+${team.goal_difference}` : team.goal_difference}
-                                </td>
-                              </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )
-              })}
+          <div className="lg:col-span-6 space-y-10">
+            <div className="flex flex-col gap-8">
+              {groupKeys.map(group => (
+                <StandingsTable 
+                  key={group}
+                  title={group}
+                  standings={standings[group] ?? []}
+                  teamLookup={teamLookup}
+                />
+              ))}
             </div>
           </div>
 

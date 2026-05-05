@@ -1,6 +1,7 @@
-import React from 'react';
+
 import PageHeader from '../layout/PageHeader';
-import FileImporter from '../components/FileImporter';
+import FileImporter from '../components/admin/FileImporter';
+import ReadmeViewer from '../components/admin/ReadmeViewer';
 
 export default function AdminPage() {
   return (
@@ -23,6 +24,18 @@ export default function AdminPage() {
             </div>
           </div>
           <FileImporter />
+        </div>
+        <div className="bg-zinc-900/30 p-8 rounded-[2rem] border border-zinc-800/50 shadow-2xl">
+          <div className="flex items-center gap-4 mb-8 border-b border-zinc-800 pb-6">
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-black shadow-lg">
+              📝
+            </div>
+            <div>
+              <h3 className="text-white font-black uppercase tracking-tighter text-2xl">Notas del Desarrollador</h3>
+              <p className="text-zinc-500 text-xs font-medium uppercase tracking-widest">Estado Actual del Proyecto</p>
+            </div>
+          </div>
+          <ReadmeViewer />
         </div>
       </div>
     </>

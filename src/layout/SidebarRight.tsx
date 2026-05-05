@@ -1,8 +1,8 @@
-import React from 'react';
+
 
 export default function SidebarRight() {
   return (
-    <aside className="hidden lg:block w-80 shrink-0 border-l border-zinc-900 p-6 space-y-8 sticky top-16 h-[calc(100vh-64px)] overflow-y-auto custom-scrollbar">
+    <aside className="hidden lg:block w-[20%] shrink-0 border-l border-zinc-900 p-6 space-y-8 sticky top-16 h-[calc(100vh-64px)] overflow-y-auto custom-scrollbar">
       <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 space-y-4">
         <h3 className="text-white font-bold text-sm">Próximos Destacados</h3>
         <div className="space-y-4">

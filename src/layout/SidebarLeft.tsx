@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../functions/supabase';
 
@@ -22,7 +22,7 @@ export default function SidebarLeft() {
   }, []);
 
   return (
-    <aside className="hidden xl:block w-64 shrink-0 border-r border-zinc-900 p-6 sticky top-16 h-[calc(100vh-64px)] overflow-y-auto custom-scrollbar">
+    <aside className="hidden xl:block w-[15%] shrink-0 border-r border-zinc-900 p-6 sticky top-16 h-[calc(100vh-64px)] overflow-y-auto custom-scrollbar">
       <div className="space-y-1">
         {tournaments.map(tourney => (
           <Link 

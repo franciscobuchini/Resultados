@@ -3,7 +3,7 @@
 // ============================================================
 
 import type { Tiebreaker, LeaguePhase } from './tournamentTypes'
-import type { Match } from './tournamentTypes'
+import type { Match } from './matchTypes'
 
 // ------------------------------------------------------------
 // TIPOS

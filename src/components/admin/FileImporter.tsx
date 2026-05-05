@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { supabase } from '../functions/supabase'
+import { supabase } from '../../functions/supabase'
 import Papa from 'papaparse'
 
 // ── Tipos ──────────────────────────────────────────────

@@ -1,10 +1,10 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 
 interface PageHeaderProps {
   title?: string;
   subtitle?: string;
-  tournament_banner_url?: string;
-  logo?: string;
+  tournament_banner_url?: string | null;
+  logo?: string | null;
 }
 
 export default function PageHeader({ 
@@ -14,10 +14,10 @@ export default function PageHeader({
   logo
 }: PageHeaderProps) {
   const defaultBanner = "https://cdn.pixabay.com/photo/2024/10/09/23/52/ai-generated-9109556_640.jpg";
-  const [imgSrc, setImgSrc] = React.useState(tournament_banner_url || defaultBanner);
+  const [imgSrc, setImgSrc] = useState(tournament_banner_url || defaultBanner);
 
   // Sincronizar imgSrc cuando cambie el prop
-  React.useEffect(() => {
+  useEffect(() => {
     setImgSrc(tournament_banner_url || defaultBanner);
   }, [tournament_banner_url]);
 
