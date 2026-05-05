@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useTime } from '../functions/time'
+import { useTime } from '../../functions/time'
 
 const OFFSETS = [
   { label: 'USW (UTC-7)', value: -7 },
@@ -29,7 +29,7 @@ export default function UtcSelector() {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 bottom-full mb-2 w-40 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl z-50 overflow-hidden max-h-[60vh] overflow-y-auto">
+          <div className="absolute right-0 top-full mt-2 w-40 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl z-50 overflow-hidden max-h-[60vh] overflow-y-auto">
             {OFFSETS.map((opt) => (
               <button
                 key={opt.value}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../functions/supabase'
-import { adjustDateWithOffset, useTime } from '../functions/time'
+import { supabase } from '../../functions/supabase'
+import { adjustDateWithOffset, useTime } from '../../functions/time'
 
 export default function SyncStatus() {
   const [lastSync, setLastSync] = useState('')
@@ -44,8 +44,8 @@ export default function SyncStatus() {
         <span className="text-[10px] sm:text-xs text-green-400">
           {loading ? '...' : (
             <>
-              <span className="hidden sm:inline">Sincronizado</span>
-              <span className="sm:hidden">SYNC</span>
+              <span className="hidden sm:inline">Sync</span>
+              <span className="sm:hidden">Sync</span>
             </>
           )}
         </span>

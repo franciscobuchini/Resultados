@@ -1,20 +1,46 @@
-import SyncStatus from './components/SyncStatus'
-import UtcSelector from './components/UtcSelector'
-import FileImporter from './components/FileImporter'
-import WorldCupFixture from './components/WorldCupFixture'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import MainLayout from './layout/MainLayout'
+import TournamentPage from './pages/TournamentPage'
+import AdminPage from './pages/AdminPage'
+import Error404 from './pages/Error404'
+import { useEffect, useState } from 'react'
+import { supabase } from './functions/supabase'
 
 export default function App() {
-  return (
-    <div className="bg-neutral-900 min-h-screen pb-20 relative">
-      <div className="fixed bottom-6 right-6 flex items-center gap-3 z-50">
-        <UtcSelector />
-        <SyncStatus />
-      </div>
+  const [defaultTournamentId, setDefaultTournamentId] = useState<string | null>(null)
 
-      <div className="pt-2">
-        <FileImporter />
-      </div>
-      <WorldCupFixture />
-    </div>
+  useEffect(() => {
+    const fetchDefault = async () => {
+      const { data } = await supabase
+        .from('tournaments')
+        .select('tournament_id')
+        .order('tournament_banner_url', { ascending: false, nullsFirst: false })
+        .limit(1)
+        .single()
+      
+      if (data) setDefaultTournamentId(data.tournament_id)
+    }
+    fetchDefault()
+  }, [])
+
+  return (
+    <BrowserRouter>
+      <MainLayout>
+        <Routes>
+          {/* Redirigir la raíz al torneo por defecto si existe */}
+          <Route path="/" element={
+            defaultTournamentId 
+              ? <Navigate to={`/tournament/${defaultTournamentId}`} replace /> 
+              : <div className="p-20 text-center text-zinc-500 font-black uppercase tracking-widest animate-pulse">Cargando Competición...</div>
+          } />
+          
+          <Route path="/tournament/:tournamentId" element={<TournamentPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          
+          {/* Capturar todo lo demás como 404 */}
+          <Route path="*" element={<Error404 />} />
+        </Routes>
+      </MainLayout>
+    </BrowserRouter>
   )
 }
