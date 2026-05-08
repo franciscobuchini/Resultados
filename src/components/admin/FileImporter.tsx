@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { supabase } from '../../functions/supabase'
 import Papa from 'papaparse'
+import { useThemeClasses } from '../../functions/themeStore'
 
 // ── Tipos ──────────────────────────────────────────────
 interface RawMatch {
@@ -177,6 +178,7 @@ function parsePenalties(notes: string, home: string, away: string) {
 }
 
 export default function FileImporter() {
+  const { textMain, textMuted, border, bgSurface } = useThemeClasses()
   const [teams, setTeams] = useState<DbTeam[]>([])
   const [countries, setCountries] = useState<DbCountry[]>([])
   const [existingTournaments, setExistingTournaments] = useState<DbTournament[]>([])
@@ -421,7 +423,7 @@ export default function FileImporter() {
     for (const entry of ready) await handleImportEntry(entry)
   }
 
-  if (loading) return <div className="p-4 text-zinc-600 text-xs font-mono text-center pt-20">Cargando datos...</div>
+  if (loading) return <div className={`p-4 ${textMuted} text-xs font-mono text-center pt-20`}>Cargando datos...</div>
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
@@ -429,14 +431,14 @@ export default function FileImporter() {
 
       {/* Drop Zone */}
       <div onClick={() => fileInputRef.current?.click()}
-        className="mb-8 border-2 border-dashed border-zinc-800 bg-zinc-900/20 hover:border-zinc-600 hover:bg-zinc-900/40 rounded-2xl p-10 transition-all cursor-pointer flex flex-col items-center justify-center gap-4 group">
+        className={`mb-8 border-2 border-dashed ${border} ${bgSurface}/20 hover:bg-zinc-900/40 rounded-2xl p-10 transition-all cursor-pointer flex flex-col items-center justify-center gap-4 group`}>
         <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".json,.txt,.csv" multiple />
-        <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-500 group-hover:scale-110 group-hover:text-white transition-all">
+        <div className={`w-16 h-16 rounded-full ${bgSurface} flex items-center justify-center ${textMuted} group-hover:scale-110 group-hover:text-white transition-all`}>
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
         </div>
         <div className="text-center">
-          <p className="text-sm font-mono font-bold text-zinc-300">Seleccionar archivos CSV / JSON</p>
-          <p className="text-[10px] text-zinc-600 mt-1 uppercase tracking-widest">Puedes subir múltiples archivos a la vez</p>
+          <p className={`text-sm font-mono font-bold ${textMain}`}>Seleccionar archivos CSV / JSON</p>
+          <p className={`text-[10px] ${textMuted} mt-1 uppercase tracking-widest`}>Puedes subir múltiples archivos a la vez</p>
         </div>
       </div>
 

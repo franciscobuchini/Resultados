@@ -1,14 +1,18 @@
 
 
-export default function ReadmeViewer() {
+import { useThemeClasses } from '../../functions/themeStore';
 
+export default function ReadmeViewer() {
+  const { textMain, textMuted } = useThemeClasses();
 
   return (
-    <div className="max-w-4xl mx-auto mt-20 mb-32 px-6 text-white">
-      Cosas a resolver:
-    <br/> - Goles desde 2020 (J)
-    <br/> - Sistema de inicio de sesión, perfiles, etc (F)
-    <br/> - Hay partidos unicos entre campeonatos (J)
+    <div className={`max-w-4xl mx-auto px-6 ${textMain}`}>
+      <h2 className="text-2xl font-bold mb-4">Tareas pendientes</h2>
+      <ul className={`space-y-2 ${textMuted}`}>
+        <li>- Goles desde 2020</li>
+        <li>- Sistema de inicio de sesión, perfiles, etc</li>
+        <li>- Partidos únicos entre campeonatos</li>
+      </ul>
     </div>
   )
 }

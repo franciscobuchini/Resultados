@@ -3,14 +3,17 @@ import Header from './Header';
 import Footer from './Footer';
 import SidebarLeft from './SidebarLeft';
 import SidebarRight from './SidebarRight';
+import { useThemeClasses } from '../functions/themeStore';
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
+  const { bgApp, textMain } = useThemeClasses();
+
   return (
-    <div className="min-h-screen bg-black flex flex-col font-sans text-zinc-100">
+    <div className={`min-h-screen ${bgApp} ${textMain} flex flex-col font-sans`}>
       {/* Header Fijo */}
       <Header />
 
@@ -19,7 +22,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <SidebarLeft />
 
         {/* Parte Central del Sitio */}
-        <main className="flex-1 min-w-0 bg-zinc-950/50">
+        <main className="flex-1 min-w-0 bg-black/10">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

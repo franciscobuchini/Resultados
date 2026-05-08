@@ -142,8 +142,29 @@ Deno.serve(async (_req) => {
           matchMap[matchId] = {
             match_id: matchId,
             match_id_api: gameId,
-            match_date: startTime.split('T')[0],
-            match_time_utc: new Date(startTime).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }),
+            // Convertir startTime de Buenos Aires (UTC-3) a UTC real.
+            // Esto afecta tanto la hora como potencialmente la fecha (ej: 23:00 BA → 02:00+1d UTC).
+            ...(() => {
+              const timePart = startTime.split('T')[1]; // "15:00:00" o "15:00:00-03:00"
+              if (!timePart) return { match_date: startTime.split('T')[0], match_time_utc: '00:00' };
+              
+              const dateParts = startTime.split('T')[0].split('-').map(Number); // [2026, 6, 11]
+              const [hStr, mStr] = timePart.split(':');
+              let h = parseInt(hStr, 10) + 3; // Buenos Aires → UTC
+              let dateStr = startTime.split('T')[0];
+              
+              if (h >= 24) {
+                h -= 24;
+                // Avanzar un día
+                const d = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2] + 1));
+                dateStr = d.toISOString().split('T')[0];
+              }
+              
+              return {
+                match_date: dateStr,
+                match_time_utc: `${String(h).padStart(2, '0')}:${mStr}`
+              };
+            })(),
             match_status: g.statusText || g.status_text || 'Desconocido',
             game_time: gameTime,
             home_id: homeId,

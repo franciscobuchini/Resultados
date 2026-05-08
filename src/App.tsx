@@ -5,9 +5,11 @@ import AdminPage from './pages/AdminPage'
 import Error404 from './pages/Error404'
 import { useEffect, useState } from 'react'
 import { supabase } from './functions/supabase'
+import ThemeProvider, { useThemeClasses } from './functions/themeStore'
 
 export default function App() {
   const [defaultTournamentId, setDefaultTournamentId] = useState<string | null>(null)
+  const { textMuted } = useThemeClasses()
 
   useEffect(() => {
     const fetchDefault = async () => {
@@ -17,30 +19,32 @@ export default function App() {
         .order('tournament_banner_url', { ascending: false, nullsFirst: false })
         .limit(1)
         .single()
-      
+
       if (data) setDefaultTournamentId(data.tournament_id)
     }
     fetchDefault()
   }, [])
 
   return (
-    <BrowserRouter>
-      <MainLayout>
-        <Routes>
-          {/* Redirigir la raíz al torneo por defecto si existe */}
-          <Route path="/" element={
-            defaultTournamentId 
-              ? <Navigate to={`/tournament/${defaultTournamentId}`} replace /> 
-              : <div className="p-20 text-center text-zinc-500 font-black uppercase tracking-widest animate-pulse">Cargando Competición...</div>
-          } />
-          
-          <Route path="/tournament/:tournamentId" element={<TournamentPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          
-          {/* Capturar todo lo demás como 404 */}
-          <Route path="*" element={<Error404 />} />
-        </Routes>
-      </MainLayout>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <MainLayout>
+          <Routes>
+            {/* Redirigir la raíz al torneo por defecto si existe */}
+            <Route path="/" element={
+              defaultTournamentId
+                ? <Navigate to={`/tournament/${defaultTournamentId}`} replace />
+                : <div className={`p-20 text-center ${textMuted} animate-pulse`}>Cargando Competición...</div>
+            } />
+
+            <Route path="/tournament/:tournamentId" element={<TournamentPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+
+            {/* Capturar todo lo demás como 404 */}
+            <Route path="*" element={<Error404 />} />
+          </Routes>
+        </MainLayout>
+      </BrowserRouter>
+    </ThemeProvider>
   )
 }
