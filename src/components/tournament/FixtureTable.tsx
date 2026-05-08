@@ -1,3 +1,4 @@
+import React from 'react';
 import { DataRowHeader, DataRowSeparator, FixtureRow } from '../ui/DataRow';
 import DataBox from '../ui/DataBox';
 import type { Match } from '../../../shared/tournament/matchTypes';
@@ -69,7 +70,7 @@ export default function FixtureTable({
         const formattedDay = `${dayName} ${dayNum}`;
 
         return (
-          <div key={date}>
+          <React.Fragment key={date}>
             <DataRowSeparator label={formattedDay} />
 
             {dayMatches.map(match => {
@@ -94,7 +95,7 @@ export default function FixtureTable({
                 />
               );
             })}
-          </div>
+          </React.Fragment>
         );
       })}
     </DataBox>
