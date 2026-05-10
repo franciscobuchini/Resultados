@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { useThemeClasses } from '../../functions/themeStore';

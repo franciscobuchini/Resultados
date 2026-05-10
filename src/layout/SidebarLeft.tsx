@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
 import { supabase } from '../functions/supabase';
 import { useThemeClasses } from '../functions/themeStore';
 import { Accordion } from '../components/ui/Accordion';
@@ -22,8 +21,7 @@ export default function SidebarLeft() {
   const [tournaments, setTournaments] = useState<TournamentItem[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
-  const { tournamentId } = useParams<{ tournamentId: string }>();
-  const { border, textMain, textMuted, bgSurface } = useThemeClasses();
+  const { border, bgSurface } = useThemeClasses();
 
   useEffect(() => {
     const fetchData = async () => {
