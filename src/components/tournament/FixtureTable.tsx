@@ -74,13 +74,7 @@ export default function FixtureTable({
             <DataRowSeparator label={formattedDay} />
 
             {dayMatches.map(match => {
-              // Convertir hora UTC → hora local (una sola llamada, cero preocupaciones)
               const local = toLocal(match.match_date, match.match_time_utc, utcOffset);
-              
-              const statusDisplay = 
-                (match.match_status?.toLowerCase() === 'prog.' || match.match_status === 'NS')
-                  ? local.time
-                  : match.match_status;
 
               return (
                 <FixtureRow
@@ -91,7 +85,9 @@ export default function FixtureTable({
                   awayLogo={teamLookup[match.away_id!]?.team_crest_url}
                   awayName={teamLookup[match.away_id!]?.team_name ?? match.away_name}
                   awayScore={match.away_score}
-                  status={statusDisplay}
+                  homePenalty={match.home_penalty}
+                  awayPenalty={match.away_penalty}
+                  matchTime={local.time}
                 />
               );
             })}

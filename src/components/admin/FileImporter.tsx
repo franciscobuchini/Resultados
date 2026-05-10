@@ -587,7 +587,14 @@ export default function FileImporter() {
                                   </select>
                                 ) : <span className="text-zinc-100 font-bold">{row.home_name} <span className="text-zinc-600">[{row.home_id}]</span></span>}
                               </td>
-                              <td className="p-3 text-center text-zinc-200 font-bold bg-zinc-900/20">{row.home_score} - {row.away_score}</td>
+                               <td className="p-3 text-center text-zinc-200 font-bold bg-zinc-900/20">
+                                {row.home_score} - {row.away_score}
+                                {(row.home_penalty !== null || row.away_penalty !== null) && (
+                                  <div className="text-[8px] text-zinc-500 font-normal">
+                                    ({row.home_penalty ?? 0} - {row.away_penalty ?? 0})
+                                  </div>
+                                )}
+                              </td>
                               <td className="p-3 text-right">
                                 {!aOk ? (
                                   <select value={row.away_id} onChange={e => handleTeamChange(entry.id, i, 'away', e.target.value)}

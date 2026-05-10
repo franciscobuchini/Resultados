@@ -11,7 +11,7 @@ export default function Error404() {
           404
         </h1>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className={`w-20 h-20 ${bgSurfaceHover} border ${border} rounded-3xl flex items-center justify-center ${textMain} text-4xl shadow-2xl mb-6 animate-bounce`}>
+          <div className={`w-20 h-20 ${bgSurfaceHover} flex items-center justify-center ${textMain} text-4xl shadow-2xl mb-6 animate-bounce`}>
             ⚽
           </div>
           <h2 className={`text-2xl md:text-4xl font-black ${textMain}`}>

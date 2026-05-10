@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../functions/supabase'
 import { useTime, toLocal } from '../../functions/time'
 import { useThemeClasses } from '../../functions/themeStore'
+import { Database } from 'lucide-react'
 
 export default function SyncStatus() {
   const [lastSync, setLastSync] = useState('')
   const [loading, setLoading] = useState(false)
   const { utcOffset } = useTime()
-  const { textDimmed, textMuted } = useThemeClasses()
+  const { textMuted, textMain } = useThemeClasses()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,7 +22,6 @@ export default function SyncStatus() {
 
         if (data?.[0]) {
           const rawDate = new Date(data[0].updated_at)
-          // Extraer fecha y hora UTC del timestamp de sincronización
           const utcDate = rawDate.toISOString().split('T')[0];
           const utcTime = `${String(rawDate.getUTCHours()).padStart(2, '0')}:${String(rawDate.getUTCMinutes()).padStart(2, '0')}`;
           const local = toLocal(utcDate, utcTime, utcOffset);
@@ -39,12 +39,13 @@ export default function SyncStatus() {
     fetchData()
     const interval = setInterval(fetchData, 60000)
     return () => clearInterval(interval)
-  }, [utcOffset]) // Dependemos del offset para refrescar el string
+  }, [utcOffset])
 
   return (
-    <div className="flex items-center gap-1 font-mono text-[10px] sm:text-xs">
-      <span className={`${textDimmed} uppercase tracking-widest`}>Sync:</span>
-      <span className={textMuted}>{loading ? '...' : lastSync || '--/-- --:--'}</span>
+    <div className="flex items-center gap-2 font-mono">
+      <Database size={14} className={textMuted} />
+      <span className={`text-xs ${textMuted}`}>Sync</span>
+      <span className={`text-xs font-bold ${textMain}`}>{loading ? '...' : lastSync || '--/-- --:--'}</span>
     </div>
   )
 }

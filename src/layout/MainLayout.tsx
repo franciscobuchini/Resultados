@@ -4,6 +4,7 @@ import Footer from './Footer';
 import SidebarLeft from './SidebarLeft';
 import SidebarRight from './SidebarRight';
 import { useThemeClasses } from '../functions/themeStore';
+import Scrollbar from './Scrollbar';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className={`min-h-screen ${bgApp} ${textMain} flex flex-col font-sans`}>
+      <Scrollbar />
       {/* Header Fijo */}
       <Header />
 

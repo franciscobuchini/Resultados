@@ -173,19 +173,24 @@ interface FixtureRowProps {
   awayName: string;
   /** Goles del equipo visitante */
   awayScore?: number | string | null;
-  /** Estado o Hora del partido ("20:00", "FT", etc.) */
-  status?: ReactNode;
+  /** Goles de penales del equipo local */
+  homePenalty?: number | null;
+  /** Goles de penales del equipo visitante */
+  awayPenalty?: number | null;
+  /** Hora del partido para mostrar cuando no hay marcador */
+  matchTime?: string | null;
   className?: string;
 }
 
 /**
  * FixtureRow — Fila completa de un partido.
- * Estructura: [Local ←] [Marcador] [→ Visitante] [Estado]
+ * Estructura: [Local ←] [Marcador] [→ Visitante]
  */
 export function FixtureRow({ 
   homeLogo, homeName, homeScore,
   awayLogo, awayName, awayScore,
-  status,
+  homePenalty, awayPenalty,
+  matchTime,
   className = '',
 }: FixtureRowProps) {
   const { bgApp, border, textMuted, textHover, textProminent } = useThemeClasses();
@@ -201,10 +206,33 @@ export function FixtureRow({
         </div>
 
         {/* Marcador */}
-        <div className="flex items-center justify-center px-4 gap-2">
-          <span className={textProminent}>{homeScore ?? '-'}</span>
-          <span className={`${textMuted} font-normal`}>:</span>
-          <span className={textProminent}>{awayScore ?? '-'}</span>
+        <div className="flex-shrink-0 flex justify-center w-24 gap-2 tabular-nums">
+          {/* Penalty Local (Espacio reservado) */}
+          <div className="flex-1 flex justify-end">
+            {(homePenalty !== undefined && homePenalty !== null) && (
+              <span className={`${textMuted} font-normal`}>({homePenalty})</span>
+            )}
+          </div>
+
+          {/* Goles u Horario */}
+          <div className="flex gap-2 font-bold min-w-[32px] justify-center">
+            {(homeScore === null || homeScore === undefined) && (awayScore === null || awayScore === undefined) && matchTime ? (
+              <span className={`${textMuted} font-normal`}>{matchTime}</span>
+            ) : (
+              <>
+                <span className={textProminent}>{homeScore ?? '-'}</span>
+                <span className={`${textMuted} font-normal opacity-40`}>:</span>
+                <span className={textProminent}>{awayScore ?? '-'}</span>
+              </>
+            )}
+          </div>
+
+          {/* Penalty Visita (Espacio reservado) */}
+          <div className="flex-1 flex justify-start">
+            {(awayPenalty !== undefined && awayPenalty !== null) && (
+              <span className={`${textMuted} font-normal`}>({awayPenalty})</span>
+            )}
+          </div>
         </div>
 
         {/* Equipo Visitante (alineado a la izquierda) */}
@@ -213,15 +241,6 @@ export function FixtureRow({
           <span className="truncate">{awayName}</span>
         </div>
       </div>
-
-      {/* Estado / Hora */}
-      {status && (
-        <div className="flex-shrink-0 flex items-center justify-end">
-          <div className="w-10 flex items-center justify-center text-xs">
-            {status}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -24,7 +24,6 @@ export default function ThemeSelector() {
       align="left" 
       widthClass="w-48"
       icon={Palette}
-      label="Tema:"
       value={<span className="capitalize">{currentTheme}</span>}
     >
       {THEME_OPTIONS.map((opt) => (

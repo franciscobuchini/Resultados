@@ -6,7 +6,7 @@ import StandingsTable from '../components/tournament/StandingsTable'
 import FixtureTable from '../components/tournament/FixtureTable'
 import Error404 from './Error404'
 import { computeStandings } from '../../shared/tournament/computeStandings'
-import type { TournamentSystem } from '../../shared/tournament/tournamentTypes'
+import type { TournamentSystem, LeaguePhase, Tiebreaker } from '../../shared/tournament/tournamentTypes'
 import type { Match } from '../../shared/tournament/matchTypes'
 import { useTime, toLocal } from '../functions/time'
 import { useThemeClasses } from '../functions/themeStore'
@@ -35,13 +35,34 @@ interface Tournament {
 // HELPERS
 // ------------------------------------------------------------
 
-/** Determina si un partido está finalizado según el status de la API */
-const isFinished = (status: string | null): boolean =>
-  status === 'FT' || status === 'AET' || status === 'PEN'
+/** Determina si un partido está finalizado según el status */
+const isFinished = (status: string | null): boolean => {
+  if (!status) return false
+  const s = status.toLowerCase().trim()
+  return ['ft', 'aet', 'pen', 'finalizado'].includes(s)
+}
 
-/** Determina si un match_round es una fecha numérica */
+/** Determina si un match_round es una fecha de liga (numérica o "Fecha X") */
 const isMatchday = (round: string): boolean =>
-  /^\d+$/.test(round.trim())
+  /^\d+$/.test(round.trim()) || /^fecha\s+\d+$/i.test(round.trim())
+
+/** Extrae el número de fecha de un match_round para ordenar */
+const matchdayNumber = (round: string): number => {
+  const pure = round.trim().match(/^(\d+)$/)
+  if (pure) return parseInt(pure[1])
+  const fechaN = round.trim().match(/^fecha\s+(\d+)$/i)
+  if (fechaN) return parseInt(fechaN[1])
+  return Infinity
+}
+
+/** Tiebreakers estándar por defecto (puntos → dif. goles → goles a favor) */
+const DEFAULT_TIEBREAKERS: Tiebreaker[] = ['points', 'goal_difference', 'goals_scored']
+
+/** Fase de liga por defecto cuando no hay tournament_system */
+const DEFAULT_LEAGUE_PHASE: LeaguePhase = {
+  id: 'default',
+  type: 'league',
+}
 
 // ------------------------------------------------------------
 // COMPONENTE
@@ -89,7 +110,7 @@ export default function TournamentPage() {
 
       // Seleccionar la primera fecha disponible por defecto (numérica si existe, si no la primera que haya)
       const rounds = Array.from(new Set(fetchedMatches.map(m => m.match_round).filter(Boolean))) as string[]
-      const firstMatchday = rounds.filter(isMatchday).sort((a, b) => parseInt(a) - parseInt(b))[0]
+      const firstMatchday = rounds.filter(isMatchday).sort((a, b) => matchdayNumber(a) - matchdayNumber(b))[0]
       setSelectedRound(firstMatchday ?? rounds[0] ?? null)
 
       // Traer info de equipos
@@ -133,8 +154,6 @@ export default function TournamentPage() {
   // DATOS DERIVADOS
   // ------------------------------------------------------------
 
-  const groups = tournament.tournament_teams ?? {}
-  const groupKeys = Object.keys(groups).sort()
   const system = tournament.tournament_system
 
   // Nombres de equipos para computeStandings
@@ -143,25 +162,40 @@ export default function TournamentPage() {
     if (t.team_name) teamNames[t.team_id] = t.team_name
   })
 
-  // Partidos de la fase de liga (fechas numéricas)
+  // Si no hay tournament_teams, derivar un grupo único desde los partidos
+  const groups: Record<string, string[]> = (() => {
+    if (tournament.tournament_teams && Object.keys(tournament.tournament_teams).length > 0) {
+      return tournament.tournament_teams
+    }
+    // Fallback: todos los equipos en un solo grupo
+    const allTeamIds = Array.from(new Set([
+      ...matches.map(m => m.home_id),
+      ...matches.map(m => m.away_id)
+    ])).filter(Boolean) as string[]
+    return allTeamIds.length > 0 ? { 'General': allTeamIds } : {}
+  })()
+  const groupKeys = Object.keys(groups).sort()
+
+  // Partidos de la fase de liga (fechas numéricas o "Fecha X")
   const leagueMatches = matches.filter(m =>
     m.match_round !== null && isMatchday(m.match_round) && isFinished(m.match_status)
   )
 
-  // Tabla de posiciones usando el sistema del torneo
-  const standings = system
+  // Tabla de posiciones — usa el sistema del torneo si existe, si no valores por defecto
+  const leaguePhase = system?.phases.find(p => p.type === 'league') as LeaguePhase | undefined
+  const standings = groupKeys.length > 0
     ? computeStandings(
       leagueMatches,
       groups,
       teamNames,
-      system.phases.find(p => p.type === 'league') as Parameters<typeof computeStandings>[3],
-      system.tiebreakers
+      leaguePhase ?? DEFAULT_LEAGUE_PHASE,
+      system?.tiebreakers ?? DEFAULT_TIEBREAKERS
     )
     : {}
 
   // Rounds disponibles para el selector
   const allRounds = Array.from(new Set(matches.map(m => m.match_round).filter(Boolean))) as string[]
-  const matchdayRounds = allRounds.filter(isMatchday).sort((a, b) => parseInt(a) - parseInt(b))
+  const matchdayRounds = allRounds.filter(isMatchday).sort((a, b) => matchdayNumber(a) - matchdayNumber(b))
   const knockoutRounds = allRounds.filter(r => !isMatchday(r))
   const sortedRounds = [...matchdayRounds, ...knockoutRounds]
   const currentIndex = sortedRounds.indexOf(selectedRound ?? '')
@@ -221,7 +255,7 @@ export default function TournamentPage() {
 
             {selectedRound ? (
               <FixtureTable
-                roundName={isMatchday(selectedRound) ? `Fecha ${selectedRound}` : selectedRound}
+                roundName={isMatchday(selectedRound) ? `${selectedRound}` : selectedRound}
                 matchesByDate={matchesByDate}
                 teamLookup={teamLookup}
                 onPrevRound={currentIndex > 0 ? () => setSelectedRound(sortedRounds[currentIndex - 1]) : undefined}

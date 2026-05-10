@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../functions/supabase';
 import { useThemeClasses } from '../functions/themeStore';
 import { Accordion } from '../components/ui/Accordion';
+import { LAYOUT_CONFIG } from '../functions/layoutConfig';
+import Scrollbar from './Scrollbar';
 
 interface TournamentItem {
   tournament_id: string;
@@ -58,7 +60,10 @@ export default function SidebarLeft() {
   });
 
   return (
-    <aside className={`hidden xl:block w-[18%] shrink-0 border-r ${border} p-6 sticky top-16 h-[calc(100vh-64px)] overflow-y-auto custom-scrollbar`}>
+    <Scrollbar 
+      className={`hidden xl:block shrink-0 border-r ${border} p-6 sticky top-16 h-[calc(100vh-64px)]`}
+      style={{ width: LAYOUT_CONFIG.sidebarWidth }}
+    >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           {loading ? (
@@ -80,6 +85,6 @@ export default function SidebarLeft() {
         </div>
 
       </div>
-    </aside>
+    </Scrollbar>
   );
 }

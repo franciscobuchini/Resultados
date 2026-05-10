@@ -20,7 +20,6 @@ export default function UtcSelector() {
       align="right" 
       widthClass="w-32"
       icon={Globe}
-      label="Zona:"
       value={OFFSETS.find(o => o.value === currentOffset)?.label || `UTC${currentOffset >= 0 ? '+' : ''}${currentOffset}`}
     >
       {OFFSETS.map((opt) => (
