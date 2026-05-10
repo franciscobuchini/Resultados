@@ -23,12 +23,13 @@ export default function PageBanner({
   }, [tournament_banner_url]);
 
   return (
-    <div className="relative w-full h-60 md:h-72 overflow-hidden group">
+    <div className="relative w-full h-80 md:h-120 overflow-hidden group">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
         <img
           src={imgSrc}
           alt="Banner background"
+          loading="lazy"
           onError={() => setImgSrc(defaultBanner)}
           className="w-full h-full object-cover transition-transform duration-1000"
           style={{
@@ -39,13 +40,14 @@ export default function PageBanner({
       </div>
 
       {/* Content */}
-      <div className="relative h-full flex items-end max-w-3xl pb-4 px-6">
-        <div className="flex items-center gap-2">
+      <div className="relative h-full flex items-end pb-4 px-6">
+        <div className="flex items-center gap-3">
           {logo && (
             <img
               src={logo}
               alt="Tournament Logo"
-              className="w-24 h-24 md:w-32 md:h-32 object-contain"
+              loading="lazy"
+              className="w-24 h-24 md:w-32 md:h-32 object-contain rounded-lg"
             />
           )}
 
