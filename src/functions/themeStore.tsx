@@ -27,6 +27,7 @@ export interface ThemeClasses {
   
   // States
   textSuccess?: string
+  textError?: string
   bgProminent?: string
 }
 
@@ -43,6 +44,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-zinc-100',
     textHover: 'hover:text-zinc-100',
     textSuccess: 'text-green-400',
+    textError: 'text-red-900',
     bgProminent: 'bg-zinc-800/50',
   },
   // Tema premium amarronado/taupe
@@ -57,6 +59,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-stone-100',
     textHover: 'hover:text-stone-100',
     textSuccess: 'text-green-400',
+    textError: 'text-red-900',
     bgProminent: 'bg-stone-800/50',
   },
   // Tema azulado oscuro
@@ -71,6 +74,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-slate-100',
     textHover: 'hover:text-slate-100',
     textSuccess: 'text-green-400',
+    textError: 'text-red-900',
     bgProminent: 'bg-slate-800/50',
   },
   // Tema negro profundo
@@ -85,6 +89,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-neutral-100',
     textHover: 'hover:text-neutral-100',
     textSuccess: 'text-green-400',
+    textError: 'text-red-900',
     bgProminent: 'bg-neutral-800/50',
   },
   // Tema gris neutro
@@ -99,6 +104,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-gray-100',
     textHover: 'hover:text-gray-100',
     textSuccess: 'text-green-400',
+    textError: 'text-red-900',
     bgProminent: 'bg-gray-800/50',
   },
   // Tema Taupe (Cálido)
@@ -113,6 +119,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-taupe-100',
     textHover: 'hover:text-taupe-100',
     textSuccess: 'text-green-400',
+    textError: 'text-red-900',
     bgProminent: 'bg-taupe-800/50',
   },
   // Tema Mauve (Violáceo)
@@ -127,6 +134,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-mauve-100',
     textHover: 'hover:text-mauve-100',
     textSuccess: 'text-green-400',
+    textError: 'text-red-900',
     bgProminent: 'bg-mauve-800/50',
   },
   // Tema Mist (Azul Hielo)
@@ -141,6 +149,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-mist-100',
     textHover: 'hover:text-mist-100',
     textSuccess: 'text-green-400',
+    textError: 'text-red-900',
     bgProminent: 'bg-mist-800/50',
   },
   // Tema Olive (Verdoso)
@@ -155,6 +164,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-olive-100',
     textHover: 'hover:text-olive-100',
     textSuccess: 'text-green-400',
+    textError: 'text-red-900',
     bgProminent: 'bg-olive-800/50',
   }
 }

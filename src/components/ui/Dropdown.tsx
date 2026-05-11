@@ -2,6 +2,8 @@ import { useState, createContext, useContext, type ReactNode, type ElementType }
 import { useThemeClasses } from '../../functions/themeStore';
 import { ChevronRight } from 'lucide-react';
 
+import { Button } from './Button';
+
 // Contexto para coordinar qué sección lateral está abierta
 interface DropdownContextType {
   activeSection: string | null;
@@ -19,10 +21,10 @@ interface DropdownProps {
   widthClass?: string;
 }
 
-export function Dropdown({ icon: Icon, label, value, children, align = 'right', widthClass = 'w-48' }: DropdownProps) {
+export function Dropdown({ icon, label, value, children, align = 'right', widthClass = 'w-48' }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
-  const { bgSurface, bgSurfaceHover, border, textMuted, textMain } = useThemeClasses();
+  const { bgSurface, border } = useThemeClasses();
 
   // Resetear sección activa al cerrar el dropdown principal
   const toggleDropdown = () => {
@@ -33,20 +35,18 @@ export function Dropdown({ icon: Icon, label, value, children, align = 'right', 
   return (
     <DropdownContext.Provider value={{ activeSection, setActiveSection }}>
       <div className="relative inline-block text-left">
-        <button
+        <Button
           onClick={toggleDropdown}
-          className={`flex items-center gap-2 px-3 h-8 rounded-full border font-mono ${bgSurface} ${border} ${bgSurfaceHover}`}
-        >
-          {Icon && <Icon size={14} className={textMuted} />}
-          {label && <span className={`text-xs ${textMuted} hidden sm:inline`}>{label}</span>}
-          <span className={`text-xs font-bold ${textMain}`}>{value}</span>
-        </button>
+          icon={icon}
+          label={label}
+          value={value}
+        />
 
         {isOpen && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
             <div 
-              className={`absolute top-full mt-2 z-50 flex flex-col rounded-xl border ${align === 'left' ? 'left-0' : 'right-0'} ${widthClass} ${bgSurface} ${border}`}
+              className={`absolute top-full mt-2 z-50 flex flex-col rounded-xl border ${align === 'left' ? 'left-0' : 'right-0'} ${widthClass} ${bgSurface} ${border} overflow-hidden`}
             >
               {children}
             </div>
@@ -57,23 +57,87 @@ export function Dropdown({ icon: Icon, label, value, children, align = 'right', 
   );
 }
 
+interface DropdownOptionProps {
+  icon?: ElementType;
+  label?: ReactNode;
+  value?: ReactNode;
+  onClick?: (e: React.MouseEvent) => void;
+  children?: ReactNode;
+  isActive?: boolean;
+  className?: string;
+  rightElement?: ReactNode;
+}
+
+export function DropdownOption({ 
+  icon: Icon, 
+  label, 
+  value, 
+  onClick, 
+  children, 
+  isActive, 
+  className = '',
+  rightElement
+}: DropdownOptionProps) {
+  const { bgSurfaceHover, textMuted, textMain } = useThemeClasses();
+  
+  const Tag = onClick ? 'button' : 'div';
+  
+  return (
+    <Tag
+      onClick={onClick}
+      className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between transition-colors ${onClick ? bgSurfaceHover : ''} ${
+        isActive ? `${textMain} font-medium` : textMuted
+      } ${className}`}
+    >
+      {children ? children : (
+        <>
+          <div className="flex items-center gap-2">
+            {Icon && <Icon size={16} className={textMuted} />}
+            {label && <span className={textMuted}>{label}</span>}
+          </div>
+          <div className="flex items-center gap-2">
+            {value && <span className={`${textMain} font-medium`}>{value}</span>}
+            {rightElement}
+          </div>
+        </>
+      )}
+    </Tag>
+  );
+}
+
 interface DropdownItemProps {
   onClick: () => void;
   isActive?: boolean;
-  children: ReactNode;
+  children?: ReactNode;
+  icon?: ElementType;
+  label?: ReactNode;
+  value?: ReactNode;
+  rightElement?: ReactNode;
+  className?: string;
 }
 
-export function DropdownItem({ onClick, isActive, children }: DropdownItemProps) {
-  const { bgSurfaceHover, textMuted, textMain } = useThemeClasses();
+export function DropdownItem({ 
+  onClick, 
+  isActive, 
+  children, 
+  icon, 
+  label, 
+  value, 
+  rightElement, 
+  className 
+}: DropdownItemProps) {
   return (
-    <button
-      onClick={onClick}
-      className={`w-full px-4 py-3 text-left text-xs flex items-center justify-between ${bgSurfaceHover} ${
-        isActive ? `${textMain} font-bold` : textMuted
-      }`}
+    <DropdownOption 
+      onClick={onClick} 
+      isActive={isActive} 
+      icon={icon} 
+      label={label} 
+      value={value}
+      rightElement={rightElement}
+      className={className}
     >
       {children}
-    </button>
+    </DropdownOption>
   );
 }
 
@@ -86,7 +150,7 @@ interface DropdownSectionProps {
 
 export function DropdownSection({ icon: Icon, label, value, children }: DropdownSectionProps) {
   const context = useContext(DropdownContext);
-  const { bgSurface, bgSurfaceHover, border, textMuted, textMain } = useThemeClasses();
+  const { bgSurface, border, textMuted } = useThemeClasses();
 
   if (!context) {
     throw new Error('DropdownSection debe usarse dentro de un componente Dropdown');
@@ -101,27 +165,24 @@ export function DropdownSection({ icon: Icon, label, value, children }: Dropdown
 
   return (
     <div className="relative">
-      <button
+      <DropdownOption
         onClick={handleToggle}
-        className={`w-full px-4 py-3 text-left text-xs flex items-center justify-between ${bgSurfaceHover} ${isOpen ? textMain : ''}`}
-      >
-        <div className="flex items-center gap-2">
-          {Icon && <Icon size={14} className={textMuted} />}
-          <span className={textMuted}>{label}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className={`font-bold ${textMain}`}>{value}</span>
+        icon={Icon}
+        label={label}
+        value={value}
+        isActive={isOpen}
+        rightElement={
           <ChevronRight 
             size={12} 
             className={`${textMuted} transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
           />
-        </div>
-      </button>
+        }
+      />
 
       {/* Panel flotante lateral */}
       {isOpen && (
         <div 
-          className={`absolute top-0 right-full mr-2 z-50 flex flex-col overflow-hidden rounded-xl border w-36 overflow-y-auto ${bgSurface} ${border}`}
+          className={`absolute top-0 right-full mr-2 z-50 flex flex-col overflow-hidden rounded-xl border w-36 overflow-hidden ${bgSurface} ${border}`}
         >
           {children}
         </div>
@@ -130,6 +191,3 @@ export function DropdownSection({ icon: Icon, label, value, children }: Dropdown
   );
 }
 
-export function DropdownDivider() {
-  return <div className="h-1 opacity-20" />;
-}

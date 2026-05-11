@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../functions/supabase'
 import { useTime, toLocal } from '../../functions/time'
 import { useThemeClasses } from '../../functions/themeStore'
-import { Database } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 
 export default function SyncStatus() {
   const [lastSync, setLastSync] = useState('')
@@ -42,10 +42,10 @@ export default function SyncStatus() {
   }, [utcOffset])
 
   return (
-    <div className="flex items-center gap-2 font-mono">
-      <Database size={14} className={textMuted} />
-      <span className={`text-xs ${textMuted}`}>Sync</span>
-      <span className={`text-xs font-bold ${textMain}`}>{loading ? '...' : lastSync || '--/-- --:--'}</span>
+    <div className="flex items-center gap-2 w-full justify-center">
+      <RefreshCw size={16} className={textMuted} />
+      <span className={`text-sm ${textMuted}`}>Sincronización:</span>
+      <span className={`text-sm font-medium ${textMain}`}>{loading ? '...' : lastSync || '--/-- --:--'}</span>
     </div>
   )
 }

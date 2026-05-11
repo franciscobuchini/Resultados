@@ -12,7 +12,6 @@ export default function ReadmeViewer() {
         <li>- Goles desde 2020 Liga Argentina</li>
         <li>- Sistema de inicio de sesión, perfiles, etc</li>
         <li>- Partidos únicos entre campeonatos</li>
-        <li>- Revisar y Rehacer Tournaments ID's</li>
         <li>- Partidos del mundial dicen: fase regular en vez de octavos, cuartos, semis, final</li>
       </ul>
     </div>
