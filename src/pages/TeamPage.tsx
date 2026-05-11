@@ -246,7 +246,7 @@ export default function TeamPage() {
         logo={team.team_crest_url}
       />
 
-      <div className="max-w-[1400px] mx-auto p-4 md:p-8 flex flex-col gap-12">
+      <div className="max-w-[1400px] mx-auto p-2 md:p-8 flex flex-col gap-12">
         
         {/* Fila superior: Próximos y Últimos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
