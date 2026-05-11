@@ -14,6 +14,11 @@ export default function ReadmeViewer() {
         <li>- Partidos únicos entre campeonatos</li>
         <li>- Partidos del mundial dicen: fase regular en vez de octavos, cuartos, semis, final</li>
         <li>- Cambiar url de los escudos del futbol por https://www.thesportsdb.com/ ya que los escudos ahora mismo los toma de 365 y se ven al abrir la imagen en una nueva pestaña </li>
+        <li>- Resolver goleadores por partido para el mundial</li>
+        <li>- Resolver tabla general de goleadores por partido para el mundial</li>
+        <li>- Menu de inicio mostrar todos los partidos del dia</li>
+        <li>- Resolver api en network para que no se vean los datos en texto plano</li>
+        <li>- Resolver problema de que esta tomando los teampage por "team_shortname" en vez de por "team_id"</li>
       </ul>
     </div>
   )

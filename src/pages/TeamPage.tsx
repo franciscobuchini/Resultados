@@ -110,7 +110,7 @@ export default function TeamPage() {
             .select('*')
             .or(`home_name.eq."${teamData.team_name}",away_name.eq."${teamData.team_name}"`)
             .order('match_date', { ascending: false })
-          
+
           if (nameMatchData && nameMatchData.length > 0) {
             fetchedMatches = nameMatchData as MatchWithTournament[]
           }
@@ -187,11 +187,11 @@ export default function TeamPage() {
 
     matchList.forEach(m => {
       if (!isFinished(m.match_status)) return;
-      
+
       const cleanId = teamId.trim();
       const isHome = m.home_id === cleanId;
       const rivalId = isHome ? m.away_id : m.home_id;
-      
+
       if (!rivalId) return;
 
       if (!statsMap[rivalId]) {
@@ -247,13 +247,13 @@ export default function TeamPage() {
       />
 
       <div className="max-w-[1400px] mx-auto p-2 md:p-8 flex flex-col gap-12">
-        
+
         {/* Fila superior: Próximos y Últimos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Próximos Partidos */}
           <div className="flex flex-col gap-4">
             {upcomingMatches.length > 0 ? (
-              <FixtureTable 
+              <FixtureTable
                 roundName="Próximos Partidos"
                 matchesByDate={groupedUpcoming}
                 teamLookup={teamLookup}
@@ -269,7 +269,7 @@ export default function TeamPage() {
           {/* Últimos Resultados */}
           <div className="flex flex-col gap-4">
             {finishedMatches.length > 0 ? (
-              <FixtureTable 
+              <FixtureTable
                 roundName="Últimos Resultados"
                 matchesByDate={groupedFinished}
                 teamLookup={teamLookup}
