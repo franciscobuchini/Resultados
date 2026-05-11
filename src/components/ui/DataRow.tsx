@@ -61,26 +61,23 @@ interface StandingsRowProps {
   /** Celdas de estadísticas (PTS, PJ, PG, etc.) */
   stats: ReactNode;
   className?: string;
+  noBorder?: boolean;
 }
 
 /**
  * StandingsRow — Fila completa de tabla de posiciones.
  * Estructura: [Posición] [Escudo + Nombre] [Estadísticas]
  */
-export function StandingsRow({ position, logo, name, stats, className = '' }: StandingsRowProps) {
+export function StandingsRow({ position, logo, name, stats, className = '', noBorder = false }: StandingsRowProps) {
   const { bgApp, border, textMuted, textHover } = useThemeClasses();
   
   return (
-    <div className={`${BASE} ${HEIGHT} ${bgApp} ${border} ${textMuted} ${textHover} ${className}`}>
-      {/* Posición */}
-      <div className="flex-shrink-0 flex items-center justify-start min-w-[32px] mr-4">
-        <span className={`w-8 text-center ${textMuted} text-xs tabular-nums`}>
-          {position}
-        </span>
-      </div>
-
+    <div className={`${BASE} ${HEIGHT} ${bgApp} ${border} ${textMuted} ${textHover} ${noBorder ? '!border-b-0' : ''} ${className}`}>
       {/* Equipo */}
       <div className="flex-grow flex items-center gap-3 overflow-hidden min-w-0">
+        <span className={`w-4 md:w-8 text-center shrink-0 ${textMuted} text-xs tabular-nums`}>
+          {position}
+        </span>
         <ImageCrest src={logo} />
         <span className="truncate">{name}</span>
       </div>
@@ -98,20 +95,13 @@ export function StandingsRow({ position, logo, name, stats, className = '' }: St
  * Estructura: [#] [Título] [Columnas de Stats]
  */
 export function StandingsHeaderRow({ title, stats, className = '' }: { title: string; stats: ReactNode; className?: string }) {
-  const { bgSurface, border, textAccent, textMuted } = useThemeClasses();
+  const { bgSurface, border, textAccent } = useThemeClasses();
 
   return (
     <div className={`${BASE} ${HEIGHT} ${bgSurface} ${border} ${textAccent} font-medium uppercase ${className}`}>
-      {/* # */}
-      <div className="flex-shrink-0 flex items-center justify-start min-w-[32px] mr-4">
-        <span className={`w-8 text-center ${textMuted} text-xs tabular-nums`}>
-          #
-        </span>
-      </div>
-
       {/* Título */}
-      <div className="flex-grow flex items-center overflow-hidden min-w-0">
-        {title}
+      <div className="flex-grow flex items-center overflow-hidden px-2">
+        <span className="truncate">{title}</span>
       </div>
 
       {/* Columnas */}
@@ -138,19 +128,32 @@ export function StatGroup({ children, className = '' }: { children: ReactNode; c
  */
 export function Stat({ 
   value, 
-  width = 'w-10', 
+  width = 'w-7 md:w-10', 
   prominent = false,
+  onClick,
   className = '',
 }: { 
   value: ReactNode;
   width?: string;
   prominent?: boolean;
+  onClick?: () => void;
   className?: string;
 }) {
   const { textMuted, textProminent } = useThemeClasses();
-  const style = prominent ? textProminent : textMuted;
+  
+  // Si la className contiene 'text-', asumimos que estamos pasando un color manual
+  const hasCustomColor = className.includes('text-');
+  
+  // Si es prominent, aplicamos el estilo prominent (que incluye font-black)
+  // pero si hay un color custom, intentamos que no choque (aunque textProminent trae color)
+  // Lo ideal es que textProminent solo trajera peso, pero como trae color, lo manejamos así:
+  const baseColor = prominent ? textProminent : textMuted;
+  
   return (
-    <div className={`${width} flex items-center justify-center ${style} ${className}`}>
+    <div 
+      onClick={onClick}
+      className={`${width} flex items-center justify-center ${!hasCustomColor ? baseColor : ''} ${prominent ? 'font-black' : ''} ${onClick ? 'cursor-pointer hover:opacity-70 select-none' : ''} ${className}`}
+    >
       {value}
     </div>
   );
@@ -161,12 +164,16 @@ export function Stat({
 // ============================================================
 
 interface FixtureRowProps {
+  /** ID del equipo local (para links) */
+  homeId?: string;
   /** Escudo del equipo local */
   homeLogo?: string | null;
   /** Nombre del equipo local */
   homeName: string;
   /** Goles del equipo local */
   homeScore?: number | string | null;
+  /** ID del equipo visitante (para links) */
+  awayId?: string;
   /** Escudo del equipo visitante */
   awayLogo?: string | null;
   /** Nombre del equipo visitante */
@@ -180,6 +187,7 @@ interface FixtureRowProps {
   /** Hora del partido para mostrar cuando no hay marcador */
   matchTime?: string | null;
   className?: string;
+  noBorder?: boolean;
 }
 
 /**
@@ -187,23 +195,37 @@ interface FixtureRowProps {
  * Estructura: [Local ←] [Marcador] [→ Visitante]
  */
 export function FixtureRow({ 
-  homeLogo, homeName, homeScore,
-  awayLogo, awayName, awayScore,
+  homeId, homeLogo, homeName, homeScore,
+  awayId, awayLogo, awayName, awayScore,
   homePenalty, awayPenalty,
   matchTime,
   className = '',
+  noBorder = false
 }: FixtureRowProps) {
   const { bgApp, border, textMuted, textHover, textProminent } = useThemeClasses();
   
+  // Componente interno para evitar repetición
+  const TeamLink = ({ id, children, isRight }: { id?: string; children: ReactNode; isRight?: boolean }) => {
+    const content = (
+      <div className={`flex-1 flex items-center gap-3 overflow-hidden ${isRight ? 'flex-row-reverse text-right justify-start' : 'justify-start'} ${id ? 'cursor-pointer hover:opacity-70 transition-opacity' : ''}`}>
+        {children}
+      </div>
+    );
+    if (id) {
+      return <a href={`/team/${id}`} onClick={(e) => { e.stopPropagation(); }} className="flex-1 flex min-w-0">{content}</a>;
+    }
+    return content;
+  };
+  
   return (
-    <div className={`${BASE} ${HEIGHT} ${bgApp} ${border} ${textMuted} ${textHover} ${className}`}>
+    <div className={`${BASE} ${HEIGHT} ${bgApp} ${border} ${textMuted} ${textHover} ${noBorder ? '!border-b-0' : ''} ${className}`}>
       {/* Contenido principal: Local + Marcador + Visitante */}
       <div className="flex-grow flex items-center overflow-hidden min-w-0">
-        {/* Equipo Local (alineado a la derecha) */}
-        <div className="flex-1 flex items-center gap-3 overflow-hidden flex-row-reverse text-right justify-start">
+        {/* Equipo Local */}
+        <TeamLink id={homeId} isRight>
           <ImageCrest src={homeLogo} />
           <span className="truncate">{homeName}</span>
-        </div>
+        </TeamLink>
 
         {/* Marcador */}
         <div className="flex-shrink-0 flex justify-center w-24 gap-2 tabular-nums">
@@ -235,11 +257,11 @@ export function FixtureRow({
           </div>
         </div>
 
-        {/* Equipo Visitante (alineado a la izquierda) */}
-        <div className="flex-1 flex items-center gap-3 overflow-hidden justify-start">
+        {/* Equipo Visitante */}
+        <TeamLink id={awayId}>
           <ImageCrest src={awayLogo} />
           <span className="truncate">{awayName}</span>
-        </div>
+        </TeamLink>
       </div>
     </div>
   );

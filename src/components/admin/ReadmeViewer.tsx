@@ -13,6 +13,7 @@ export default function ReadmeViewer() {
         <li>- Sistema de inicio de sesión, perfiles, etc</li>
         <li>- Partidos únicos entre campeonatos</li>
         <li>- Partidos del mundial dicen: fase regular en vez de octavos, cuartos, semis, final</li>
+        <li>- Cambiar url de los escudos del futbol por https://www.thesportsdb.com/ ya que los escudos ahora mismo los toma de 365 y se ven al abrir la imagen en una nueva pestaña </li>
       </ul>
     </div>
   )

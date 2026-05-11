@@ -11,7 +11,7 @@ interface MainLayoutProps {
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
-  const { bgApp, textMain } = useThemeClasses();
+  const { bgApp, textMain, bgMain } = useThemeClasses();
 
   return (
     <div className={`min-h-screen ${bgApp} ${textMain} flex flex-col font-sans`}>
@@ -24,7 +24,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <SidebarLeft />
 
         {/* Parte Central del Sitio */}
-        <main className="flex-1 min-w-0 bg-black/10">
+        <main className={`flex-1 min-w-0 ${bgMain}`}>
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

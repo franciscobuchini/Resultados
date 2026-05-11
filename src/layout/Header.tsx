@@ -1,11 +1,35 @@
-import { Link } from 'react-router-dom';
-import { Trophy } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Trophy, ChevronLeft } from 'lucide-react';
 import UserMenu from '../components/header/UserMenu';
-import { useThemeClasses } from '../functions/themeStore';
+import { useTheme, useThemeClasses } from '../functions/themeStore';
 import { LAYOUT_CONFIG } from '../functions/layoutConfig';
+
+import { Button } from '../components/ui/Button';
 
 export default function Header() {
   const { bgApp, border, textMain } = useThemeClasses();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+
+  const { lastTournamentId } = useTheme();
+
+  const handleBack = () => {
+    // Si tenemos un último torneo guardado
+    if (lastTournamentId) {
+      // Si ya estamos en la página de ese torneo, vamos al home
+      if (location.pathname === `/tournament/${lastTournamentId}`) {
+        navigate('/');
+      } else {
+        // Si estamos en un equipo o perfil, volvemos al torneo
+        navigate(`/tournament/${lastTournamentId}`);
+      }
+    } else {
+      // Si no hay historial de torneos, siempre al home
+      navigate('/');
+    }
+  };
+
   return (
     <header className={`fixed top-0 left-0 right-0 h-16 ${bgApp} bg-opacity-80 backdrop-blur-md border-b ${border} z-50 flex items-center`}>
       {/* Sección Izquierda - Alineada con SidebarLeft */}
@@ -26,7 +50,13 @@ export default function Header() {
       {/* Sección Central - Alineada con el contenido Main */}
       <div className="flex-1 flex items-center justify-between px-6 h-full">
         <div className="flex items-center gap-4">
-          {/* Los selectores se movieron al UserMenu */}
+          {!isHome && (
+            <Button
+              icon={ChevronLeft}
+              label="Volver"
+              onClick={handleBack}
+            />
+          )}
         </div>
         <UserMenu />
       </div>

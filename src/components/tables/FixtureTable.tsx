@@ -17,6 +17,12 @@ interface FixtureTableProps {
   onPrevRound?: () => void;
   /** Callback para ir a la ronda siguiente */
   onNextRound?: () => void;
+  /** Mostrar fecha completa (ej: martes 16 de mayo) */
+  fullDate?: boolean;
+  /** Ocultar separadores de fecha */
+  hideDateSeparators?: boolean;
+  /** Ordenar fechas de forma descendente */
+  sortDescending?: boolean;
 }
 
 /**
@@ -26,12 +32,18 @@ export default function FixtureTable({
   roundName, 
   matchesByDate, 
   teamLookup, 
-  onPrevRound, 
-  onNextRound 
+  onPrevRound,
+  onNextRound,
+  fullDate = false,
+  hideDateSeparators = false,
+  sortDescending = false
 }: FixtureTableProps) {
   const { utcOffset } = useTime();
   const { bgSurfaceHover } = useThemeClasses();
-  const sortedDates = Object.keys(matchesByDate).sort();
+  
+  const sortedDates = Object.keys(matchesByDate).sort((a, b) => {
+    return sortDescending ? b.localeCompare(a) : a.localeCompare(b);
+  });
 
   return (
     <DataBox>
@@ -60,34 +72,39 @@ export default function FixtureTable({
         </div>
       </DataRowHeader>
 
-      {sortedDates.map(date => {
+      {sortedDates.map((date, dateIdx) => {
         const dayMatches = matchesByDate[date];
 
-        // Formatear el día (ej: "jueves 29")
+        // Formatear el día
         const dateObj = new Date(date + 'T12:00:00');
-        const dayName = dateObj.toLocaleDateString('es-ES', { weekday: 'long' });
-        const dayNum = dateObj.getDate();
-        const formattedDay = `${dayName} ${dayNum}`;
+        const options: Intl.DateTimeFormatOptions = fullDate 
+          ? { weekday: 'long', day: 'numeric', month: 'long' }
+          : { weekday: 'long', day: 'numeric' };
+        
+        const formattedDay = dateObj.toLocaleDateString('es-ES', options);
 
         return (
           <React.Fragment key={date}>
-            <DataRowSeparator label={formattedDay} />
+            {!hideDateSeparators && <DataRowSeparator label={formattedDay} />}
 
-            {dayMatches.map(match => {
+            {dayMatches.map((match, matchIdx) => {
               const local = toLocal(match.match_date, match.match_time_utc, utcOffset);
 
               return (
                 <FixtureRow
                   key={match.match_id}
+                  homeId={match.home_id!}
                   homeLogo={teamLookup[match.home_id!]?.team_crest_url}
                   homeName={teamLookup[match.home_id!]?.team_name ?? match.home_name}
                   homeScore={match.home_score}
+                  awayId={match.away_id!}
                   awayLogo={teamLookup[match.away_id!]?.team_crest_url}
                   awayName={teamLookup[match.away_id!]?.team_name ?? match.away_name}
                   awayScore={match.away_score}
                   homePenalty={match.home_penalty}
                   awayPenalty={match.away_penalty}
                   matchTime={local.time}
+                  noBorder={dateIdx === sortedDates.length - 1 && matchIdx === dayMatches.length - 1}
                 />
               );
             })}

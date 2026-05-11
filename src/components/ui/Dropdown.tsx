@@ -19,9 +19,10 @@ interface DropdownProps {
   children: ReactNode;
   align?: 'left' | 'right';
   widthClass?: string;
+  variant?: 'outline' | 'danger';
 }
 
-export function Dropdown({ icon, label, value, children, align = 'right', widthClass = 'w-48' }: DropdownProps) {
+export function Dropdown({ icon, label, value, children, align = 'right', widthClass = 'w-48', variant = 'outline' }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const { bgSurface, border } = useThemeClasses();
@@ -40,13 +41,14 @@ export function Dropdown({ icon, label, value, children, align = 'right', widthC
           icon={icon}
           label={label}
           value={value}
+          variant={variant}
         />
 
         {isOpen && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
             <div 
-              className={`absolute top-full mt-2 z-50 flex flex-col rounded-xl border ${align === 'left' ? 'left-0' : 'right-0'} ${widthClass} ${bgSurface} ${border} overflow-hidden`}
+              className={`absolute top-full mt-2 z-50 flex flex-col rounded-xl border ${align === 'left' ? 'left-0' : 'right-0'} ${widthClass} ${bgSurface} ${border}`}
             >
               {children}
             </div>
@@ -182,7 +184,7 @@ export function DropdownSection({ icon: Icon, label, value, children }: Dropdown
       {/* Panel flotante lateral */}
       {isOpen && (
         <div 
-          className={`absolute top-0 right-full mr-2 z-50 flex flex-col overflow-hidden rounded-xl border w-36 overflow-hidden ${bgSurface} ${border}`}
+          className={`absolute top-0 right-full mr-2 z-50 flex flex-col rounded-xl border w-36 overflow-hidden ${bgSurface} ${border}`}
         >
           {children}
         </div>

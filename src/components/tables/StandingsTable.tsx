@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { StandingsHeaderRow, StandingsRow, StatGroup, Stat } from '../ui/DataRow';
 import DataBox from '../ui/DataBox';
 import type { TeamStanding } from '../../../shared/tournament/computeStandings';
@@ -43,24 +44,26 @@ export default function StandingsTable({ title, standings, teamLookup }: Standin
         const info = teamLookup[team.team_id.trim()];
         
         return (
-          <StandingsRow
-            key={team.team_id}
-            position={idx + 1}
-            logo={info?.team_crest_url}
-            name={info?.team_name ?? team.team_name}
-            stats={
-              <StatGroup>
-                <Stat value={team.points} prominent />
-                <Stat value={team.played} />
-                <Stat value={team.won} />
-                <Stat value={team.drawn} />
-                <Stat value={team.lost} />
-                <Stat 
-                  value={team.goal_difference > 0 ? `+${team.goal_difference}` : team.goal_difference}
-                />
-              </StatGroup>
-            }
-          />
+          <Link key={team.team_id} to={`/team/${team.team_id}`} className="block transition-opacity hover:opacity-80">
+            <StandingsRow
+              position={idx + 1}
+              logo={info?.team_crest_url}
+              name={info?.team_name ?? team.team_name}
+              noBorder={idx === standings.length - 1}
+              stats={
+                <StatGroup>
+                  <Stat value={team.points} prominent />
+                  <Stat value={team.played} />
+                  <Stat value={team.won} />
+                  <Stat value={team.drawn} />
+                  <Stat value={team.lost} />
+                  <Stat 
+                    value={team.goal_difference > 0 ? `+${team.goal_difference}` : team.goal_difference}
+                  />
+                </StatGroup>
+              }
+            />
+          </Link>
         );
       })}
     </DataBox>

@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../functions/supabase'
 import PageBanner from '../layout/PageBanner'
-import StandingsTable from '../components/tournament/StandingsTable'
-import FixtureTable from '../components/tournament/FixtureTable'
+import StandingsTable from '../components/tables/StandingsTable'
+import FixtureTable from '../components/tables/FixtureTable'
 import Error404 from './Error404'
 import { computeStandings } from '../../shared/tournament/computeStandings'
 import type { TournamentSystem, LeaguePhase, Tiebreaker } from '../../shared/tournament/tournamentTypes'
 import type { Match } from '../../shared/tournament/matchTypes'
 import { useTime, toLocal } from '../functions/time'
-import { useThemeClasses } from '../functions/themeStore'
+import { useTheme, useThemeClasses } from '../functions/themeStore'
 
 // ------------------------------------------------------------
 // TIPOS
@@ -77,9 +77,11 @@ export default function TournamentPage() {
   const [selectedRound, setSelectedRound] = useState<string | null>(null)
   const { utcOffset } = useTime();
   const { border, textMain, textMuted } = useThemeClasses();
+  const setLastTournamentId = useTheme(state => state.setLastTournamentId);
 
   useEffect(() => {
     if (!tournamentId) return
+    setLastTournamentId(tournamentId);
 
     const fetchData = async () => {
       setLoading(true)
@@ -232,27 +234,12 @@ export default function TournamentPage() {
         logo={tournament.tournament_crest_url}
       />
 
-      <div className="max-w-[1600px] mx-auto p-8">
+      <div className="max-w-[1600px] mx-auto p-2 md:p-8">
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-          {/* Tabla de posiciones */}
-          <div className="lg:col-span-6">
-            <div className="flex flex-col gap-8">
-              {groupKeys.map(group => (
-                <StandingsTable
-                  key={group}
-                  title={group}
-                  standings={standings[group] ?? []}
-                  teamLookup={teamLookup}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Partidos del round seleccionado */}
-          <div className="lg:col-span-6 flex flex-col gap-4">
-
+          {/* Partidos del round seleccionado (Primero en mobile) */}
+          <div className="lg:col-span-6 flex flex-col gap-4 order-1 lg:order-2">
             {selectedRound ? (
               <FixtureTable
                 roundName={isMatchday(selectedRound) ? `${selectedRound}` : selectedRound}
@@ -266,6 +253,20 @@ export default function TournamentPage() {
                 No hay partidos programados
               </div>
             )}
+          </div>
+
+          {/* Tabla de posiciones (Segundo en mobile) */}
+          <div className="lg:col-span-6 order-2 lg:order-1">
+            <div className="flex flex-col gap-8">
+              {groupKeys.map(group => (
+                <StandingsTable
+                  key={group}
+                  title={group}
+                  standings={standings[group] ?? []}
+                  teamLookup={teamLookup}
+                />
+              ))}
+            </div>
           </div>
 
         </div>
