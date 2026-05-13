@@ -1,8 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useEffect, type ReactNode } from 'react'
+import logoLight from '../assets/ResultadosLogoLight.webp'
+import logoDark from '../assets/ResultadosLogoDark.webp'
 
-export type ThemeName = 
+export type ThemeName =
   | 'zinc-dark' | 'stone-dark' | 'slate-dark' | 'neutral-dark' | 'gray-dark' | 'taupe-dark' | 'mauve-dark' | 'mist-dark' | 'olive-dark'
   | 'zinc-light' | 'stone-light' | 'slate-light' | 'neutral-light' | 'gray-light' | 'taupe-light' | 'mauve-light' | 'mist-light' | 'olive-light'
 
@@ -27,11 +29,12 @@ export interface ThemeClasses {
   textAccent: string
   textProminent: string
   textHover: string
-  
+
   // States
   textSuccess?: string
   textError?: string
   bgProminent?: string
+  logo: string
 }
 
 export const THEMES: Record<ThemeName, ThemeClasses> = {
@@ -49,9 +52,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-zinc-100',
     textHover: 'hover:text-zinc-100',
     textSuccess: 'text-green-400',
-    textError: 'text-red-500',
+    textError: 'text-red-400',
     bgProminent: 'bg-zinc-800/50',
     bgMain: 'bg-black/10',
+    logo: logoLight,
   },
   'stone-dark': {
     bgApp: 'bg-stone-950',
@@ -64,9 +68,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-stone-100',
     textHover: 'hover:text-stone-100',
     textSuccess: 'text-green-400',
-    textError: 'text-red-500',
+    textError: 'text-red-400',
     bgProminent: 'bg-stone-800/50',
     bgMain: 'bg-black/10',
+    logo: logoLight,
   },
   'slate-dark': {
     bgApp: 'bg-slate-950',
@@ -79,9 +84,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-slate-100',
     textHover: 'hover:text-slate-100',
     textSuccess: 'text-green-400',
-    textError: 'text-red-500',
+    textError: 'text-red-400',
     bgProminent: 'bg-slate-800/50',
     bgMain: 'bg-black/10',
+    logo: logoLight,
   },
   'neutral-dark': {
     bgApp: 'bg-neutral-950',
@@ -94,9 +100,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-neutral-100',
     textHover: 'hover:text-neutral-100',
     textSuccess: 'text-green-400',
-    textError: 'text-red-500',
+    textError: 'text-red-400',
     bgProminent: 'bg-neutral-800/50',
     bgMain: 'bg-black/10',
+    logo: logoLight,
   },
   'gray-dark': {
     bgApp: 'bg-gray-950',
@@ -109,9 +116,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-gray-100',
     textHover: 'hover:text-gray-100',
     textSuccess: 'text-green-400',
-    textError: 'text-red-500',
+    textError: 'text-red-400',
     bgProminent: 'bg-gray-800/50',
     bgMain: 'bg-black/10',
+    logo: logoLight,
   },
   'taupe-dark': {
     bgApp: 'bg-taupe-950',
@@ -124,9 +132,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-taupe-100',
     textHover: 'hover:text-taupe-100',
     textSuccess: 'text-green-400',
-    textError: 'text-red-500',
+    textError: 'text-red-400',
     bgProminent: 'bg-taupe-800/50',
     bgMain: 'bg-black/10',
+    logo: logoLight,
   },
   'mauve-dark': {
     bgApp: 'bg-mauve-950',
@@ -139,9 +148,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-mauve-100',
     textHover: 'hover:text-mauve-100',
     textSuccess: 'text-green-400',
-    textError: 'text-red-500',
+    textError: 'text-red-400',
     bgProminent: 'bg-mauve-800/50',
     bgMain: 'bg-black/10',
+    logo: logoLight,
   },
   'mist-dark': {
     bgApp: 'bg-mist-950',
@@ -154,9 +164,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-mist-100',
     textHover: 'hover:text-mist-100',
     textSuccess: 'text-green-400',
-    textError: 'text-red-500',
+    textError: 'text-red-400',
     bgProminent: 'bg-mist-800/50',
     bgMain: 'bg-black/10',
+    logo: logoLight,
   },
   'olive-dark': {
     bgApp: 'bg-olive-950',
@@ -169,9 +180,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textProminent: 'font-black text-olive-100',
     textHover: 'hover:text-olive-100',
     textSuccess: 'text-green-400',
-    textError: 'text-red-500',
+    textError: 'text-red-400',
     bgProminent: 'bg-olive-800/50',
     bgMain: 'bg-black/10',
+    logo: '/src/assets/ResultadosLogoLight.webp',
   },
 
   // ------------------------------------------------------------
@@ -191,6 +203,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textError: 'text-red-600',
     bgProminent: 'bg-zinc-100',
     bgMain: 'bg-white/40',
+    logo: logoDark,
   },
   'stone-light': {
     bgApp: 'bg-stone-100',
@@ -206,6 +219,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textError: 'text-red-600',
     bgProminent: 'bg-stone-100',
     bgMain: 'bg-white/40',
+    logo: logoDark,
   },
   'slate-light': {
     bgApp: 'bg-slate-100',
@@ -221,6 +235,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textError: 'text-red-600',
     bgProminent: 'bg-slate-100',
     bgMain: 'bg-white/40',
+    logo: logoDark,
   },
   'neutral-light': {
     bgApp: 'bg-neutral-100',
@@ -236,6 +251,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textError: 'text-red-600',
     bgProminent: 'bg-neutral-100',
     bgMain: 'bg-white/40',
+    logo: logoDark,
   },
   'gray-light': {
     bgApp: 'bg-gray-100',
@@ -251,6 +267,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textError: 'text-red-600',
     bgProminent: 'bg-gray-100',
     bgMain: 'bg-white/40',
+    logo: logoDark,
   },
   'taupe-light': {
     bgApp: 'bg-taupe-100',
@@ -266,6 +283,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textError: 'text-red-600',
     bgProminent: 'bg-taupe-100',
     bgMain: 'bg-white/40',
+    logo: logoDark,
   },
   'mauve-light': {
     bgApp: 'bg-mauve-100',
@@ -281,6 +299,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textError: 'text-red-600',
     bgProminent: 'bg-mauve-100',
     bgMain: 'bg-white/40',
+    logo: logoDark,
   },
   'mist-light': {
     bgApp: 'bg-mist-100',
@@ -296,6 +315,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textError: 'text-red-600',
     bgProminent: 'bg-mist-100',
     bgMain: 'bg-white/40',
+    logo: '/src/assets/ResultadosLogoDark.webp',
   },
   'olive-light': {
     bgApp: 'bg-olive-100',
@@ -311,6 +331,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textError: 'text-red-600',
     bgProminent: 'bg-olive-100',
     bgMain: 'bg-white/40',
+    logo: '/src/assets/ResultadosLogoDark.webp',
   },
 }
 
@@ -324,7 +345,7 @@ interface ThemeState {
 export const useTheme = create<ThemeState>()(
   persist(
     (set) => ({
-      currentTheme: 'stone-dark', 
+      currentTheme: 'stone-dark',
       setTheme: (theme) => set({ currentTheme: theme }),
       lastTournamentId: null,
       setLastTournamentId: (id) => set({ lastTournamentId: id }),

@@ -9,7 +9,7 @@ interface PageBannerProps {
 }
 
 export default function PageBanner({
-  title = "Competición",
+  title = "",
   tournament_banner_url,
   logo
 }: PageBannerProps) {
@@ -47,7 +47,7 @@ export default function PageBanner({
               src={logo}
               alt="Tournament Logo"
               loading="lazy"
-              className="w-24 h-24 md:w-32 md:h-32 object-contain rounded-lg"
+              className="w-24 h-24 md:w-32 md:h-32 object-contain"
             />
           )}
 

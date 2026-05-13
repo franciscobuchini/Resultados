@@ -41,7 +41,7 @@ export default function UserAvatar({
       {/* Bandera (dentro del recuadro, esquina inferior derecha) */}
       {flagUrl && (
         <div className="absolute bottom-1 right-1 w-[30%] h-auto">
-          <img src={flagUrl} className="w-full h-full" alt="" />
+          <img src={flagUrl} className="w-full h-auto object-contain" alt="" />
         </div>
       )}
     </div>

@@ -15,14 +15,14 @@ interface DataBoxProps {
  * Encapsula un conjunto de DataRows con un estilo visual coherente,
  * bordes redondeados, sombras y manejo de títulos.
  */
-export default function DataBox({ 
-  children, 
-  className = "" 
+export default function DataBox({
+  children,
+  className = ""
 }: DataBoxProps) {
   const { border } = useThemeClasses();
 
   return (
-    <div className={`flex flex-col ${className}`}>      
+    <div className={`flex flex-col ${className}`}>
       {/* 
         El contenedor principal. 
         Utilizamos [&>*:last-child]:border-b-0 para asegurar que el último 

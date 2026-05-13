@@ -4,7 +4,7 @@ import { useThemeClasses } from '../functions/themeStore'
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true)
-  const { border, textMain } = useThemeClasses()
+  const { border, textMain, logo } = useThemeClasses()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,9 +25,9 @@ export default function HomePage() {
 
   return (
     <>
-      <PageBanner 
-        title="Resultados.ar" 
+      <PageBanner
         tournament_banner_url="https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2093&auto=format&fit=crop"
+        logo={logo}
       />
     </>
   )

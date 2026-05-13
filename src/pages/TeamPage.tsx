@@ -6,6 +6,7 @@ import FixtureTable from '../components/tables/FixtureTable'
 import Error404 from './Error404'
 import { useThemeClasses } from '../functions/themeStore'
 import { useTime, toLocal } from '../functions/time'
+import type { Goal } from '../../shared/tournament/matchTypes'
 import HistoryTable, { type HistoryStats } from '../components/tables/HistoryTable'
 
 // ------------------------------------------------------------
@@ -69,6 +70,7 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true)
   const [team, setTeam] = useState<Team | null>(null)
   const [matches, setMatches] = useState<MatchWithTournament[]>([])
+  const [goals, setGoals] = useState<Goal[]>([])
   const [teamLookup, setTeamLookup] = useState<TeamLookup>({})
   const { utcOffset } = useTime()
   const { border, textMain, textMuted, bgSurface } = useThemeClasses()
@@ -117,6 +119,17 @@ export default function TeamPage() {
         }
 
         setMatches(fetchedMatches)
+
+        // 2.5 Traer goles
+        const matchIds = fetchedMatches.map(m => m.match_id)
+        if (matchIds.length > 0) {
+          const { data: goalData } = await supabase
+            .from('goals')
+            .select('*')
+            .in('match_id', matchIds)
+            .order('goal_minute', { ascending: true })
+          if (goalData) setGoals(goalData as Goal[])
+        }
 
         // 3. Crear el lookup de equipos (incluyendo rivales)
         const rivalIds = Array.from(new Set([
@@ -256,6 +269,7 @@ export default function TeamPage() {
               <FixtureTable
                 roundName="Próximos Partidos"
                 matchesByDate={groupedUpcoming}
+                goals={goals}
                 teamLookup={teamLookup}
                 fullDate={true}
               />
@@ -272,6 +286,7 @@ export default function TeamPage() {
               <FixtureTable
                 roundName="Últimos Resultados"
                 matchesByDate={groupedFinished}
+                goals={goals}
                 teamLookup={teamLookup}
                 hideDateSeparators={true}
                 sortDescending={true}

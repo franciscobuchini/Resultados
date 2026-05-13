@@ -161,7 +161,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-4">
                   <div className={`${textMuted} w-6 h-6 flex items-center justify-center shrink-0`}>
                     {selectedCountry?.country_flag_url ? (
-                      <img src={selectedCountry.country_flag_url} className="w-6 h-4 object-cover rounded-sm" alt="" />
+                      <img src={selectedCountry.country_flag_url} className="w-6 h-auto object-contain" alt="" />
                     ) : (
                       <Globe size={20} />
                     )}
@@ -186,7 +186,7 @@ export default function ProfilePage() {
                   <div className={`absolute left-0 right-0 top-full mt-2 z-10 rounded-xl border ${border} ${bgSurface} overflow-hidden shadow-2xl`}>
                     {countries.map(country => (
                       <button key={country.country_id} onClick={() => { setSelectedCountry(country); setShowCountryResults(false); setCountryQuery(''); }} className={`w-full p-4 flex items-center gap-3 ${bgSurfaceHover} transition-colors text-left`}>
-                        {country.country_flag_url && <img src={country.country_flag_url} className="w-6 h-4 object-cover rounded-sm" alt="" />}
+                        {country.country_flag_url && <img src={country.country_flag_url} className="w-6 h-auto object-contain" alt="" />}
                         <span className={`text-sm font-medium ${textMain}`}>{country.country_name}</span>
                       </button>
                     ))}

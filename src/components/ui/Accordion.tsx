@@ -40,7 +40,7 @@ export function Accordion({ cid, country, tournaments, defaultOpen = true }: Acc
             <img 
               src={country.country_flag_url} 
               alt="" 
-              className="w-6 h-4 object-cover" 
+              className="w-6 h-auto object-contain" 
             />
           )}
           <span>{countryName}</span>

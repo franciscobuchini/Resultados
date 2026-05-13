@@ -18,3 +18,12 @@ export interface Match {
   away_penalty: number | null
   tournament_id: string | null
 }
+
+export interface Goal {
+  goal_id: string
+  match_id: string
+  team_id: string
+  goal_minute: number | null
+  player_name: string
+  goal_type: string // 'G' = normal, 'P' = penalty, 'C' = own goal
+}

@@ -47,7 +47,7 @@ export function Dropdown({ icon, label, value, children, align = 'right', widthC
         {isOpen && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-            <div 
+            <div
               className={`absolute top-full mt-2 z-50 flex flex-col rounded-xl border ${align === 'left' ? 'left-0' : 'right-0'} ${widthClass} ${bgSurface} ${border}`}
             >
               {children}
@@ -70,26 +70,25 @@ interface DropdownOptionProps {
   rightElement?: ReactNode;
 }
 
-export function DropdownOption({ 
-  icon: Icon, 
-  label, 
-  value, 
-  onClick, 
-  children, 
-  isActive, 
+export function DropdownOption({
+  icon: Icon,
+  label,
+  value,
+  onClick,
+  children,
+  isActive,
   className = '',
   rightElement
 }: DropdownOptionProps) {
   const { bgSurfaceHover, textMuted, textMain } = useThemeClasses();
-  
+
   const Tag = onClick ? 'button' : 'div';
-  
+
   return (
     <Tag
       onClick={onClick}
-      className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between transition-colors ${onClick ? bgSurfaceHover : ''} ${
-        isActive ? `${textMain} font-medium` : textMuted
-      } ${className}`}
+      className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between transition-colors ${onClick ? bgSurfaceHover : ''} ${isActive ? `${textMain} font-medium` : textMuted
+        } ${className}`}
     >
       {children ? children : (
         <>
@@ -118,22 +117,22 @@ interface DropdownItemProps {
   className?: string;
 }
 
-export function DropdownItem({ 
-  onClick, 
-  isActive, 
-  children, 
-  icon, 
-  label, 
-  value, 
-  rightElement, 
-  className 
+export function DropdownItem({
+  onClick,
+  isActive,
+  children,
+  icon,
+  label,
+  value,
+  rightElement,
+  className
 }: DropdownItemProps) {
   return (
-    <DropdownOption 
-      onClick={onClick} 
-      isActive={isActive} 
-      icon={icon} 
-      label={label} 
+    <DropdownOption
+      onClick={onClick}
+      isActive={isActive}
+      icon={icon}
+      label={label}
       value={value}
       rightElement={rightElement}
       className={className}
@@ -174,16 +173,16 @@ export function DropdownSection({ icon: Icon, label, value, children }: Dropdown
         value={value}
         isActive={isOpen}
         rightElement={
-          <ChevronRight 
-            size={12} 
-            className={`${textMuted} transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+          <ChevronRight
+            size={12}
+            className={`${textMuted} transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           />
         }
       />
 
       {/* Panel flotante lateral */}
       {isOpen && (
-        <div 
+        <div
           className={`absolute top-0 right-full mr-2 z-50 flex flex-col rounded-xl border w-36 overflow-hidden ${bgSurface} ${border}`}
         >
           {children}

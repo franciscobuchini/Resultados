@@ -7,7 +7,7 @@ import FixtureTable from '../components/tables/FixtureTable'
 import Error404 from './Error404'
 import { computeStandings } from '../../shared/tournament/computeStandings'
 import type { TournamentSystem, LeaguePhase, Tiebreaker } from '../../shared/tournament/tournamentTypes'
-import type { Match } from '../../shared/tournament/matchTypes'
+import type { Match, Goal } from '../../shared/tournament/matchTypes'
 import { useTime, toLocal } from '../functions/time'
 import { useTheme, useThemeClasses } from '../functions/themeStore'
 
@@ -73,6 +73,7 @@ export default function TournamentPage() {
   const [loading, setLoading] = useState(true)
   const [tournament, setTournament] = useState<Tournament | null>(null)
   const [matches, setMatches] = useState<Match[]>([])
+  const [goals, setGoals] = useState<Goal[]>([])
   const [teamLookup, setTeamLookup] = useState<Record<string, TeamInfo>>({})
   const [selectedRound, setSelectedRound] = useState<string | null>(null)
   const { utcOffset } = useTime();
@@ -109,6 +110,20 @@ export default function TournamentPage() {
 
       const fetchedMatches = (matchData || []) as Match[]
       setMatches(fetchedMatches)
+
+      // Traer goles de estos partidos
+      const matchIds = fetchedMatches.map(m => m.match_id)
+      if (matchIds.length > 0) {
+        const { data: goalData } = await supabase
+          .from('goals')
+          .select('*')
+          .in('match_id', matchIds)
+          .order('goal_minute', { ascending: true })
+        
+        if (goalData) {
+          setGoals(goalData as Goal[])
+        }
+      }
 
       // Seleccionar la primera fecha disponible por defecto (numérica si existe, si no la primera que haya)
       const rounds = Array.from(new Set(fetchedMatches.map(m => m.match_round).filter(Boolean))) as string[]
@@ -244,6 +259,7 @@ export default function TournamentPage() {
               <FixtureTable
                 roundName={isMatchday(selectedRound) ? `${selectedRound}` : selectedRound}
                 matchesByDate={matchesByDate}
+                goals={goals}
                 teamLookup={teamLookup}
                 onPrevRound={currentIndex > 0 ? () => setSelectedRound(sortedRounds[currentIndex - 1]) : undefined}
                 onNextRound={currentIndex < sortedRounds.length - 1 ? () => setSelectedRound(sortedRounds[currentIndex + 1]) : undefined}

@@ -19,6 +19,7 @@ export default function ReadmeViewer() {
         <li>- Menu de inicio mostrar todos los partidos del dia</li>
         <li>- Resolver api en network para que no se vean los datos en texto plano</li>
         <li>- Resolver problema de que esta tomando los teampage por "team_shortname" en vez de por "team_id"</li>
+        <li>- IA Futbolera YT</li>
       </ul>
     </div>
   )

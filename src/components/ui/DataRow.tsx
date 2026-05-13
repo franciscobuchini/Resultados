@@ -9,6 +9,9 @@ import { useThemeClasses } from '../../functions/themeStore';
 /** Altura fija inamovible (pactada): 48px */
 const HEIGHT = 'h-12';
 
+/** Altura para filas de detalles: 24px */
+const HEIGHT_DETAILS = 'min-h-6';
+
 /** Layout base de toda fila */
 const BASE = 'flex items-center w-full px-3 border-b text-sm';
 
@@ -262,6 +265,22 @@ export function FixtureRow({
           <ImageCrest src={awayLogo} />
           <span className="truncate">{awayName}</span>
         </TeamLink>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * DetailsRow — Fila de detalles (goleadores, incidencias, etc.)
+ * Estructura simplificada con altura reducida (h-6).
+ */
+export function DetailsRow({ children, className = '', noBorder = false }: { children: ReactNode; className?: string; noBorder?: boolean }) {
+  const { bgApp, border, textMuted } = useThemeClasses();
+  
+  return (
+    <div className={`grid items-center w-full ${HEIGHT_DETAILS} ${bgApp} ${border} border-b text-xs leading-tight ${noBorder ? '!border-b-0' : ''} ${className}`}>
+      <div className={`px-2 ${textMuted} overflow-hidden min-w-0`}>
+        {children}
       </div>
     </div>
   );
