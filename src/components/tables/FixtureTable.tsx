@@ -40,22 +40,22 @@ const isPlayedOrPlaying = (status: string | null): boolean => {
 const formatGoalName = (g: Goal): string => {
   let s = g.player_name;
   const type = (g.goal_type || '').toUpperCase();
-  
+
   // Evitar duplicados si ya está en el nombre
   if (type === 'P' && !s.toUpperCase().includes('(P)')) s += ' (P)';
   else if ((type === 'C' || type === 'EC') && !s.toUpperCase().includes('(EC)')) s += ' (EC)';
-  
+
   return s;
 };
 
 /**
  * FixtureTable - Tabla de partidos agrupada por fecha y día.
  */
-export default function FixtureTable({ 
-  roundName, 
-  matchesByDate, 
+export default function FixtureTable({
+  roundName,
+  matchesByDate,
   goals = [],
-  teamLookup, 
+  teamLookup,
   onPrevRound,
   onNextRound,
   fullDate = false,
@@ -64,7 +64,7 @@ export default function FixtureTable({
 }: FixtureTableProps) {
   const { utcOffset } = useTime();
   const { bgSurfaceHover, textMain, textSuccess } = useThemeClasses();
-  
+
   const sortedDates = Object.keys(matchesByDate).sort((a, b) => {
     return sortDescending ? b.localeCompare(a) : a.localeCompare(b);
   });
@@ -74,7 +74,7 @@ export default function FixtureTable({
       {/* Cabecera con navegación */}
       <DataRowHeader>
         <div className="flex items-center justify-between w-full">
-          <button 
+          <button
             onClick={onPrevRound}
             disabled={!onPrevRound}
             className={`p-2 ${bgSurfaceHover} rounded-full transition-colors disabled:opacity-0 disabled:cursor-default`}
@@ -82,10 +82,10 @@ export default function FixtureTable({
           >
             <ChevronLeft size={18} strokeWidth={3} />
           </button>
-          
+
           <span className="flex-grow text-center">{roundName}</span>
 
-          <button 
+          <button
             onClick={onNextRound}
             disabled={!onNextRound}
             className={`p-1 ${bgSurfaceHover} rounded-full transition-colors disabled:opacity-0 disabled:cursor-default`}
@@ -101,10 +101,10 @@ export default function FixtureTable({
 
         // Formatear el día
         const dateObj = new Date(date + 'T12:00:00');
-        const options: Intl.DateTimeFormatOptions = fullDate 
+        const options: Intl.DateTimeFormatOptions = fullDate
           ? { weekday: 'long', day: 'numeric', month: 'long' }
           : { weekday: 'long', day: 'numeric' };
-        
+
         const formattedDay = dateObj.toLocaleDateString('es-ES', options);
 
         return (

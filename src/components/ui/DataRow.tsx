@@ -73,7 +73,7 @@ interface StandingsRowProps {
  */
 export function StandingsRow({ position, logo, name, stats, className = '', noBorder = false }: StandingsRowProps) {
   const { bgApp, border, textMuted, textHover } = useThemeClasses();
-  
+
   return (
     <div className={`${BASE} ${HEIGHT} ${bgApp} ${border} ${textMuted} ${textHover} ${noBorder ? '!border-b-0' : ''} ${className}`}>
       {/* Equipo */}
@@ -129,13 +129,13 @@ export function StatGroup({ children, className = '' }: { children: ReactNode; c
 /**
  * Stat — Celda individual de estadística (PTS, PJ, PG, etc.)
  */
-export function Stat({ 
-  value, 
-  width = 'w-7 md:w-10', 
+export function Stat({
+  value,
+  width = 'w-7 md:w-10',
   prominent = false,
   onClick,
   className = '',
-}: { 
+}: {
   value: ReactNode;
   width?: string;
   prominent?: boolean;
@@ -143,17 +143,17 @@ export function Stat({
   className?: string;
 }) {
   const { textMuted, textProminent } = useThemeClasses();
-  
+
   // Si la className contiene 'text-', asumimos que estamos pasando un color manual
   const hasCustomColor = className.includes('text-');
-  
+
   // Si es prominent, aplicamos el estilo prominent (que incluye font-black)
   // pero si hay un color custom, intentamos que no choque (aunque textProminent trae color)
   // Lo ideal es que textProminent solo trajera peso, pero como trae color, lo manejamos así:
   const baseColor = prominent ? textProminent : textMuted;
-  
+
   return (
-    <div 
+    <div
       onClick={onClick}
       className={`${width} flex items-center justify-center ${!hasCustomColor ? baseColor : ''} ${prominent ? 'font-black' : ''} ${onClick ? 'cursor-pointer hover:opacity-70 select-none' : ''} ${className}`}
     >
@@ -197,7 +197,7 @@ interface FixtureRowProps {
  * FixtureRow — Fila completa de un partido.
  * Estructura: [Local ←] [Marcador] [→ Visitante]
  */
-export function FixtureRow({ 
+export function FixtureRow({
   homeId, homeLogo, homeName, homeScore,
   awayId, awayLogo, awayName, awayScore,
   homePenalty, awayPenalty,
@@ -206,7 +206,7 @@ export function FixtureRow({
   noBorder = false
 }: FixtureRowProps) {
   const { bgApp, border, textMuted, textHover, textProminent } = useThemeClasses();
-  
+
   // Componente interno para evitar repetición
   const TeamLink = ({ id, children, isRight }: { id?: string; children: ReactNode; isRight?: boolean }) => {
     const content = (
@@ -219,7 +219,7 @@ export function FixtureRow({
     }
     return content;
   };
-  
+
   return (
     <div className={`${BASE} ${HEIGHT} ${bgApp} ${border} ${textMuted} ${textHover} ${noBorder ? '!border-b-0' : ''} ${className}`}>
       {/* Contenido principal: Local + Marcador + Visitante */}
@@ -276,7 +276,7 @@ export function FixtureRow({
  */
 export function DetailsRow({ children, className = '', noBorder = false }: { children: ReactNode; className?: string; noBorder?: boolean }) {
   const { bgApp, border, textMuted } = useThemeClasses();
-  
+
   return (
     <div className={`grid items-center w-full ${HEIGHT_DETAILS} ${bgApp} ${border} border-b text-xs leading-tight ${noBorder ? '!border-b-0' : ''} ${className}`}>
       <div className={`px-2 ${textMuted} overflow-hidden min-w-0`}>
