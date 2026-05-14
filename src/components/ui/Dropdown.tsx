@@ -48,7 +48,7 @@ export function Dropdown({ icon, label, value, children, align = 'right', widthC
           <>
             <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
             <div
-              className={`absolute top-full mt-2 z-50 flex flex-col rounded-xl border overflow-hidden ${align === 'left' ? 'left-0' : 'right-0'} ${widthClass} ${bgSurface} ${border}`}
+              className={`absolute top-full mt-2 z-50 flex flex-col rounded-xl border ${align === 'left' ? 'left-0' : 'right-0'} ${widthClass} max-sm:fixed max-sm:left-4 max-sm:right-4 max-sm:w-auto max-sm:top-20 ${bgSurface} ${border} shadow-2xl animate-in fade-in zoom-in-95 duration-200`}
             >
               {children}
             </div>
@@ -180,10 +180,10 @@ export function DropdownSection({ icon: Icon, label, value, children }: Dropdown
         }
       />
 
-      {/* Panel flotante lateral */}
+      {/* Panel flotante lateral (Desktop) o Acordeón (Mobile) */}
       {isOpen && (
         <div
-          className={`absolute top-0 right-full mr-2 z-50 flex flex-col rounded-xl border w-36 overflow-hidden ${bgSurface} ${border}`}
+          className={`sm:absolute sm:top-0 sm:right-full sm:mr-2 z-50 flex flex-col rounded-xl border sm:w-36 overflow-hidden ${bgSurface} ${border} max-sm:relative max-sm:w-full max-sm:mt-1 max-sm:mb-2 max-sm:border-x-0 max-sm:rounded-none max-sm:bg-black/5 animate-in slide-in-from-top-1 duration-200`}
         >
           {children}
         </div>

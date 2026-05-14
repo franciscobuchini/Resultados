@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { LAYOUT_CONFIG } from '../functions/layoutConfig';
 
 interface PageContentProps {
   children: ReactNode;
@@ -22,14 +23,14 @@ export default function PageContent({
   };
 
   const layoutClasses = {
-    'single': 'flex flex-col gap-6 md:gap-8',
-    'grid-12': 'grid grid-cols-1 lg:grid-cols-12 gap-8',
-    'grid-12-md': 'grid grid-cols-1 md:grid-cols-12 gap-8',
-    'grid-2': 'grid grid-cols-1 lg:grid-cols-2 gap-8 items-start'
+    'single': `flex flex-col ${LAYOUT_CONFIG.gap}`,
+    'grid-12': `grid grid-cols-1 lg:grid-cols-12 ${LAYOUT_CONFIG.gapGrid}`,
+    'grid-12-md': `grid grid-cols-1 md:grid-cols-12 ${LAYOUT_CONFIG.gapGrid}`,
+    'grid-2': `grid grid-cols-1 lg:grid-cols-2 ${LAYOUT_CONFIG.gapGrid} items-start`
   };
 
   return (
-    <div className={`${maxWidthClasses[maxWidth]} mx-auto p-2 md:p-8 ${layoutClasses[layout]}`}>
+    <div className={`${maxWidthClasses[maxWidth]} mx-auto px-0 py-8 md:p-8 ${layoutClasses[layout]}`}>
       {children}
     </div>
   );

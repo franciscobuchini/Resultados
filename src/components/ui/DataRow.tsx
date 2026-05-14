@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import ImageCrest from './ImageCrest';
 import { useThemeClasses } from '../../functions/themeStore';
 
@@ -212,12 +212,13 @@ export function FixtureRow({
   className = '',
   noBorder = false
 }: FixtureRowProps) {
-  const { bgApp, border, textMain, textMuted, textProminent } = useThemeClasses();
+  const { bgApp, border, textMain, textMuted, textProminent, textError } = useThemeClasses();
+  const [isRevealed, setIsRevealed] = useState(false);
 
   // Componente interno para evitar repetición
-  const TeamLink = ({ id, name, logo, scorers, isRight }: { id?: string; name: string; logo?: string | null; scorers?: ReactNode; isRight?: boolean }) => {
+  const TeamLink = ({ id, name, logo, scorers, isRight, revealed }: { id?: string; name: string; logo?: string | null; scorers?: ReactNode; isRight?: boolean; revealed: boolean }) => {
     return (
-      <div className={`flex-1 flex items-center gap-3 overflow-hidden min-w-0 ${isRight ? 'flex-row-reverse text-right justify-start' : 'justify-start'}`}>
+      <div className={`w-full flex-1 flex items-center gap-2 sm:gap-3 overflow-hidden min-w-0 ${isRight ? 'flex-row-reverse text-right justify-start' : 'justify-start'}`}>
         {/* Escudo - Única parte con link y cursor-pointer */}
         <div className="shrink-0 relative z-10">
           {id ? (
@@ -229,12 +230,12 @@ export function FixtureRow({
           )}
         </div>
 
-        {/* Nombre del equipo (Se oculta si hay scorers y estamos en hover sobre LA FILA) */}
-        <span className={`truncate ${scorers ? 'group-hover:hidden' : ''}`}>{name}</span>
+        {/* Nombre del equipo (Se oculta si hay scorers y estamos en hover o click) */}
+        <span className={`truncate ${scorers && (revealed ? 'hidden' : 'group-hover:hidden')}`}>{name}</span>
 
-        {/* Goleadores que aparecen al hacer hover sobre LA FILA */}
+        {/* Goleadores que aparecen al hacer hover o click */}
         {scorers && (
-          <div className={`hidden group-hover:flex items-center flex-1 text-[11px] ${textMain} leading-tight italic tracking-wide animate-in fade-in duration-300 ${isRight ? 'justify-end' : 'justify-start'}`}>
+          <div className={`${revealed ? 'flex' : 'hidden group-hover:flex'} items-center flex-1 text-[11px] ${textMain} leading-tight italic tracking-wide animate-in fade-in duration-300 ${isRight ? 'justify-end' : 'justify-start'}`}>
             {scorers}
           </div>
         )}
@@ -242,20 +243,25 @@ export function FixtureRow({
     );
   };
 
+  const isLive = typeof statusLabel === 'string' && (statusLabel.includes("'") || ['LIVE', 'ET', 'MT', 'PEN'].includes(statusLabel));
+
   return (
-    <div className={`group ${BASE} ${HEIGHT} ${bgApp} ${border} ${textMuted} ${noBorder ? '!border-b-0' : ''} ${className}`}>
+    <div
+      onClick={() => setIsRevealed(!isRevealed)}
+      className={`group cursor-pointer ${BASE} ${HEIGHT} ${bgApp} ${border} ${textMuted} ${noBorder ? '!border-b-0' : ''} ${className}`}
+    >
       {/* Estado (Apartado extra a la izquierda para LIVE/FINAL) */}
-      <div className="shrink-0 w-12 text-left text-[10px] font-bold uppercase tracking-tighter mr-2">
+      <div className={`shrink-0 w-4 text-left text-xs font-bold uppercase tracking-tighter mr-1 ${isLive ? `${textError} animate-pulse` : ''}`}>
         {statusLabel}
       </div>
 
       {/* Contenido principal: Local + Marcador + Visitante */}
       <div className="flex-grow flex items-center overflow-hidden min-w-0">
         {/* Equipo Local */}
-        <TeamLink id={homeId} name={homeName} logo={homeLogo} scorers={homeScorers} isRight />
+        <TeamLink id={homeId} name={homeName} logo={homeLogo} scorers={homeScorers} isRight revealed={isRevealed} />
 
         {/* Marcador */}
-        <div className="flex-shrink-0 flex justify-center w-24 gap-2 tabular-nums">
+        <div className="flex-shrink-0 flex justify-center w-16 sm:w-24 gap-1 sm:gap-2 tabular-nums">
           {/* Penalty Local (Espacio reservado) */}
           <div className="flex-1 flex justify-end">
             {(homePenalty !== undefined && homePenalty !== null) && (
@@ -285,7 +291,7 @@ export function FixtureRow({
         </div>
 
         {/* Equipo Visitante */}
-        <TeamLink id={awayId} name={awayName} logo={awayLogo} scorers={awayScorers} />
+        <TeamLink id={awayId} name={awayName} logo={awayLogo} scorers={awayScorers} revealed={isRevealed} />
       </div>
     </div>
   );

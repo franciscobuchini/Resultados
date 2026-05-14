@@ -4,6 +4,8 @@ import DateNavigator from '../components/navigation/DateNavigator'
 import FixtureTable from '../components/tables/FixtureTable'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
+import { LAYOUT_CONFIG } from '../functions/layoutConfig'
+
 export default function HomePage() {
   const { loading, dateLabel, adaptedLeagues, changeDate } = useFixtures()
 
@@ -26,7 +28,7 @@ export default function HomePage() {
           ) : adaptedLeagues.length === 0 ? (
             <EmptyState message="Sin partidos para esta fecha" />
           ) : (
-            <div className={`flex flex-col gap-4 transition-opacity duration-300 ${loading ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
+            <div className={`flex flex-col ${LAYOUT_CONFIG.gap} transition-opacity duration-300 ${loading ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
               {adaptedLeagues.map((league) => (
                 <FixtureTable
                   key={league.leagueName}

@@ -14,7 +14,7 @@ export default function UserMenu() {
       value="Usuario"
     >
       {/* Info: estado de sincronización */}
-      <DropdownOption>
+      <DropdownOption className="rounded-t-xl">
         <SyncStatus />
       </DropdownOption>
 
@@ -36,6 +36,7 @@ export default function UserMenu() {
         onClick={() => {}}
         icon={LogOut}
         label="Cerrar Sesión"
+        className="rounded-b-xl"
       />
     </Dropdown>
   )
