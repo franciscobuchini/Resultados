@@ -175,6 +175,8 @@ interface FixtureRowProps {
   homeName: string;
   /** Goles del equipo local */
   homeScore?: number | string | null;
+  /** Goleadores del equipo local */
+  homeScorers?: ReactNode;
   /** ID del equipo visitante (para links) */
   awayId?: string;
   /** Escudo del equipo visitante */
@@ -183,52 +185,74 @@ interface FixtureRowProps {
   awayName: string;
   /** Goles del equipo visitante */
   awayScore?: number | string | null;
+  /** Goleadores del equipo visitante */
+  awayScorers?: ReactNode;
   /** Goles de penales del equipo local */
   homePenalty?: number | null;
   /** Goles de penales del equipo visitante */
   awayPenalty?: number | null;
   /** Hora del partido para mostrar cuando no hay marcador */
   matchTime?: string | null;
+  /** Etiqueta de estado (ej: '34'', 'Final', 'LIVE') */
+  statusLabel?: ReactNode;
   className?: string;
   noBorder?: boolean;
 }
 
 /**
  * FixtureRow — Fila completa de un partido.
- * Estructura: [Local ←] [Marcador] [→ Visitante]
+ * Estructura: [Local ←] [Marcador] [→ Visitante] [Estado?]
  */
 export function FixtureRow({
-  homeId, homeLogo, homeName, homeScore,
-  awayId, awayLogo, awayName, awayScore,
+  homeId, homeLogo, homeName, homeScore, homeScorers,
+  awayId, awayLogo, awayName, awayScore, awayScorers,
   homePenalty, awayPenalty,
   matchTime,
+  statusLabel,
   className = '',
   noBorder = false
 }: FixtureRowProps) {
-  const { bgApp, border, textMuted, textHover, textProminent } = useThemeClasses();
+  const { bgApp, border, textMain, textMuted, textProminent, bgSurfaceHover } = useThemeClasses();
 
   // Componente interno para evitar repetición
-  const TeamLink = ({ id, children, isRight }: { id?: string; children: ReactNode; isRight?: boolean }) => {
-    const content = (
-      <div className={`flex-1 flex items-center gap-3 overflow-hidden ${isRight ? 'flex-row-reverse text-right justify-start' : 'justify-start'} ${id ? 'cursor-pointer hover:opacity-70 transition-opacity' : ''}`}>
-        {children}
+  const TeamLink = ({ id, name, logo, scorers, isRight }: { id?: string; name: string; logo?: string | null; scorers?: ReactNode; isRight?: boolean }) => {
+    return (
+      <div className={`flex-1 flex items-center gap-3 overflow-hidden min-w-0 ${isRight ? 'flex-row-reverse text-right justify-start' : 'justify-start'}`}>
+        {/* Escudo - Única parte con link y cursor-pointer */}
+        <div className="shrink-0 relative z-10">
+          {id ? (
+            <a href={`/team/${id}`} onClick={(e) => { e.stopPropagation(); }} className="cursor-pointer hover:opacity-70 transition-opacity flex items-center justify-center">
+              <ImageCrest src={logo} />
+            </a>
+          ) : (
+            <ImageCrest src={logo} />
+          )}
+        </div>
+
+        {/* Nombre del equipo (Se oculta si hay scorers y estamos en hover sobre LA FILA) */}
+        <span className={`truncate ${scorers ? 'group-hover:hidden' : ''}`}>{name}</span>
+
+        {/* Goleadores que aparecen al hacer hover sobre LA FILA */}
+        {scorers && (
+          <div className={`hidden group-hover:flex items-center flex-1 text-[11px] ${textMain} leading-tight italic tracking-wide animate-in fade-in duration-300 ${isRight ? 'justify-end' : 'justify-start'}`}>
+            {scorers}
+          </div>
+        )}
       </div>
     );
-    if (id) {
-      return <a href={`/team/${id}`} onClick={(e) => { e.stopPropagation(); }} className="flex-1 flex min-w-0">{content}</a>;
-    }
-    return content;
   };
 
   return (
-    <div className={`${BASE} ${HEIGHT} ${bgApp} ${border} ${textMuted} ${textHover} ${noBorder ? '!border-b-0' : ''} ${className}`}>
+    <div className={`group ${BASE} ${HEIGHT} ${bgApp} ${border} ${textMuted} ${noBorder ? '!border-b-0' : ''} ${className}`}>
+      {/* Estado (Apartado extra a la izquierda para LIVE/FINAL) */}
+      <div className="shrink-0 w-12 text-left text-[10px] font-bold uppercase tracking-tighter mr-2">
+        {statusLabel}
+      </div>
+
       {/* Contenido principal: Local + Marcador + Visitante */}
       <div className="flex-grow flex items-center overflow-hidden min-w-0">
         {/* Equipo Local */}
-        <TeamLink id={homeId} isRight>
-          <ImageCrest src={homeLogo} />
-          <span className="truncate">{homeName}</span>
-        </TeamLink>
+        <TeamLink id={homeId} name={homeName} logo={homeLogo} scorers={homeScorers} isRight />
 
         {/* Marcador */}
         <div className="flex-shrink-0 flex justify-center w-24 gap-2 tabular-nums">
@@ -261,10 +285,7 @@ export function FixtureRow({
         </div>
 
         {/* Equipo Visitante */}
-        <TeamLink id={awayId}>
-          <ImageCrest src={awayLogo} />
-          <span className="truncate">{awayName}</span>
-        </TeamLink>
+        <TeamLink id={awayId} name={awayName} logo={awayLogo} scorers={awayScorers} />
       </div>
     </div>
   );

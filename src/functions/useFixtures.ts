@@ -1,0 +1,193 @@
+import { useState, useEffect, useMemo } from 'react'
+import { isLive, getMatchStatusLabel } from './matchHelpers'
+import type { Match, Goal } from '../../shared/tournament/matchTypes'
+
+// ============================================================
+// TYPES — Datos que devuelve la Edge Function get-fixtures
+// ============================================================
+
+export interface FixtureEvent {
+  minute: number
+  event_type: string
+  team_id: number
+  player_name: string | null
+  is_valid: boolean
+  extra_minute: number | null
+  details: { addition: string; sportmonks_type_id: number }
+}
+
+export interface Fixture {
+  id: number
+  status: string
+  current_minute: number | null
+  start_time: string
+  home_score: number | null
+  away_score: number | null
+  home_team_id: number
+  away_team_id: number
+  home_teams: { name: string; logo_path: string }
+  away_teams: { name: string; logo_path: string }
+  leagues: { name: string; logo_path: string }
+  fixture_events: FixtureEvent[]
+}
+
+export interface AdaptedLeagueGroup {
+  leagueName: string
+  leagueLogo: string
+  matchesByDate: Record<string, Match[]>
+  goals: Goal[]
+  teamLookup: Record<string, any>
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+const FIXTURES_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures`
+const STATUS_ORDER: Record<string, number> = { LIVE: 0, NS: 1, FT: 2 }
+const POLL_INTERVAL = 60_000
+
+/** Etiqueta humana para una fecha: "Hoy", "Ayer", "Mañana" o fecha completa */
+export const formatDateLabel = (d: string): string => {
+  const today     = new Date().toISOString().split('T')[0]
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+  const tomorrow  = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+  if (d === today)     return 'Hoy'
+  if (d === yesterday) return 'Ayer'
+  if (d === tomorrow)  return 'Mañana'
+  return new Date(d + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })
+}
+
+/** Determina el tipo de gol a partir de un FixtureEvent de dataredonda */
+const getGoalType = (event: FixtureEvent): string => {
+  if (event.event_type === 'Penalty') return 'P'
+  if (event.details?.addition?.toLowerCase().includes('own goal')) return 'C'
+  return 'G'
+}
+
+/** Filtra goles válidos de un fixture */
+const getValidGoals = (fixture: Fixture) =>
+  (fixture.fixture_events || []).filter(
+    e => e.is_valid && ['Goal', 'Penalty'].includes(e.event_type)
+  )
+
+/** Ordena partidos: en vivo → no empezados → terminados, y dentro de cada grupo por hora */
+const sortFixtures = (fixtures: Fixture[]): Fixture[] =>
+  [...fixtures].sort((a, b) => {
+    const sa = STATUS_ORDER[a.status?.toUpperCase()] ?? 1
+    const sb = STATUS_ORDER[b.status?.toUpperCase()] ?? 1
+    if (sa !== sb) return sa - sb
+    return new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+  })
+
+/** Agrupa fixtures por liga, ordena y los adapta al formato de FixtureTable (Match/Goal) */
+const groupAndAdaptFixtures = (fixtures: Fixture[]): AdaptedLeagueGroup[] => {
+  const byLeague = fixtures.reduce((acc, f) => {
+    const key = f.leagues.name
+    if (!acc[key]) acc[key] = { logo: f.leagues.logo_path, matches: [] as Fixture[] }
+    acc[key].matches.push(f)
+    return acc
+  }, {} as Record<string, { logo: string; matches: Fixture[] }>)
+
+  // Ligas con partidos en vivo primero
+  const sortedLeagueEntries = Object.entries(byLeague).sort(([, a], [, b]) => {
+    const aLive = a.matches.some(m => isLive(m.status)) ? 0 : 1
+    const bLive = b.matches.some(m => isLive(m.status)) ? 0 : 1
+    return aLive - bLive
+  })
+
+  return sortedLeagueEntries.map(([leagueName, { logo, matches }]) => {
+    const sorted = sortFixtures(matches)
+
+    const mappedMatches: Match[] = sorted.map(f => {
+      return {
+        match_id: f.id.toString(),
+        match_date: f.start_time.split('T')[0],
+        match_time_utc: f.start_time.split('T')[1].substring(0, 5),
+        match_status: f.status,
+        match_status_label: getMatchStatusLabel(f.status, f.start_time.split('T')[0], f.current_minute),
+        match_round: null,
+        home_id: f.home_team_id.toString(),
+        home_name: f.home_teams.name,
+        home_score: f.home_score,
+        home_penalty: null,
+        away_id: f.away_team_id.toString(),
+        away_name: f.away_teams.name,
+        away_score: f.away_score,
+        away_penalty: null,
+        tournament_id: null
+      }
+    })
+
+    const mappedGoals: Goal[] = sorted.flatMap(f =>
+      getValidGoals(f).map((e, idx) => ({
+        goal_id: `${f.id}-${idx}`,
+        match_id: f.id.toString(),
+        team_id: e.team_id.toString(),
+        goal_minute: e.minute,
+        player_name: e.player_name || 'Desconocido',
+        goal_type: getGoalType(e)
+      }))
+    )
+
+    const teamLookup = sorted.reduce((acc, f) => {
+      acc[f.home_team_id.toString()] = { team_name: f.home_teams.name, team_crest_url: f.home_teams.logo_path }
+      acc[f.away_team_id.toString()] = { team_name: f.away_teams.name, team_crest_url: f.away_teams.logo_path }
+      return acc
+    }, {} as Record<string, any>)
+
+    return {
+      leagueName,
+      leagueLogo: logo,
+      matchesByDate: { "": mappedMatches },
+      goals: mappedGoals,
+      teamLookup
+    }
+  })
+}
+
+// ============================================================
+// HOOK
+// ============================================================
+
+/**
+ * useFixtures — Hook que encapsula toda la lógica de la HomePage:
+ * - Fetch de fixtures por fecha
+ * - Polling cada 60s
+ * - Navegación de fechas
+ * - Agrupación por liga y adaptación de datos a FixtureTable
+ */
+export function useFixtures() {
+  const [fixtures, setFixtures] = useState<Fixture[]>([])
+  const [loading, setLoading] = useState(true)
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0])
+
+  const fetchFixtures = async (d: string, silent = false) => {
+    if (!silent) setLoading(true)
+    try {
+      const res = await fetch(`${FIXTURES_URL}?date=${d}`)
+      const data = await res.json()
+      setFixtures(Array.isArray(data) ? data : [])
+    } catch {
+      setFixtures([])
+    }
+    if (!silent) setLoading(false)
+  }
+
+  useEffect(() => {
+    fetchFixtures(date)
+    const interval = setInterval(() => fetchFixtures(date, true), POLL_INTERVAL)
+    return () => clearInterval(interval)
+  }, [date])
+
+  const changeDate = (offset: number) => {
+    const d = new Date(date + 'T12:00:00')
+    d.setDate(d.getDate() + offset)
+    setDate(d.toISOString().split('T')[0])
+  }
+
+  const adaptedLeagues = useMemo(() => groupAndAdaptFixtures(fixtures), [fixtures])
+  const dateLabel = formatDateLabel(date)
+
+  return { loading, date, dateLabel, adaptedLeagues, changeDate }
+}

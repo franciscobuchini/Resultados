@@ -20,7 +20,7 @@ export default function ReadmeViewer() {
         <li>- Resolver api en network para que no se vean los datos en texto plano</li>
         <li>- Resolver problema de que esta tomando los teampage por "team_shortname" en vez de por "team_id"</li>
         <li>- IA Futbolera YT</li>
-        <li>- Cambiar de API</li>
+        <li>- Ver bien el tema de los goles fantasmas. </li>
       </ul>
     </div>
   )

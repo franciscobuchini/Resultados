@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../functions/supabase'
 import PageBanner from '../layout/PageBanner'
+import PageContent from '../layout/PageContent'
 import FixtureTable from '../components/tables/FixtureTable'
 import Error404 from './Error404'
 import { useThemeClasses } from '../functions/themeStore'
 import { useTime, toLocal } from '../functions/time'
-import type { Goal } from '../../shared/tournament/matchTypes'
+import { getMatchStatusLabel } from '../functions/matchHelpers'
+import type { Goal, Match } from '../../shared/tournament/matchTypes'
 import HistoryTable, { type HistoryStats } from '../components/tables/HistoryTable'
+import EmptyState from '../components/ui/EmptyState'
+import LoadingState from '../components/ui/LoadingState'
 
 // ------------------------------------------------------------
 // TIPOS
@@ -32,6 +36,7 @@ interface MatchWithTournament {
   match_date: string
   match_time_utc: string | null
   match_status: string | null
+  match_status_label?: string | null
   home_score: number | null
   away_score: number | null
   home_penalty: number | null
@@ -73,7 +78,6 @@ export default function TeamPage() {
   const [goals, setGoals] = useState<Goal[]>([])
   const [teamLookup, setTeamLookup] = useState<TeamLookup>({})
   const { utcOffset } = useTime()
-  const { border, textMain, textMuted, bgSurface } = useThemeClasses()
 
   useEffect(() => {
     if (!teamId) return
@@ -170,11 +174,7 @@ export default function TeamPage() {
     fetchData()
   }, [teamId])
 
-  if (loading) return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <div className={`w-12 h-12 border-4 ${border} border-t-current ${textMain} rounded-full animate-spin`} />
-    </div>
-  )
+  if (loading) return <LoadingState fullHeight />
 
   if (!team) return <Error404 />
 
@@ -187,7 +187,14 @@ export default function TeamPage() {
       const dateKey = local.date
       if (dateKey) {
         if (!grouped[dateKey]) grouped[dateKey] = []
-        grouped[dateKey].push(m)
+        
+        // Inyectamos el label de estado para hoy
+        const matchWithLabel: MatchWithTournament = {
+          ...m,
+          match_status_label: getMatchStatusLabel(m.match_status, m.match_date)
+        }
+        
+        grouped[dateKey].push(matchWithLabel)
       }
     })
     return grouped
@@ -259,10 +266,7 @@ export default function TeamPage() {
         logo={team.team_crest_url}
       />
 
-      <div className="max-w-[1400px] mx-auto p-2 md:p-8 flex flex-col gap-12">
-
-        {/* Fila superior: Próximos y Últimos */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      <PageContent maxWidth="1600" layout="grid-2">
           {/* Próximos Partidos */}
           <div className="flex flex-col gap-4">
             {upcomingMatches.length > 0 ? (
@@ -274,9 +278,7 @@ export default function TeamPage() {
                 fullDate={true}
               />
             ) : (
-              <div className={`p-12 text-center ${textMuted} italic ${bgSurface} rounded-2xl border ${border}`}>
-                No hay próximos partidos programados para este equipo
-              </div>
+              <EmptyState message="No hay próximos partidos programados para este equipo" />
             )}
           </div>
 
@@ -292,21 +294,18 @@ export default function TeamPage() {
                 sortDescending={true}
               />
             ) : (
-              <div className={`p-12 text-center ${textMuted} italic ${bgSurface} rounded-2xl border ${border}`}>
-                No hay resultados recientes para este equipo
-              </div>
+              <EmptyState message="No hay resultados recientes para este equipo" />
             )}
           </div>
-        </div>
 
         {/* Fila inferior: Historial por Rival */}
         {historyStats.length > 0 && (
-          <div className="flex flex-col gap-4">
+          <div className="lg:col-span-2 flex flex-col gap-4">
             <HistoryTable stats={historyStats} />
           </div>
         )}
 
-      </div>
+      </PageContent>
     </>
   )
 }

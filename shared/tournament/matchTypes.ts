@@ -7,6 +7,7 @@ export interface Match {
   match_date: string | null
   match_time_utc: string | null
   match_status: string | null
+  match_status_label?: string | null
   match_round: string | null
   home_id: string | null
   home_name: string | null

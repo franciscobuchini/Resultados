@@ -4,11 +4,12 @@ import DataBox from '../ui/DataBox';
 import type { Match, Goal } from '../../../shared/tournament/matchTypes';
 import { useTime, toLocal } from '../../functions/time';
 import { useThemeClasses } from '../../functions/themeStore';
+import { isPlayedOrPlaying, formatGoalLabel } from '../../functions/matchHelpers';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface FixtureTableProps {
-  /** Nombre de la fecha (ej: "Fecha 1", "Octavos de Final") */
-  roundName: string;
+  /** Nombre de la fecha o encabezado personalizado (ej: logo + nombre) */
+  roundName: React.ReactNode;
   /** Partidos agrupados por fecha local (YYYY-MM-DD) */
   matchesByDate: Record<string, Match[]>;
   /** Goles de los partidos */
@@ -27,26 +28,9 @@ interface FixtureTableProps {
   sortDescending?: boolean;
 }
 
-/** Helper para determinar si un partido ya empezó o terminó */
-const isPlayedOrPlaying = (status: string | null): boolean => {
-  if (!status) return false;
-  const s = status.toLowerCase().trim();
-  // 'ns' = Not Started, 'tbd' = To Be Determined, 'canc' = Cancelled, 'post' = Postponed
-  const notStarted = ['ns', 'tbd', 'scheduled', 'postponed', 'cancelled'].includes(s);
-  return !notStarted && s !== '';
-};
-
-/** Formatea el nombre del goleador con sus etiquetas (P) o (EC) */
-const formatGoalName = (g: Goal): string => {
-  let s = g.player_name;
-  const type = (g.goal_type || '').toUpperCase();
-
-  // Evitar duplicados si ya está en el nombre
-  if (type === 'P' && !s.toUpperCase().includes('(P)')) s += ' (P)';
-  else if ((type === 'C' || type === 'EC') && !s.toUpperCase().includes('(EC)')) s += ' (EC)';
-
-  return s;
-};
+/** Formatea un Goal de la DB usando el helper compartido */
+const formatGoalName = (g: Goal): string =>
+  formatGoalLabel(g.player_name, g.goal_type || 'G');
 
 /**
  * FixtureTable - Tabla de partidos agrupada por fecha y día.
@@ -83,12 +67,14 @@ export default function FixtureTable({
             <ChevronLeft size={18} strokeWidth={3} />
           </button>
 
-          <span className="flex-grow text-center">{roundName}</span>
+          <div className="flex-grow flex justify-center items-center min-w-0">
+            {roundName}
+          </div>
 
           <button
             onClick={onNextRound}
             disabled={!onNextRound}
-            className={`p-1 ${bgSurfaceHover} rounded-full transition-colors disabled:opacity-0 disabled:cursor-default`}
+            className={`p-2 ${bgSurfaceHover} rounded-full transition-colors disabled:opacity-0 disabled:cursor-default`}
             title="Siguiente"
           >
             <ChevronRight size={18} strokeWidth={3} />
@@ -122,59 +108,46 @@ export default function FixtureTable({
               const homeGoals = matchGoals.filter(g => g.team_id === match.home_id);
               const awayGoals = matchGoals.filter(g => g.team_id === match.away_id);
 
+              // Formatear goleadores para el efecto hover
+              const homeScorers = homeGoals.length > 0 ? (
+                <div className="flex flex-wrap items-center justify-end gap-x-2 leading-tight">
+                  {homeGoals.map((g, idx) => (
+                    <span key={g.goal_id} className="whitespace-nowrap">
+                      {g.goal_minute && <span className={textSuccess}>{g.goal_minute}'</span>} {formatGoalName(g)}{idx < homeGoals.length - 1 ? ',' : ''}
+                    </span>
+                  ))}
+                </div>
+              ) : null;
+
+              const awayScorers = awayGoals.length > 0 ? (
+                <div className="flex flex-wrap items-center justify-start gap-x-2 leading-tight">
+                  {awayGoals.map((g, idx) => (
+                    <span key={g.goal_id} className="whitespace-nowrap">
+                      {g.goal_minute && <span className={textSuccess}>{g.goal_minute}'</span>} {formatGoalName(g)}{idx < awayGoals.length - 1 ? ',' : ''}
+                    </span>
+                  ))}
+                </div>
+              ) : null;
+
               return (
                 <React.Fragment key={match.match_id}>
                   <FixtureRow
                     homeId={match.home_id!}
                     homeLogo={teamLookup[match.home_id!]?.team_crest_url}
                     homeName={teamLookup[match.home_id!]?.team_name ?? match.home_name}
-                    homeScore={match.home_score}
+                    homeScore={isMatchPlayedOrPlaying ? match.home_score : null}
+                    homeScorers={homeScorers}
                     awayId={match.away_id!}
                     awayLogo={teamLookup[match.away_id!]?.team_crest_url}
                     awayName={teamLookup[match.away_id!]?.team_name ?? match.away_name}
-                    awayScore={match.away_score}
+                    awayScore={isMatchPlayedOrPlaying ? match.away_score : null}
+                    awayScorers={awayScorers}
                     homePenalty={match.home_penalty}
                     awayPenalty={match.away_penalty}
                     matchTime={local.time}
-                    // Si mostramos detalles, la FixtureRow NO lleva el borde inferior (lo lleva la DetailsRow)
-                    noBorder={isMatchPlayedOrPlaying ? true : isLastInTable}
+                    statusLabel={match.match_status_label}
+                    noBorder={isLastInTable}
                   />
-                  {isMatchPlayedOrPlaying && (
-                    <DetailsRow noBorder={isLastInTable}>
-                      <div className={`flex w-full ${textMain}`}>
-                        {/* Goleadores Local */}
-                        <div className="flex-1 text-right pr-12">
-                          <div className="flex flex-wrap items-center justify-end gap-x-2">
-                            {homeGoals.length > 0 ? (
-                              homeGoals.map((g, idx) => (
-                                <span key={g.goal_id}>
-                                  {g.goal_minute && <span className={textSuccess}>{g.goal_minute}' </span>}
-                                  <span>{formatGoalName(g)}{idx < homeGoals.length - 1 ? ',' : ''}</span>
-                                </span>
-                              ))
-                            ) : (
-                              <span className="opacity-0">—</span>
-                            )}
-                          </div>
-                        </div>
-                        {/* Goleadores Visita */}
-                        <div className="flex-1 text-left pl-12">
-                          <div className="flex flex-wrap items-center justify-start gap-x-2">
-                            {awayGoals.length > 0 ? (
-                              awayGoals.map((g, idx) => (
-                                <span key={g.goal_id}>
-                                  {g.goal_minute && <span className={textSuccess}>{g.goal_minute}' </span>}
-                                  <span>{formatGoalName(g)}{idx < awayGoals.length - 1 ? ',' : ''}</span>
-                                </span>
-                              ))
-                            ) : (
-                              <span className="opacity-0">—</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </DetailsRow>
-                  )}
                 </React.Fragment>
               );
             })}

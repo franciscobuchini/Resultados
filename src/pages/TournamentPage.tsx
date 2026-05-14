@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../functions/supabase'
 import PageBanner from '../layout/PageBanner'
+import PageContent from '../layout/PageContent'
 import StandingsTable from '../components/tables/StandingsTable'
 import FixtureTable from '../components/tables/FixtureTable'
 import Error404 from './Error404'
@@ -10,6 +11,9 @@ import type { TournamentSystem, LeaguePhase, Tiebreaker } from '../../shared/tou
 import type { Match, Goal } from '../../shared/tournament/matchTypes'
 import { useTime, toLocal } from '../functions/time'
 import { useTheme, useThemeClasses } from '../functions/themeStore'
+import { getMatchStatusLabel } from '../functions/matchHelpers'
+import EmptyState from '../components/ui/EmptyState'
+import LoadingState from '../components/ui/LoadingState'
 
 // ------------------------------------------------------------
 // TIPOS
@@ -77,7 +81,6 @@ export default function TournamentPage() {
   const [teamLookup, setTeamLookup] = useState<Record<string, TeamInfo>>({})
   const [selectedRound, setSelectedRound] = useState<string | null>(null)
   const { utcOffset } = useTime();
-  const { border, textMain, textMuted } = useThemeClasses();
   const setLastTournamentId = useTheme(state => state.setLastTournamentId);
 
   useEffect(() => {
@@ -159,11 +162,7 @@ export default function TournamentPage() {
   // ESTADOS DE CARGA Y ERROR
   // ------------------------------------------------------------
 
-  if (loading) return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <div className={`w-12 h-12 border-4 ${border} border-t-current ${textMain} rounded-full animate-spin`} />
-    </div>
-  )
+  if (loading) return <LoadingState fullHeight />
 
   if (!tournament) return <Error404 />
 
@@ -234,7 +233,14 @@ export default function TournamentPage() {
   for (const { match, local } of localizedMatches) {
     const dateKey = local.date || 'TBD';
     if (!matchesByDate[dateKey]) matchesByDate[dateKey] = [];
-    matchesByDate[dateKey].push(match);
+    
+    // Inyectamos el label de estado para partidos de hoy
+    const matchWithLabel: Match = {
+      ...match,
+      match_status_label: getMatchStatusLabel(match.match_status, match.match_date)
+    };
+    
+    matchesByDate[dateKey].push(matchWithLabel);
   }
 
   // ------------------------------------------------------------
@@ -249,10 +255,7 @@ export default function TournamentPage() {
         logo={tournament.tournament_crest_url}
       />
 
-      <div className="max-w-[1600px] mx-auto p-2 md:p-8">
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
+      <PageContent maxWidth="1600" layout="grid-12">
           {/* Partidos del round seleccionado (Primero en mobile) */}
           <div className="lg:col-span-6 flex flex-col gap-4 order-1 lg:order-2">
             {selectedRound ? (
@@ -265,9 +268,7 @@ export default function TournamentPage() {
                 onNextRound={currentIndex < sortedRounds.length - 1 ? () => setSelectedRound(sortedRounds[currentIndex + 1]) : undefined}
               />
             ) : (
-              <div className={`h-64 flex items-center justify-center border ${border} rounded-2xl ${textMuted} font-medium italic`}>
-                No hay partidos programados
-              </div>
+              <EmptyState message="No hay partidos programados" className="h-64" />
             )}
           </div>
 
@@ -284,9 +285,7 @@ export default function TournamentPage() {
               ))}
             </div>
           </div>
-
-        </div>
-      </div>
+      </PageContent>
     </>
   )
 }

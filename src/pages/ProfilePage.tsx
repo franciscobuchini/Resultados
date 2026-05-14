@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Mail, Calendar, Globe, ShieldQuestion } from 'lucide-react';
 import PageBanner from '../layout/PageBanner';
+import PageContent from '../layout/PageContent';
 import { useThemeClasses } from '../functions/themeStore';
 import { DropdownOption } from '../components/ui/Dropdown';
 import { PlanBadge } from '../components/ui/Badge';
@@ -94,8 +95,7 @@ export default function ProfilePage() {
         tournament_banner_url="https://www.corrienteshoy.com/galeria/fotos/2023/02/27/o_1677541416.jpg"
       />
 
-      <div className="max-w-4xl mx-auto p-4 md:p-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+      <PageContent maxWidth="1600" layout="grid-12-md">
           
           {/* Columna Izquierda: Info Básica */}
           <div className="md:col-span-4 flex flex-col gap-6">
@@ -231,8 +231,7 @@ export default function ProfilePage() {
             </div>
 
           </div>
-        </div>
-      </div>
+      </PageContent>
     </>
   );
 }

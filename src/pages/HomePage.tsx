@@ -1,27 +1,15 @@
-import { useEffect, useState } from 'react'
+import React from 'react'
 import PageBanner from '../layout/PageBanner'
 import { useThemeClasses } from '../functions/themeStore'
-
+import { useFixtures } from '../functions/useFixtures'
+import PageContent from '../layout/PageContent'
+import DateNavigator from '../components/navigation/DateNavigator'
+import FixtureTable from '../components/tables/FixtureTable'
+import EmptyState from '../components/ui/EmptyState'
+import LoadingState from '../components/ui/LoadingState'
 export default function HomePage() {
-  const [loading, setLoading] = useState(true)
-  const { border, textMain, logo } = useThemeClasses()
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
-      // Solo mantenemos una carga mínima si fuera necesario, 
-      // pero por ahora solo simulamos la carga para el spinner
-      await new Promise(resolve => setTimeout(resolve, 500))
-      setLoading(false)
-    }
-    fetchData()
-  }, [])
-
-  if (loading) return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <div className={`w-12 h-12 border-4 ${border} border-t-current ${textMain} rounded-full animate-spin`} />
-    </div>
-  )
+  const { loading, dateLabel, adaptedLeagues, changeDate } = useFixtures()
+  const { logo } = useThemeClasses()
 
   return (
     <>
@@ -29,6 +17,45 @@ export default function HomePage() {
         tournament_banner_url="https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2093&auto=format&fit=crop"
         logo={logo}
       />
+
+      <PageContent maxWidth="1600">
+        <DateNavigator dateLabel={dateLabel} onChangeDate={changeDate} />
+
+        <div className="relative min-h-[400px]">
+          {/* Overlay de carga para evitar saltos de layout */}
+          {loading && adaptedLeagues.length > 0 && (
+            <div className="absolute inset-0 z-10 flex items-start justify-center pt-20 bg-black/5 backdrop-blur-[2px] rounded-3xl transition-all duration-300">
+              <div className="sticky top-40">
+                <LoadingState />
+              </div>
+            </div>
+          )}
+
+          {loading && adaptedLeagues.length === 0 ? (
+            <LoadingState />
+          ) : adaptedLeagues.length === 0 ? (
+            <EmptyState message="Sin partidos para esta fecha" />
+          ) : (
+            <div className={`flex flex-col gap-4 transition-opacity duration-300 ${loading ? 'opacity-30 pointer-events-none' : 'opacity-100'}`}>
+              {adaptedLeagues.map((league) => (
+                <FixtureTable
+                  key={league.leagueName}
+                  roundName={
+                    <div className="flex items-center gap-2">
+                      <img src={league.leagueLogo} className="w-5 h-5 object-contain" alt={league.leagueName} />
+                      <span>{league.leagueName}</span>
+                    </div>
+                  }
+                  matchesByDate={league.matchesByDate}
+                  goals={league.goals}
+                  teamLookup={league.teamLookup}
+                  hideDateSeparators={true}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </PageContent>
     </>
   )
 }
