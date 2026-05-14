@@ -23,6 +23,7 @@ export default function ReadmeViewer() {
         <li>- Ver bien el tema de los goles fantasmas. </li>
         <li>- Asegurarme que los goles de partidos del mundial de ambas apis van a coincidir</li>
         <li>- teams sin id</li>
+        <li>- Orden de las ligas que aparecen en el homepage no tienen sentido, darle un tier de importancia</li>
         
       </ul>
     </div>
