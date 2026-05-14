@@ -21,6 +21,9 @@ export default function ReadmeViewer() {
         <li>- Resolver problema de que esta tomando los teampage por "team_shortname" en vez de por "team_id"</li>
         <li>- IA Futbolera YT</li>
         <li>- Ver bien el tema de los goles fantasmas. </li>
+        <li>- Asegurarme que los goles de partidos del mundial de ambas apis van a coincidir</li>
+        <li>- teams sin id</li>
+        
       </ul>
     </div>
   )

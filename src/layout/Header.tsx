@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import UserMenu from '../components/header/UserMenu';
 import { useTheme, useThemeClasses } from '../functions/themeStore';
@@ -7,7 +7,7 @@ import { LAYOUT_CONFIG } from '../functions/layoutConfig';
 import { Button } from '../components/ui/Button';
 
 export default function Header() {
-  const { bgApp, border, textMain, logo } = useThemeClasses();
+  const { bgApp, border, logo } = useThemeClasses();
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === '/';
@@ -37,12 +37,9 @@ export default function Header() {
         className={`hidden xl:flex items-center shrink-0 px-6 border-r ${border} h-full`}
         style={{ width: LAYOUT_CONFIG.sidebarWidth }}
       >
-        <Link to="/" className="flex items-center gap-2 group">
+        <a href="/" className="flex items-center gap-2 group">
           <img src={logo} alt="Resultados Logo" className="w-8 h-8 object-contain" />
-          <span className={`font-black text-2xl tracking-tighter font-mono ${textMain}`}>
-            RESULTADOS<span className="opacity-50">.AR</span>
-          </span>
-        </Link>
+        </a>
       </div>
 
       {/* Sección Central - Alineada con el contenido Main */}
@@ -55,9 +52,9 @@ export default function Header() {
               onClick={handleBack}
             />
           )}
-          <Link to="/" className="xl:hidden flex items-center gap-2">
+          <a href="/" className="xl:hidden flex items-center gap-2">
             <img src={logo} alt="Resultados Logo" className="w-8 h-8 object-contain" />
-          </Link>
+          </a>
         </div>
         <UserMenu />
       </div>

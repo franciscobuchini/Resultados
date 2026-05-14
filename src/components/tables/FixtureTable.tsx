@@ -1,5 +1,5 @@
 import React from 'react';
-import { DataRowHeader, DataRowSeparator, FixtureRow, DetailsRow } from '../ui/DataRow';
+import { DataRowHeader, DataRowSeparator, FixtureRow } from '../ui/DataRow';
 import DataBox from '../ui/DataBox';
 import type { Match, Goal } from '../../../shared/tournament/matchTypes';
 import { useTime, toLocal } from '../../functions/time';
@@ -47,7 +47,7 @@ export default function FixtureTable({
   sortDescending = false
 }: FixtureTableProps) {
   const { utcOffset } = useTime();
-  const { bgSurfaceHover, textMain, textSuccess } = useThemeClasses();
+  const { bgSurfaceHover, textSuccess } = useThemeClasses();
 
   const sortedDates = Object.keys(matchesByDate).sort((a, b) => {
     return sortDescending ? b.localeCompare(a) : a.localeCompare(b);

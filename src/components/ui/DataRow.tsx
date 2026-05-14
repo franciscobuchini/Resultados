@@ -212,7 +212,7 @@ export function FixtureRow({
   className = '',
   noBorder = false
 }: FixtureRowProps) {
-  const { bgApp, border, textMain, textMuted, textProminent, bgSurfaceHover } = useThemeClasses();
+  const { bgApp, border, textMain, textMuted, textProminent } = useThemeClasses();
 
   // Componente interno para evitar repetición
   const TeamLink = ({ id, name, logo, scorers, isRight }: { id?: string; name: string; logo?: string | null; scorers?: ReactNode; isRight?: boolean }) => {

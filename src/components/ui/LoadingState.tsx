@@ -1,4 +1,3 @@
-import React from 'react';
 import { useThemeClasses } from '../../functions/themeStore';
 
 interface LoadingStateProps {

@@ -1,6 +1,3 @@
-import React from 'react'
-import PageBanner from '../layout/PageBanner'
-import { useThemeClasses } from '../functions/themeStore'
 import { useFixtures } from '../functions/useFixtures'
 import PageContent from '../layout/PageContent'
 import DateNavigator from '../components/navigation/DateNavigator'
@@ -9,15 +6,8 @@ import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 export default function HomePage() {
   const { loading, dateLabel, adaptedLeagues, changeDate } = useFixtures()
-  const { logo } = useThemeClasses()
 
   return (
-    <>
-      <PageBanner
-        tournament_banner_url="https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2093&auto=format&fit=crop"
-        logo={logo}
-      />
-
       <PageContent maxWidth="1600">
         <DateNavigator dateLabel={dateLabel} onChangeDate={changeDate} />
 
@@ -56,6 +46,5 @@ export default function HomePage() {
           )}
         </div>
       </PageContent>
-    </>
   )
 }
