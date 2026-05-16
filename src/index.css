@@ -28,3 +28,12 @@ input, textarea {
   user-select: text;
   -webkit-user-select: text;
 }
+
+/* Utilidad para ocultar scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

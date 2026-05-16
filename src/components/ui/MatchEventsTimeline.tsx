@@ -17,6 +17,8 @@ interface MatchEventsTimelineProps {
   matchDate: string | null;
   homeId: string;
   awayId: string;
+  homeIdDM?: string | number | null;
+  awayIdDM?: string | number | null;
 }
 
 const getEventIcon = (eventType: string, details: string, textAccent: string) => {
@@ -34,7 +36,7 @@ const getEventIcon = (eventType: string, details: string, textAccent: string) =>
   return null;
 };
 
-export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId }: MatchEventsTimelineProps) {
+export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId, homeIdDM, awayIdDM }: MatchEventsTimelineProps) {
   const [events, setEvents] = useState<FixtureEvent[]>([]);
   const [loading, setLoading] = useState(!!(matchDate && matchId));
   const [error, setError] = useState(false);
@@ -106,8 +108,8 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
       <div className="relative w-full mx-auto">
         <div className="flex flex-col gap-2">
           {events.map((event, idx) => {
-            const isHome = event.team_id.toString() === homeId;
-            const isAway = event.team_id.toString() === awayId;
+            const isHome = event.team_id.toString() === homeId || (homeIdDM && event.team_id.toString() === homeIdDM.toString());
+            const isAway = event.team_id.toString() === awayId || (awayIdDM && event.team_id.toString() === awayIdDM.toString());
             const icon = getEventIcon(event.event_type, event.details?.addition || '', textAccent);
             
             // Si el evento no es de local ni visitante (raro, pero por si acaso) lo centramos.

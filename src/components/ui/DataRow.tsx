@@ -108,7 +108,8 @@ export function StandingsHeaderRow({ title, stats, className = '' }: { title: st
   return (
     <div className={`${BASE} ${HEIGHT} ${bgSurface} ${border} ${textAccent} font-medium uppercase ${className}`}>
       {/* Título */}
-      <div className="flex-grow flex items-center overflow-hidden px-2">
+      <div className="flex-grow flex items-center gap-3 overflow-hidden min-w-0">
+        <span className="w-4 md:w-8 shrink-0"></span> {/* Spacer para alinear con la posición */}
         <span className="truncate">{title}</span>
       </div>
 
@@ -313,9 +314,9 @@ export function FixtureRow({
                 <span className={`${textMuted} font-normal`}>{matchTime}</span>
               ) : (
                 <>
-                  <span className={textProminent}>{homeScore ?? '-'}</span>
+                  <span className={isLive ? textError : textProminent}>{homeScore ?? '-'}</span>
                   <span className={`${textMuted} font-normal opacity-40`}>:</span>
-                  <span className={textProminent}>{awayScore ?? '-'}</span>
+                  <span className={isLive ? textError : textProminent}>{awayScore ?? '-'}</span>
                 </>
               )}
             </div>
@@ -342,7 +343,14 @@ export function FixtureRow({
 
       {/* Timeline Expansion */}
       {isTimelineExpanded && matchId && matchDate && homeId && awayId && (
-        <MatchEventsTimeline matchId={matchId} matchDate={matchDate} homeId={homeId} awayId={awayId} />
+        <MatchEventsTimeline 
+          matchId={matchId} 
+          matchDate={matchDate} 
+          homeId={homeId} 
+          awayId={awayId} 
+          homeIdDM={homeIdDM}
+          awayIdDM={awayIdDM}
+        />
       )}
     </div>
   );

@@ -26,9 +26,9 @@ export default function StandingsTable({ title, standings, teamLookup }: Standin
     <StatGroup>
       <Stat value="PTS" />
       <Stat value="PJ" />
-      <Stat value="PG" />
-      <Stat value="PE" />
-      <Stat value="PP" />
+      <Stat value="PG" className="hidden xl:flex" />
+      <Stat value="PE" className="hidden xl:flex" />
+      <Stat value="PP" className="hidden xl:flex" />
       <Stat value="+/-" />
     </StatGroup>
   );
@@ -54,9 +54,9 @@ export default function StandingsTable({ title, standings, teamLookup }: Standin
                 <StatGroup>
                   <Stat value={team.points} prominent />
                   <Stat value={team.played} />
-                  <Stat value={team.won} />
-                  <Stat value={team.drawn} />
-                  <Stat value={team.lost} />
+                  <Stat value={team.won} className="hidden xl:flex" />
+                  <Stat value={team.drawn} className="hidden xl:flex" />
+                  <Stat value={team.lost} className="hidden xl:flex" />
                   <Stat 
                     value={team.goal_difference > 0 ? `+${team.goal_difference}` : team.goal_difference}
                   />

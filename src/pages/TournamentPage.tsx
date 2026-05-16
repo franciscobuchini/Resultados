@@ -298,9 +298,9 @@ export default function TournamentPage() {
 
       <PageContent maxWidth="1600">
         {activeTab === 'general' && (
-          <div className="grid grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Partidos del round seleccionado (Primero en mobile) */}
-            <div className="lg:col-span-6 flex flex-col gap-4 order-1 lg:order-2">
+            <div className="flex flex-col gap-4 order-1 lg:order-2">
               {selectedRound ? (
                 <FixtureTable
                   roundName={isMatchday(selectedRound) ? `${selectedRound}` : selectedRound}
@@ -316,7 +316,7 @@ export default function TournamentPage() {
             </div>
 
             {/* Tabla de posiciones (Segundo en mobile) */}
-            <div className="lg:col-span-6 order-2 lg:order-1">
+            <div className="order-2 lg:order-1">
               <div className="flex flex-col gap-8">
                 {groupKeys.map(group => (
                   <StandingsTable

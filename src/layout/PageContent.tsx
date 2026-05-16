@@ -6,7 +6,7 @@ interface PageContentProps {
   /** Ancho máximo del contenedor */
   maxWidth?: '3xl' | '4xl' | '1400' | '1600' | 'full';
   /** Distribución interna del contenedor */
-  layout?: 'single' | 'grid-12' | 'grid-12-md' | 'grid-2';
+  layout?: 'single' | 'grid-2' | 'grid-3' | 'grid-side-left';
 }
 
 export default function PageContent({ 
@@ -24,9 +24,9 @@ export default function PageContent({
 
   const layoutClasses = {
     'single': `flex flex-col ${LAYOUT_CONFIG.gap}`,
-    'grid-12': `grid grid-cols-1 lg:grid-cols-12 ${LAYOUT_CONFIG.gapGrid}`,
-    'grid-12-md': `grid grid-cols-1 md:grid-cols-12 ${LAYOUT_CONFIG.gapGrid}`,
-    'grid-2': `grid grid-cols-1 lg:grid-cols-2 ${LAYOUT_CONFIG.gapGrid} items-start`
+    'grid-2': `grid grid-cols-1 lg:grid-cols-2 ${LAYOUT_CONFIG.gapGrid} items-start`,
+    'grid-3': `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${LAYOUT_CONFIG.gapGrid} items-start`,
+    'grid-side-left': `grid grid-cols-1 lg:grid-cols-[1fr_2fr] ${LAYOUT_CONFIG.gapGrid} items-start`,
   };
 
   return (

@@ -95,10 +95,10 @@ export default function ProfilePage() {
         tournament_banner_url="https://www.corrienteshoy.com/galeria/fotos/2023/02/27/o_1677541416.jpg"
       />
 
-      <PageContent maxWidth="1600" layout="grid-12-md">
+      <PageContent maxWidth="1600" layout="grid-side-left">
           
           {/* Columna Izquierda: Info Básica */}
-          <div className="md:col-span-4 flex flex-col gap-6">
+          <div className="flex flex-col gap-6">
             <div className={`p-8 rounded-2xl border ${border} ${bgSurface} flex flex-col items-center text-center gap-2`}>
               <UserAvatar 
                 crestUrl={selectedTeam?.team_crest_url} 
@@ -113,7 +113,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Columna Derecha: Ajustes y Secciones */}
-          <div className="md:col-span-8 flex flex-col gap-6">
+          <div className="flex flex-col gap-6">
             
             {/* Club e Hincha */}
             <div className="flex flex-col gap-4">

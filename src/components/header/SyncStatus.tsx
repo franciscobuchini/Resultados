@@ -45,7 +45,7 @@ export default function SyncStatus() {
     <div className="flex items-center gap-2 w-full justify-center">
       <RefreshCw size={16} className={textMuted} />
       <span className={`text-sm ${textMuted}`}>Sincronización:</span>
-      <span className={`text-sm font-medium ${textMain}`}>{loading ? '...' : lastSync || '--/-- --:--'}</span>
+      <span className={`text-sm font-medium ${textMain}`}>{loading ? '--/-- --:--' : lastSync || '--/-- --:--'}</span>
     </div>
   )
 }
