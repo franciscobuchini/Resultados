@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { isLive, getMatchStatusLabel } from './matchHelpers'
 import type { Match, Goal } from '../../shared/tournament/matchTypes'
 import { supabase } from './supabase'
+import { decryptPayload } from './crypto'
 
 // ============================================================
 // TYPES — Datos que devuelve la Edge Function get-fixtures
