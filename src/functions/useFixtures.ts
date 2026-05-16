@@ -212,7 +212,8 @@ export function useFixtures() {
     if (!silent) setLoading(true)
     try {
       const res = await fetch(`${FIXTURES_URL}?date=${d}`)
-      const data = await res.json()
+      const encryptedText = await res.text()
+      const data = decryptPayload(encryptedText)
       setFixtures(Array.isArray(data) ? data : [])
     } catch {
       setFixtures([])

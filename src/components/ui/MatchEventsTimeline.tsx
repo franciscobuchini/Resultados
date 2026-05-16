@@ -3,6 +3,7 @@ import { ArrowRightLeft, MonitorPlay } from 'lucide-react';
 import { supabase } from '../../functions/supabase';
 import { useThemeClasses } from '../../functions/themeStore';
 import type { Goal } from '../../../shared/tournament/matchTypes';
+import { decryptPayload } from '../../functions/crypto';
 
 interface FixtureEvent {
   minute: number;
@@ -82,7 +83,8 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
           const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${matchDate}`;
           const res = await fetch(url);
           if (res.ok) {
-            const data = await res.json();
+            const encryptedText = await res.text();
+            const data = decryptPayload(encryptedText);
             const fixture = data.find((f: { id: string | number; fixture_events?: FixtureEvent[] }) => f.id.toString() === matchId);
             if (fixture && fixture.fixture_events) {
               apiEvents = fixture.fixture_events
