@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { ArrowRightLeft, MonitorPlay } from 'lucide-react';
+import { supabase } from '../../functions/supabase';
 import { useThemeClasses } from '../../functions/themeStore';
+import type { Goal } from '../../../shared/tournament/matchTypes';
 
 interface FixtureEvent {
   minute: number;
   event_type: string;
-  team_id: number;
+  team_id: number | string;
   player_name: string | null;
   is_valid: boolean;
   extra_minute: number | null;
@@ -19,6 +21,7 @@ interface MatchEventsTimelineProps {
   awayId: string;
   homeIdDM?: string | number | null;
   awayIdDM?: string | number | null;
+  matchNotes?: string | null;
 }
 
 const getEventIcon = (eventType: string, details: string, textAccent: string) => {
@@ -36,11 +39,32 @@ const getEventIcon = (eventType: string, details: string, textAccent: string) =>
   return null;
 };
 
-export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId, homeIdDM, awayIdDM }: MatchEventsTimelineProps) {
+/** Convierte un Goal de la tabla goals de Supabase a FixtureEvent para el timeline */
+const goalToEvent = (goal: Goal): FixtureEvent => {
+  const goalTypeMap: Record<string, string> = {
+    'G': 'Goal',
+    'P': 'Penalty',
+    'C': 'Goal', // own goal — se marca con details.addition
+  };
+  return {
+    minute: goal.goal_minute ?? 0,
+    event_type: goalTypeMap[goal.goal_type] || 'Goal',
+    team_id: goal.team_id,
+    player_name: goal.player_name,
+    is_valid: true,
+    extra_minute: null,
+    details: {
+      addition: goal.goal_type === 'C' ? 'Own Goal' : '',
+      sportmonks_type_id: 0,
+    },
+  };
+};
+
+export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId, homeIdDM, awayIdDM, matchNotes }: MatchEventsTimelineProps) {
   const [events, setEvents] = useState<FixtureEvent[]>([]);
   const [loading, setLoading] = useState(!!(matchDate && matchId));
   const [error, setError] = useState(false);
-  const { bgApp, border, textMuted, textMain, textError, textAccent } = useThemeClasses();
+  const { bgApp, bgSurface, textMuted, textMain, textError, textAccent } = useThemeClasses();
 
   useEffect(() => {
     if (!matchDate || !matchId) return;
@@ -48,23 +72,43 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        // Usamos la API pública de DR (misma lógica que get-fixtures edge function)
-        // Ya que la url es VITE_SUPABASE_URL, la reconstruimos:
-        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${matchDate}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('API Error');
-        const data = await res.json();
-        
-        const fixture = data.find((f: { id: string | number; fixture_events?: FixtureEvent[] }) => f.id.toString() === matchId);
-        if (fixture && fixture.fixture_events) {
-          // Filtramos solo los eventos validos
-          const validEvents = fixture.fixture_events.filter((e: FixtureEvent) => e.is_valid);
-          // Ordenamos por minuto
-          validEvents.sort((a: FixtureEvent, b: FixtureEvent) => {
-            if (a.minute !== b.minute) return a.minute - b.minute;
-            return (a.extra_minute || 0) - (b.extra_minute || 0);
-          });
-          setEvents(validEvents);
+
+        // 1. Intentar cargar eventos de la API de DataRedonda
+        let apiEvents: FixtureEvent[] = [];
+        try {
+          const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${matchDate}`;
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            const fixture = data.find((f: { id: string | number; fixture_events?: FixtureEvent[] }) => f.id.toString() === matchId);
+            if (fixture && fixture.fixture_events) {
+              apiEvents = fixture.fixture_events
+                .filter((e: FixtureEvent) => e.is_valid)
+                .sort((a: FixtureEvent, b: FixtureEvent) => {
+                  if (a.minute !== b.minute) return a.minute - b.minute;
+                  return (a.extra_minute || 0) - (b.extra_minute || 0);
+                });
+            }
+          }
+        } catch {
+          // API no disponible, seguimos con el fallback
+        }
+
+        // 2. Si la API devolvió eventos, usarlos
+        if (apiEvents.length > 0) {
+          setEvents(apiEvents);
+          return;
+        }
+
+        // 3. Fallback: buscar goles en la tabla goals de Supabase
+        const { data: goalsData } = await supabase
+          .from('goals')
+          .select('*')
+          .eq('match_id', matchId)
+          .order('goal_minute', { ascending: true });
+
+        if (goalsData && goalsData.length > 0) {
+          setEvents(goalsData.map((g: Goal) => goalToEvent(g)));
         } else {
           setEvents([]);
         }
@@ -81,7 +125,7 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
 
   if (loading) {
     return (
-      <div className={`p-4 text-center text-xs ${textMuted} ${bgApp} border-t ${border}`}>
+      <div className={`h-12 flex items-center justify-center text-xs ${textMuted} ${bgSurface} sm:${bgApp}`}>
         Cargando eventos...
       </div>
     );
@@ -89,64 +133,62 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
 
   if (error) {
     return (
-      <div className={`p-4 text-center text-xs ${textError} ${bgApp} border-t ${border}`}>
+      <div className={`h-12 flex items-center justify-center text-xs ${textError} ${bgSurface} sm:${bgApp}`}>
         No se pudieron cargar los eventos del partido.
       </div>
     );
   }
 
-  if (events.length === 0) {
-    return (
-      <div className={`p-4 text-center text-xs ${textMuted} ${bgApp} border-t ${border}`}>
-        No hay eventos registrados para este partido.
-      </div>
-    );
-  }
-
   return (
-    <div className={`px-2 pb-4 sm:px-6 w-full text-xs ${bgApp} `}>
+    <div className={`px-2 pb-4 sm:px-6 w-full text-xs ${bgSurface} sm:${bgApp} `}>
       <div className="relative w-full mx-auto">
         <div className="flex flex-col gap-2">
-          {events.map((event, idx) => {
-            const isHome = event.team_id.toString() === homeId || (homeIdDM && event.team_id.toString() === homeIdDM.toString());
-            const isAway = event.team_id.toString() === awayId || (awayIdDM && event.team_id.toString() === awayIdDM.toString());
-            const icon = getEventIcon(event.event_type, event.details?.addition || '', textAccent);
-            
-            // Si el evento no es de local ni visitante (raro, pero por si acaso) lo centramos.
-            // Si no tiene icono, no mostramos nada raro
-            if (!icon && !event.player_name) return null;
+          {/* Notas del partido (Siempre visibles) */}
+          {matchNotes && (
+            <div className={`pt-2 text-center ${textMuted}`}>
+              {matchNotes}
+            </div>
+          )}
 
-            return (
-              <div key={`${event.minute}-${idx}`} className="flex items-center w-full relative z-10 group">
-                
-                {/* Home Side */}
-                <div className="flex-1 flex justify-end items-center gap-1.5 sm:gap-2 pr-2 sm:pr-4 min-w-0 text-[10px] sm:text-xs">
-                  {isHome && (
-                    <>
-                      <span className={`${textMain} text-right truncate`}>{event.player_name}</span>
-                      <span className="shrink-0 flex items-center justify-center">{icon}</span>
-                    </>
-                  )}
+          {events.length === 0 ? (
+            <div className={`h-12 flex items-center justify-center text-xs ${textMuted}`}>
+              No hay eventos registrados
+            </div>
+          ) : (
+            events.map((event, idx) => {
+              const isHome = event.team_id.toString() === homeId || (homeIdDM && event.team_id.toString() === homeIdDM.toString());
+              const isAway = event.team_id.toString() === awayId || (awayIdDM && event.team_id.toString() === awayIdDM.toString());
+              const icon = getEventIcon(event.event_type, event.details?.addition || '', textAccent);
+              
+              if (!icon && !event.player_name) return null;
+
+              return (
+                <div key={`${event.minute}-${idx}`} className="flex items-center w-full relative z-10 group">
+                  <div className="flex-1 flex justify-end items-center gap-1.5 sm:gap-2 pr-2 sm:pr-4 min-w-0 text-[10px] sm:text-xs">
+                    {isHome && (
+                      <>
+                        <span className={`${textMain} text-right truncate`}>{event.player_name}</span>
+                        <span className="shrink-0 flex items-center justify-center">{icon}</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className={`w-10 h-6 flex items-center justify-center shrink-0 text-[10px] sm:text-xs font-bold ${textMuted}`}>
+                    {event.minute}'{event.extra_minute ? `+${event.extra_minute}` : ''}
+                  </div>
+
+                  <div className="flex-1 flex justify-start items-center gap-1.5 sm:gap-2 pl-2 sm:pl-4 min-w-0 text-[10px] sm:text-xs">
+                    {isAway && (
+                      <>
+                        <span className="shrink-0 flex items-center justify-center">{icon}</span>
+                        <span className={`${textMain} text-left truncate`}>{event.player_name}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
-
-                {/* Center Minute */}
-                <div className={`w-10 h-6 flex items-center justify-center shrink-0 text-[10px] sm:text-xs font-bold ${textMuted}`}>
-                  {event.minute}'{event.extra_minute ? `+${event.extra_minute}` : ''}
-                </div>
-
-                {/* Away Side */}
-                <div className="flex-1 flex justify-start items-center gap-1.5 sm:gap-2 pl-2 sm:pl-4 min-w-0 text-[10px] sm:text-xs">
-                  {isAway && (
-                    <>
-                      <span className="shrink-0 flex items-center justify-center">{icon}</span>
-                      <span className={`${textMain} text-left truncate`}>{event.player_name}</span>
-                    </>
-                  )}
-                </div>
-
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
     </div>

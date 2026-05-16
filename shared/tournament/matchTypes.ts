@@ -18,6 +18,7 @@ export interface Match {
   away_score: number | null
   away_penalty: number | null
   tournament_id: string | null
+  match_notes?: string | null
 }
 
 export interface Goal {

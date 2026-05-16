@@ -150,6 +150,7 @@ export default function FixtureTable({
                     awayPenalty={match.away_penalty}
                     matchTime={local.time}
                     statusLabel={match.match_status_label}
+                    matchNotes={match.match_notes}
                     noBorder={isLastInTable}
                   />
                 </React.Fragment>

@@ -20,7 +20,7 @@ export default function PageHeader({ tabs, activeTabId, onChange, isHeaderVarian
   const { bgProminent, textMain, textMuted } = useThemeClasses()
 
   return (
-    <div className={`flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 ${isHeaderVariant ? 'mb-0' : 'mb-8'}`}>
+    <div className={`flex items-center gap-1  no-scrollbar pb-1 ${isHeaderVariant ? 'mb-0' : 'mb-8'}`}>
       <div className="flex items-center gap-1 min-w-max">
         {tabs.map((tab) => {
           const isActive = activeTabId === tab.id

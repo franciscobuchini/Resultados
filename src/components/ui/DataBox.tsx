@@ -28,7 +28,7 @@ export default function DataBox({
         Utilizamos [&>*:last-child]:border-b-0 para asegurar que el último 
         DataRow no tenga borde inferior, manteniendo la limpieza visual.
       */}
-      <div className={`border ${border} rounded-3xl overflow-hidden [&>*:last-child]:border-b-0`}>
+      <div className={`border-x border-b sm:border-t ${border} rounded-b-3xl sm:rounded-t-3xl overflow-hidden [&>*:last-child]:border-b-0`}>
         {children}
       </div>
     </div>

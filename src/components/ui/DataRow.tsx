@@ -30,7 +30,7 @@ export const BASE = 'flex items-center w-full px-3 border-b text-sm';
 export function DataRowHeader({ children, className = '' }: { children: ReactNode; className?: string }) {
   const { bgSurface, border, textAccent } = useThemeClasses();
   return (
-    <div className={`${BASE} ${HEIGHT} ${bgSurface} ${border} ${textAccent} font-medium uppercase ${className}`}>
+    <div className={`${BASE} ${HEIGHT} bg-transparent sm:${bgSurface} ${border} ${textAccent} font-medium uppercase ${className}`}>
       <div className="flex-grow flex items-center overflow-hidden min-w-0">
         {children}
       </div>
@@ -42,9 +42,9 @@ export function DataRowHeader({ children, className = '' }: { children: ReactNod
  * DataRowSeparator — Separador visual entre secciones (ej: "Jueves 29").
  */
 export function DataRowSeparator({ label, className = '' }: { label: ReactNode; className?: string }) {
-  const { bgApp, border, textAccent } = useThemeClasses();
+  const { bgApp, bgSurface, border, textAccent } = useThemeClasses();
   return (
-    <div className={`${BASE} ${HEIGHT} ${bgApp} ${border} ${textAccent} font-medium uppercase ${className}`}>
+    <div className={`${BASE} ${HEIGHT} ${bgSurface} sm:${bgApp} ${border} ${textAccent} font-medium uppercase ${className}`}>
       <div className="flex-grow flex items-center overflow-hidden min-w-0">
         {label}
       </div>
@@ -74,10 +74,10 @@ interface StandingsRowProps {
  * Estructura: [Posición] [Escudo + Nombre] [Estadísticas]
  */
 export function StandingsRow({ position, logo, name, stats, className = '', noBorder = false }: StandingsRowProps) {
-  const { bgApp, border, textMuted, textHover } = useThemeClasses();
+  const { bgApp, bgSurface, border, textMuted, textHover } = useThemeClasses();
 
   return (
-    <div className={`${BASE} ${HEIGHT} ${bgApp} ${border} ${textMuted} ${textHover} ${noBorder ? '!border-b-0' : ''} ${className}`}>
+    <div className={`${BASE} ${HEIGHT} ${bgSurface} sm:${bgApp} ${border} ${textMuted} ${textHover} ${noBorder ? '!border-b-0' : ''} ${className}`}>
       {/* Equipo */}
       <div className="flex-grow flex items-center gap-3 overflow-hidden min-w-0">
         <span className={`w-4 md:w-8 text-center shrink-0 ${textMuted} text-xs tabular-nums`}>
@@ -106,7 +106,7 @@ export function StandingsHeaderRow({ title, stats, className = '' }: { title: st
   const { bgSurface, border, textAccent } = useThemeClasses();
 
   return (
-    <div className={`${BASE} ${HEIGHT} ${bgSurface} ${border} ${textAccent} font-medium uppercase ${className}`}>
+    <div className={`${BASE} ${HEIGHT} bg-transparent sm:${bgSurface} ${border} ${textAccent} font-medium uppercase ${className}`}>
       {/* Título */}
       <div className="flex-grow flex items-center gap-3 overflow-hidden min-w-0">
         <span className="w-4 md:w-8 shrink-0"></span> {/* Spacer para alinear con la posición */}
@@ -205,6 +205,7 @@ interface FixtureRowProps {
   matchTime?: string | null;
   /** Etiqueta de estado (ej: '34'', 'Final', 'LIVE') */
   statusLabel?: ReactNode;
+  matchNotes?: string | null;
   className?: string;
   noBorder?: boolean;
 }
@@ -221,10 +222,11 @@ export function FixtureRow({
   homeIdDM, awayIdDM,
   matchTime,
   statusLabel,
+  matchNotes,
   className = '',
   noBorder = false
 }: FixtureRowProps & { homeIdDM?: string | number | null; awayIdDM?: string | number | null }) {
-  const { bgApp, border, textMuted, textProminent, textError } = useThemeClasses();
+  const { bgApp, bgSurface, border, textMuted, textProminent, textError } = useThemeClasses();
   const [isTimelineExpanded, setIsTimelineExpanded] = useState(false);
 
   // Componente interno para evitar repetición
@@ -280,7 +282,7 @@ export function FixtureRow({
   const isLive = typeof statusLabel === 'string' && (statusLabel.includes("'") || ['LIVE', 'ET', 'MT', 'PEN'].includes(statusLabel));
 
   return (
-    <div className={`flex flex-col w-full ${bgApp} ${border} ${noBorder ? '' : 'border-b'} ${className}`}>
+    <div className={`flex flex-col w-full ${bgSurface} sm:${bgApp} ${border} ${noBorder ? '' : 'border-b'} ${className}`}>
       <div
         onClick={() => {
           if (matchId && matchDate && homeId && awayId) {
@@ -350,6 +352,7 @@ export function FixtureRow({
           awayId={awayId} 
           homeIdDM={homeIdDM}
           awayIdDM={awayIdDM}
+          matchNotes={matchNotes}
         />
       )}
     </div>
@@ -361,10 +364,10 @@ export function FixtureRow({
  * Estructura simplificada con altura reducida (h-6).
  */
 export function DetailsRow({ children, className = '', noBorder = false }: { children: ReactNode; className?: string; noBorder?: boolean }) {
-  const { bgApp, border, textMuted } = useThemeClasses();
+  const { bgApp, bgSurface, border, textMuted } = useThemeClasses();
 
   return (
-    <div className={`grid items-center w-full ${HEIGHT_DETAILS} ${bgApp} ${border} border-b text-xs leading-tight ${noBorder ? '!border-b-0' : ''} ${className}`}>
+    <div className={`grid items-center w-full ${HEIGHT_DETAILS} ${bgSurface} sm:${bgApp} ${border} border-b text-xs leading-tight ${noBorder ? '!border-b-0' : ''} ${className}`}>
       <div className={`px-2 ${textMuted} overflow-hidden min-w-0`}>
         {children}
       </div>
