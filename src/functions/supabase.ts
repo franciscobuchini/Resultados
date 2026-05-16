@@ -30,7 +30,25 @@ const secureFetch = async (url: string | URL | Request, options?: RequestInit): 
     // Redirigir a la Edge Function
     requestUrl = requestUrl.replace('/rest/v1/', '/functions/v1/secure-rest/')
     
-    const response = await fetch(requestUrl, options)
+    // Extraer headers y body del Request original si url es un objeto Request
+    let fetchOptions = options || {};
+    if (url instanceof Request) {
+      const headers = new Headers(url.headers);
+      if (options?.headers) {
+        new Headers(options.headers).forEach((value, key) => headers.set(key, value));
+      }
+      fetchOptions = {
+        ...options,
+        method: url.method,
+        headers: headers,
+        body: (url.method !== 'GET' && url.method !== 'HEAD') ? url.body : undefined,
+        credentials: url.credentials,
+        mode: url.mode,
+        cache: url.cache,
+      };
+    }
+
+    const response = await fetch(requestUrl, fetchOptions)
     
     // Si falla o no tiene contenido, la devolvemos igual
     if (!response.ok) return response
