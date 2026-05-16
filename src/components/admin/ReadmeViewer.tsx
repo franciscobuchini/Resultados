@@ -11,7 +11,7 @@ export default function ReadmeViewer() {
           <li>- Goles desde 2020 Liga Argentina (JAVI)</li>
           <li>- Sistema de inicio de sesión, perfiles, etc</li>
           <li>- Partidos únicos entre campeonatos (JAVI)</li>
-          <li>- Resolver api en network para que no se vean los datos en texto plano</li>
+          <li>- Resolver "nombre de torneo" para usar de contenedor para cada liga/torneo y crear su funcion</li>
           <li>- IA Futbolera YT</li>
           <li>- Asegurarme que los goles de partidos del mundial de ambas apis van a coincidir</li>
           <li>- teams sin id de SM (JAVI)</li>
