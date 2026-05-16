@@ -164,12 +164,12 @@ const groupAndAdaptFixtures = (fixtures: Fixture[], localTeamsMap: Map<number, a
       acc[hId] = { 
         team_name: homeLocal?.team_name || f.home_teams.name, 
         team_crest_url: homeLocal?.team_crest_url || f.home_teams.logo_path,
-        team_id_api_dm: f.home_team_id
+        team_id_api_drsm: f.home_team_id
       }
       acc[aId] = { 
         team_name: awayLocal?.team_name || f.away_teams.name, 
         team_crest_url: awayLocal?.team_crest_url || f.away_teams.logo_path,
-        team_id_api_dm: f.away_team_id
+        team_id_api_drsm: f.away_team_id
       }
       return acc
     }, {} as Record<string, any>)
@@ -224,12 +224,12 @@ export function useFixtures() {
     const fetchLocalTeams = async () => {
       const { data } = await supabase
         .from('teams')
-        .select('team_id, team_name, team_crest_url, team_id_api_dm')
-        .not('team_id_api_dm', 'is', null)
+        .select('team_id, team_name, team_crest_url, team_id_api_drsm')
+        .not('team_id_api_drsm', 'is', null)
       
       if (data) {
         const map = new Map()
-        data.forEach(t => map.set(Number(t.team_id_api_dm), t))
+        data.forEach(t => map.set(Number(t.team_id_api_drsm), t))
         setLocalTeams(map)
       }
     }

@@ -352,6 +352,8 @@ export function FixtureRow({
           awayId={awayId} 
           homeIdDM={homeIdDM}
           awayIdDM={awayIdDM}
+          homeScore={homeScore}
+          awayScore={awayScore}
           matchNotes={matchNotes}
         />
       )}

@@ -30,7 +30,6 @@ export default function PageHeader({ tabs, activeTabId, onChange, isHeaderVarian
               <Dropdown
                 key={tab.id}
                 value={tab.label}
-                triggerOnHover={true}
                 align="left"
                 widthClass="min-w-max"
               >

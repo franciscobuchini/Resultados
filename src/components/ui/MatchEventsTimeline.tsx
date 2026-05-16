@@ -21,11 +21,14 @@ interface MatchEventsTimelineProps {
   awayId: string;
   homeIdDM?: string | number | null;
   awayIdDM?: string | number | null;
+  homeScore?: string | number | null;
+  awayScore?: string | number | null;
   matchNotes?: string | null;
 }
 
 const getEventIcon = (eventType: string, details: string, textAccent: string) => {
   const type = eventType.toLowerCase();
+  if (type.includes('disallowed')) return <span title="Gol Anulado">❌</span>;
   if (type.includes('goal') || type.includes('penalty')) {
     if (type.includes('miss')) return <span title="Penal Fallado">❌</span>;
     if (details.toLowerCase().includes('own goal')) return <span title="Gol en Contra">⚽ (EC)</span>;
@@ -35,7 +38,7 @@ const getEventIcon = (eventType: string, details: string, textAccent: string) =>
   if (type.includes('yellowcard')) return <span title="Amarilla">🟨</span>;
   if (type.includes('redcard')) return <span title="Roja">🟥</span>;
   if (type.includes('substitution')) return <span title="Cambio"><ArrowRightLeft size={14} className={textAccent} /></span>;
-  if (type.includes('var')) return <span title="VAR"><MonitorPlay size={14} className={textAccent} /></span>;
+  if (type.includes('var')) return <span title="Chequeo VAR"><MonitorPlay size={14} className={textAccent} /></span>;
   return null;
 };
 
@@ -60,7 +63,7 @@ const goalToEvent = (goal: Goal): FixtureEvent => {
   };
 };
 
-export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId, homeIdDM, awayIdDM, matchNotes }: MatchEventsTimelineProps) {
+export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId, homeIdDM, awayIdDM, homeScore, awayScore, matchNotes }: MatchEventsTimelineProps) {
   const [events, setEvents] = useState<FixtureEvent[]>([]);
   const [loading, setLoading] = useState(!!(matchDate && matchId));
   const [error, setError] = useState(false);
@@ -94,9 +97,54 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
           // API no disponible, seguimos con el fallback
         }
 
+        const processDisallowedGoals = (eventsList: FixtureEvent[]) => {
+          const isGoal = (e: FixtureEvent) => e.event_type.toLowerCase().includes('goal') || e.event_type.toLowerCase().includes('penalty');
+          const isMiss = (e: FixtureEvent) => e.event_type.toLowerCase().includes('miss') || e.event_type.toLowerCase().includes('disallowed');
+          
+          const teamGoals: Record<string, FixtureEvent[]> = {};
+          eventsList.forEach(e => {
+            if (e.event_type.toLowerCase().includes('var')) {
+              e.player_name = 'Chequeo VAR';
+            }
+            if (isGoal(e) && !isMiss(e)) {
+              const tId = e.team_id.toString();
+              if (!teamGoals[tId]) teamGoals[tId] = [];
+              teamGoals[tId].push(e);
+            }
+          });
+
+          const homeIds = [homeId];
+          if (homeIdDM) homeIds.push(homeIdDM.toString());
+          const awayIds = [awayId];
+          if (awayIdDM) awayIds.push(awayIdDM.toString());
+
+          if (homeScore != null) {
+            let homeGoalEvents: FixtureEvent[] = [];
+            homeIds.forEach(id => { if (teamGoals[id]) homeGoalEvents.push(...teamGoals[id]) });
+            if (homeGoalEvents.length > Number(homeScore)) {
+              homeGoalEvents.filter(e => !e.player_name || e.player_name.trim() === '').forEach(e => {
+                e.event_type = 'Disallowed Goal';
+                e.player_name = 'Gol anulado';
+              });
+            }
+          }
+
+          if (awayScore != null) {
+            let awayGoalEvents: FixtureEvent[] = [];
+            awayIds.forEach(id => { if (teamGoals[id]) awayGoalEvents.push(...teamGoals[id]) });
+            if (awayGoalEvents.length > Number(awayScore)) {
+              awayGoalEvents.filter(e => !e.player_name || e.player_name.trim() === '').forEach(e => {
+                e.event_type = 'Disallowed Goal';
+                e.player_name = 'Gol anulado';
+              });
+            }
+          }
+          return eventsList;
+        };
+
         // 2. Si la API devolvió eventos, usarlos
         if (apiEvents.length > 0) {
-          setEvents(apiEvents);
+          setEvents(processDisallowedGoals(apiEvents));
           return;
         }
 
@@ -108,7 +156,8 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
           .order('goal_minute', { ascending: true });
 
         if (goalsData && goalsData.length > 0) {
-          setEvents(goalsData.map((g: Goal) => goalToEvent(g)));
+          const mappedEvents = goalsData.map((g: Goal) => goalToEvent(g));
+          setEvents(processDisallowedGoals(mappedEvents));
         } else {
           setEvents([]);
         }

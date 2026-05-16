@@ -1,4 +1,4 @@
-import { User, Shield, Settings, LogOut } from 'lucide-react'
+import { User, Shield, LogOut } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Dropdown, DropdownItem, DropdownOption } from '../ui/Dropdown'
 import SyncStatus from './SyncStatus'
@@ -29,8 +29,6 @@ export default function UserMenu() {
       <Link to="/admin">
         <DropdownItem onClick={() => {}} icon={Shield} label="Panel Admin" />
       </Link>
-      <DropdownItem onClick={() => {}} icon={Settings} label="Ajustes" />
-
       {/* Sesión */}
       <DropdownItem
         onClick={() => {}}

@@ -36,18 +36,16 @@ interface DropdownProps {
   align?: 'left' | 'right';
   widthClass?: string;
   variant?: 'outline' | 'danger';
-  triggerOnHover?: boolean;
 }
 
-export function Dropdown({ 
-  icon, 
-  label, 
-  value, 
-  children, 
-  align = 'right', 
-  widthClass = 'min-w-max', 
+export function Dropdown({
+  icon,
+  label,
+  value,
+  children,
+  align = 'right',
+  widthClass = 'min-w-max',
   variant = 'outline',
-  triggerOnHover = false
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -82,14 +80,12 @@ export function Dropdown({
 
   return (
     <DropdownContext.Provider value={{ activeSection, setActiveSection }}>
-      <div 
+      <div
         ref={dropdownRef}
         className="relative inline-block text-left"
-        onMouseEnter={() => triggerOnHover && setIsOpen(true)}
-        onMouseLeave={() => triggerOnHover && setIsOpen(false)}
       >
         <Button
-          onClick={!triggerOnHover ? toggleDropdown : undefined}
+          onClick={toggleDropdown}
           icon={icon}
           label={label}
           value={value}
