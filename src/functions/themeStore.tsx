@@ -33,6 +33,7 @@ export interface ThemeClasses {
   // States
   textSuccess?: string
   textError?: string
+  textInfo?: string
   bgProminent?: string
   logo: string
 }
@@ -53,6 +54,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-zinc-100',
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
+    textInfo: 'text-blue-400',
     bgProminent: 'bg-zinc-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
@@ -69,6 +71,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-stone-100',
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
+    textInfo: 'text-blue-400',
     bgProminent: 'bg-stone-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
@@ -85,6 +88,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-slate-100',
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
+    textInfo: 'text-blue-400',
     bgProminent: 'bg-slate-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
@@ -101,6 +105,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-neutral-100',
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
+    textInfo: 'text-blue-400',
     bgProminent: 'bg-neutral-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
@@ -117,6 +122,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-gray-100',
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
+    textInfo: 'text-blue-400',
     bgProminent: 'bg-gray-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
@@ -133,6 +139,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-taupe-100',
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
+    textInfo: 'text-blue-400',
     bgProminent: 'bg-taupe-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
@@ -149,6 +156,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-mauve-100',
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
+    textInfo: 'text-blue-400',
     bgProminent: 'bg-mauve-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
@@ -165,6 +173,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-mist-100',
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
+    textInfo: 'text-blue-400',
     bgProminent: 'bg-mist-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
@@ -181,6 +190,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-olive-100',
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
+    textInfo: 'text-blue-400',
     bgProminent: 'bg-olive-800/50',
     bgMain: 'bg-black/10',
     logo: '/src/assets/ResultadosLogoLight.webp',
@@ -201,6 +211,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-zinc-950',
     textSuccess: 'text-green-600',
     textError: 'text-red-600',
+    textInfo: 'text-blue-600',
     bgProminent: 'bg-zinc-100',
     bgMain: 'bg-white/40',
     logo: logoDark,
@@ -217,6 +228,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-stone-950',
     textSuccess: 'text-green-600',
     textError: 'text-red-600',
+    textInfo: 'text-blue-600',
     bgProminent: 'bg-stone-100',
     bgMain: 'bg-white/40',
     logo: logoDark,
@@ -233,6 +245,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-slate-950',
     textSuccess: 'text-green-600',
     textError: 'text-red-600',
+    textInfo: 'text-blue-600',
     bgProminent: 'bg-slate-100',
     bgMain: 'bg-white/40',
     logo: logoDark,
@@ -249,6 +262,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-neutral-950',
     textSuccess: 'text-green-600',
     textError: 'text-red-600',
+    textInfo: 'text-blue-600',
     bgProminent: 'bg-neutral-100',
     bgMain: 'bg-white/40',
     logo: logoDark,
@@ -265,6 +279,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-gray-950',
     textSuccess: 'text-green-600',
     textError: 'text-red-600',
+    textInfo: 'text-blue-600',
     bgProminent: 'bg-gray-100',
     bgMain: 'bg-white/40',
     logo: logoDark,
@@ -281,6 +296,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-taupe-950',
     textSuccess: 'text-green-600',
     textError: 'text-red-600',
+    textInfo: 'text-blue-600',
     bgProminent: 'bg-taupe-100',
     bgMain: 'bg-white/40',
     logo: logoDark,
@@ -297,6 +313,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-mauve-950',
     textSuccess: 'text-green-600',
     textError: 'text-red-600',
+    textInfo: 'text-blue-600',
     bgProminent: 'bg-mauve-100',
     bgMain: 'bg-white/40',
     logo: logoDark,
@@ -313,6 +330,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-mist-950',
     textSuccess: 'text-green-600',
     textError: 'text-red-600',
+    textInfo: 'text-blue-600',
     bgProminent: 'bg-mist-100',
     bgMain: 'bg-white/40',
     logo: '/src/assets/ResultadosLogoDark.webp',
@@ -329,6 +347,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textHover: 'hover:text-olive-950',
     textSuccess: 'text-green-600',
     textError: 'text-red-600',
+    textInfo: 'text-blue-600',
     bgProminent: 'bg-olive-100',
     bgMain: 'bg-white/40',
     logo: '/src/assets/ResultadosLogoDark.webp',
@@ -340,6 +359,8 @@ interface ThemeState {
   setTheme: (theme: ThemeName) => void
   lastTournamentId: string | null
   setLastTournamentId: (id: string) => void
+  showApiIds: boolean
+  setShowApiIds: (show: boolean) => void
 }
 
 export const useTheme = create<ThemeState>()(
@@ -349,6 +370,8 @@ export const useTheme = create<ThemeState>()(
       setTheme: (theme) => set({ currentTheme: theme }),
       lastTournamentId: null,
       setLastTournamentId: (id) => set({ lastTournamentId: id }),
+      showApiIds: false,
+      setShowApiIds: (show) => set({ showApiIds: show }),
     }),
     {
       name: 'app-theme',

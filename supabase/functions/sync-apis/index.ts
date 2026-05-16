@@ -97,12 +97,12 @@ const headers = {
     // PASO 2: Construir matches
     const [tRes, teRes, apiRes] = await Promise.all([
       supabase.from('tournaments').select('tournament_id, tournament_id_api'),
-      supabase.from('teams').select('team_id, team_id_api, team_name, team_crest_url'),
+      supabase.from('teams').select('team_id, team_id_api_365, team_name, team_crest_url'),
       supabase.from('apis').select('*')
     ])
 
     const tournamentLookup = new Map((tRes.data || []).map((t: any) => [Number(t.tournament_id_api), t.tournament_id]))
-    const teamLookup = new Map((teRes.data || []).map((t: any) => [Number(t.team_id_api), { id: t.team_id, name: t.team_name, crest: t.team_crest_url }]))
+    const teamLookup = new Map((teRes.data || []).map((t: any) => [Number(t.team_id_api_365), { id: t.team_id, name: t.team_name, crest: t.team_crest_url }]))
     
     // Extraer IDs de competencias activas basándose solo en las APIs que estamos procesando en este ciclo
     const allowedCompetitions = new Set<number>()
@@ -177,12 +177,10 @@ const headers = {
             match_status: g.statusText || g.status_text || 'Desconocido',
             game_time: gameTime,
             home_id: homeId,
-            home_id_api: g.homeCompetitor?.id || null,
             home_name: homeTeamInfo?.name || g.homeCompetitor?.name || 'Local',
             home_score: (g.homeCompetitor?.score === -1 || g.homeCompetitor?.score === undefined) ? null : g.homeCompetitor.score,
             home_penalty: g.homeCompetitor?.penaltyScore || null,
             away_id: awayId,
-            away_id_api: g.awayCompetitor?.id || null,
             away_name: awayTeamInfo?.name || g.awayCompetitor?.name || 'Visitante',
             away_score: (g.awayCompetitor?.score === -1 || g.awayCompetitor?.score === undefined) ? null : g.awayCompetitor.score,
             away_penalty: g.awayCompetitor?.penaltyScore || null,

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { isLive, getMatchStatusLabel } from './matchHelpers'
 import type { Match, Goal } from '../../shared/tournament/matchTypes'
+import { supabase } from './supabase'
 
 // ============================================================
 // TYPES — Datos que devuelve la Edge Function get-fixtures
@@ -49,9 +50,24 @@ const POLL_INTERVAL = 60_000
 
 /** Etiqueta humana para una fecha: "Hoy", "Ayer", "Mañana" o fecha completa */
 export const formatDateLabel = (d: string): string => {
-  const today     = new Date().toISOString().split('T')[0]
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
-  const tomorrow  = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+  const getLocalDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const now = new Date();
+  const today     = getLocalDate(now);
+  
+  const yesterdayDate = new Date(now);
+  yesterdayDate.setDate(now.getDate() - 1);
+  const yesterday = getLocalDate(yesterdayDate);
+
+  const tomorrowDate = new Date(now);
+  tomorrowDate.setDate(now.getDate() + 1);
+  const tomorrow  = getLocalDate(tomorrowDate);
+
   if (d === today)     return 'Hoy'
   if (d === yesterday) return 'Ayer'
   if (d === tomorrow)  return 'Mañana'
@@ -81,7 +97,7 @@ const sortFixtures = (fixtures: Fixture[]): Fixture[] =>
   })
 
 /** Agrupa fixtures por liga, ordena y los adapta al formato de FixtureTable (Match/Goal) */
-const groupAndAdaptFixtures = (fixtures: Fixture[]): AdaptedLeagueGroup[] => {
+const groupAndAdaptFixtures = (fixtures: Fixture[], localTeamsMap: Map<number, any>): AdaptedLeagueGroup[] => {
   const byLeague = fixtures.reduce((acc, f) => {
     const key = f.leagues.name
     if (!acc[key]) acc[key] = { logo: f.leagues.logo_path, matches: [] as Fixture[] }
@@ -100,6 +116,9 @@ const groupAndAdaptFixtures = (fixtures: Fixture[]): AdaptedLeagueGroup[] => {
     const sorted = sortFixtures(matches)
 
     const mappedMatches: Match[] = sorted.map(f => {
+      const homeLocal = localTeamsMap.get(f.home_team_id);
+      const awayLocal = localTeamsMap.get(f.away_team_id);
+
       return {
         match_id: f.id.toString(),
         match_date: f.start_time.split('T')[0],
@@ -107,12 +126,14 @@ const groupAndAdaptFixtures = (fixtures: Fixture[]): AdaptedLeagueGroup[] => {
         match_status: f.status,
         match_status_label: getMatchStatusLabel(f.status, f.start_time.split('T')[0], f.current_minute),
         match_round: null,
-        home_id: f.home_team_id.toString(),
-        home_name: f.home_teams.name,
+        home_id: homeLocal?.team_id || f.home_team_id.toString(),
+        home_name: homeLocal?.team_name || f.home_teams.name,
+        home_logo: homeLocal?.team_crest_url || f.home_teams.logo_path,
         home_score: f.home_score,
         home_penalty: null,
-        away_id: f.away_team_id.toString(),
-        away_name: f.away_teams.name,
+        away_id: awayLocal?.team_id || f.away_team_id.toString(),
+        away_name: awayLocal?.team_name || f.away_teams.name,
+        away_logo: awayLocal?.team_crest_url || f.away_teams.logo_path,
         away_score: f.away_score,
         away_penalty: null,
         tournament_id: null
@@ -120,19 +141,36 @@ const groupAndAdaptFixtures = (fixtures: Fixture[]): AdaptedLeagueGroup[] => {
     })
 
     const mappedGoals: Goal[] = sorted.flatMap(f =>
-      getValidGoals(f).map((e, idx) => ({
-        goal_id: `${f.id}-${idx}`,
-        match_id: f.id.toString(),
-        team_id: e.team_id.toString(),
-        goal_minute: e.minute,
-        player_name: e.player_name || 'Desconocido',
-        goal_type: getGoalType(e)
-      }))
+      getValidGoals(f).map((e, idx) => {
+        const localGoalTeam = localTeamsMap.get(e.team_id);
+        return {
+          goal_id: `${f.id}-${idx}`,
+          match_id: f.id.toString(),
+          team_id: localGoalTeam?.team_id || e.team_id.toString(),
+          goal_minute: e.minute,
+          player_name: e.player_name || 'Desconocido',
+          goal_type: getGoalType(e)
+        };
+      })
     )
 
     const teamLookup = sorted.reduce((acc, f) => {
-      acc[f.home_team_id.toString()] = { team_name: f.home_teams.name, team_crest_url: f.home_teams.logo_path }
-      acc[f.away_team_id.toString()] = { team_name: f.away_teams.name, team_crest_url: f.away_teams.logo_path }
+      const homeLocal = localTeamsMap.get(f.home_team_id);
+      const awayLocal = localTeamsMap.get(f.away_team_id);
+
+      const hId = homeLocal?.team_id || f.home_team_id.toString();
+      const aId = awayLocal?.team_id || f.away_team_id.toString();
+
+      acc[hId] = { 
+        team_name: homeLocal?.team_name || f.home_teams.name, 
+        team_crest_url: homeLocal?.team_crest_url || f.home_teams.logo_path,
+        team_id_api_dm: f.home_team_id
+      }
+      acc[aId] = { 
+        team_name: awayLocal?.team_name || f.away_teams.name, 
+        team_crest_url: awayLocal?.team_crest_url || f.away_teams.logo_path,
+        team_id_api_dm: f.away_team_id
+      }
       return acc
     }, {} as Record<string, any>)
 
@@ -159,8 +197,15 @@ const groupAndAdaptFixtures = (fixtures: Fixture[]): AdaptedLeagueGroup[] => {
  */
 export function useFixtures() {
   const [fixtures, setFixtures] = useState<Fixture[]>([])
+  const [localTeams, setLocalTeams] = useState<Map<number, any>>(new Map())
   const [loading, setLoading] = useState(true)
-  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  })
 
   const fetchFixtures = async (d: string, silent = false) => {
     if (!silent) setLoading(true)
@@ -174,6 +219,23 @@ export function useFixtures() {
     if (!silent) setLoading(false)
   }
 
+  // Cargar mapeo de equipos locales
+  useEffect(() => {
+    const fetchLocalTeams = async () => {
+      const { data } = await supabase
+        .from('teams')
+        .select('team_id, team_name, team_crest_url, team_id_api_dm')
+        .not('team_id_api_dm', 'is', null)
+      
+      if (data) {
+        const map = new Map()
+        data.forEach(t => map.set(Number(t.team_id_api_dm), t))
+        setLocalTeams(map)
+      }
+    }
+    fetchLocalTeams()
+  }, [])
+
   useEffect(() => {
     fetchFixtures(date)
     const interval = setInterval(() => fetchFixtures(date, true), POLL_INTERVAL)
@@ -186,7 +248,7 @@ export function useFixtures() {
     setDate(d.toISOString().split('T')[0])
   }
 
-  const adaptedLeagues = useMemo(() => groupAndAdaptFixtures(fixtures), [fixtures])
+  const adaptedLeagues = useMemo(() => groupAndAdaptFixtures(fixtures, localTeams), [fixtures, localTeams])
   const dateLabel = formatDateLabel(date)
 
   return { loading, date, dateLabel, adaptedLeagues, changeDate }

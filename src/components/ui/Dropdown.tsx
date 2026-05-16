@@ -20,9 +20,19 @@ interface DropdownProps {
   align?: 'left' | 'right';
   widthClass?: string;
   variant?: 'outline' | 'danger';
+  triggerOnHover?: boolean;
 }
 
-export function Dropdown({ icon, label, value, children, align = 'right', widthClass = 'w-48', variant = 'outline' }: DropdownProps) {
+export function Dropdown({ 
+  icon, 
+  label, 
+  value, 
+  children, 
+  align = 'right', 
+  widthClass = 'w-48', 
+  variant = 'outline',
+  triggerOnHover = false
+}: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const { bgSurface, border } = useThemeClasses();
@@ -35,9 +45,13 @@ export function Dropdown({ icon, label, value, children, align = 'right', widthC
 
   return (
     <DropdownContext.Provider value={{ activeSection, setActiveSection }}>
-      <div className="relative inline-block text-left">
+      <div 
+        className="relative inline-block text-left"
+        onMouseEnter={() => triggerOnHover && setIsOpen(true)}
+        onMouseLeave={() => triggerOnHover && setIsOpen(false)}
+      >
         <Button
-          onClick={toggleDropdown}
+          onClick={!triggerOnHover ? toggleDropdown : undefined}
           icon={icon}
           label={label}
           value={value}
@@ -46,11 +60,13 @@ export function Dropdown({ icon, label, value, children, align = 'right', widthC
 
         {isOpen && (
           <>
-            <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+            {!triggerOnHover && <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />}
             <div
-              className={`absolute top-full mt-2 z-50 flex flex-col rounded-xl border ${align === 'left' ? 'left-0' : 'right-0'} ${widthClass} max-sm:fixed max-sm:left-4 max-sm:right-4 max-sm:w-auto max-sm:top-20 ${bgSurface} ${border} shadow-2xl animate-in fade-in zoom-in-95 duration-200`}
+              className={`absolute top-full z-50 pt-2 ${align === 'left' ? 'left-0' : 'right-0'} ${widthClass} max-sm:fixed max-sm:left-4 max-sm:right-4 max-sm:w-auto max-sm:top-20 animate-in fade-in zoom-in-95 duration-200`}
             >
-              {children}
+              <div className={`flex flex-col rounded-xl border ${bgSurface} ${border} shadow-2xl`}>
+                {children}
+              </div>
             </div>
           </>
         )}
@@ -183,9 +199,11 @@ export function DropdownSection({ icon: Icon, label, value, children }: Dropdown
       {/* Panel flotante lateral (Desktop) o Acordeón (Mobile) */}
       {isOpen && (
         <div
-          className={`sm:absolute sm:top-0 sm:right-full sm:mr-2 z-50 flex flex-col rounded-xl border sm:w-36 overflow-hidden ${bgSurface} ${border} max-sm:relative max-sm:w-full max-sm:mt-1 max-sm:mb-2 max-sm:border-x-0 max-sm:rounded-none max-sm:bg-black/5 animate-in slide-in-from-top-1 duration-200`}
+          className={`sm:absolute sm:top-0 sm:right-full sm:pr-2 z-50 flex flex-col max-sm:relative max-sm:w-full max-sm:mt-1 max-sm:mb-2 max-sm:border-x-0 max-sm:rounded-none max-sm:bg-black/5 animate-in slide-in-from-top-1 duration-200`}
         >
-          {children}
+          <div className={`flex flex-col rounded-xl border sm:w-36 overflow-hidden ${bgSurface} ${border} shadow-xl`}>
+            {children}
+          </div>
         </div>
       )}
     </div>

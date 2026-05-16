@@ -39,7 +39,7 @@ Deno.serve(async () => {
       matchLookup.set(key, m)
     }
 
-    // Traer fixtures de dataredonda para cada fecha
+    // Traer fixtures de DR para cada fecha
     const allFixtures: any[] = []
     for (const date of dates) {
       const res = await fetch(DR_URL, {

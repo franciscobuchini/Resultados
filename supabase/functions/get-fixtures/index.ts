@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
     const now = Date.now()
     const cached = cache.get(date)
 
-    // Si hay caché vigente, devolver sin llamar a dataredonda
+    // Si hay caché vigente, devolver sin llamar a DR
     if (cached && now - cached.ts < CACHE_TTL) {
       return new Response(JSON.stringify(cached.data), {
         headers: {
@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Si no hay caché, llamar a dataredonda y guardar
+    // Si no hay caché, llamar a DR y guardar
     const res = await fetch(DR_URL, {
       method: 'POST',
       headers: {

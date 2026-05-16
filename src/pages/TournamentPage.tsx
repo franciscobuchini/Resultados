@@ -14,6 +14,8 @@ import { useTheme } from '../functions/themeStore'
 import { getMatchStatusLabel } from '../functions/matchHelpers'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
+import PageHeader from '../layout/PageHeader'
+import { useNavigate } from 'react-router-dom'
 
 // ------------------------------------------------------------
 // TIPOS
@@ -82,6 +84,9 @@ export default function TournamentPage() {
   const [selectedRound, setSelectedRound] = useState<string | null>(null)
   const { utcOffset } = useTime();
   const setLastTournamentId = useTheme(state => state.setLastTournamentId);
+  const [activeTab, setActiveTab] = useState('general')
+  const [historyTournaments, setHistoryTournaments] = useState<{ tournament_id: string; tournament_name: string }[]>([])
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!tournamentId) return
@@ -104,6 +109,28 @@ export default function TournamentPage() {
       const tourney = tournaments[0] as Tournament
       setTournament(tourney)
 
+      // Buscar ediciones históricas
+      const tId = tourney.tournament_id.trim()
+      const prefix = tId.substring(0, 3)
+      const penultimate = tId.charAt(tId.length - 2)
+      
+      // Consultar torneos que empiecen con el mismo prefijo
+      const { data: history } = await supabase
+        .from('tournaments')
+        .select('tournament_id, tournament_name')
+        .ilike('tournament_id', `${prefix}.%`)
+      
+      if (history) {
+        const filtered = history.filter(t => {
+          const otherId = t.tournament_id.trim()
+          if (otherId.length < 4) return false
+          const otherPenultimate = otherId.charAt(otherId.length - 2)
+          return otherPenultimate === penultimate && otherId !== tId
+        }).sort((a, b) => b.tournament_id.localeCompare(a.tournament_id))
+        
+        setHistoryTournaments(filtered)
+      }
+
       const { data: matchData } = await supabase
         .from('matches')
         .select('*')
@@ -122,7 +149,7 @@ export default function TournamentPage() {
           .select('*')
           .in('match_id', matchIds)
           .order('goal_minute', { ascending: true })
-        
+
         if (goalData) {
           setGoals(goalData as Goal[])
         }
@@ -233,13 +260,13 @@ export default function TournamentPage() {
   for (const { match, local } of localizedMatches) {
     const dateKey = local.date || 'TBD';
     if (!matchesByDate[dateKey]) matchesByDate[dateKey] = [];
-    
+
     // Inyectamos el label de estado para partidos de hoy
     const matchWithLabel: Match = {
       ...match,
       match_status_label: getMatchStatusLabel(match.match_status, match.match_date)
     };
-    
+
     matchesByDate[dateKey].push(matchWithLabel);
   }
 
@@ -247,44 +274,86 @@ export default function TournamentPage() {
   // RENDER
   // ------------------------------------------------------------
 
+  const tournamentTabs = [
+    { id: 'general', label: 'General' },
+    { id: 'fixtures', label: 'Partidos', disabled: true },
+    { id: 'standings', label: 'Posiciones', disabled: true },
+    { id: 'history', label: 'Historial' },
+    { id: 'stats', label: 'Estadísticas', disabled: true },
+  ]
+
   return (
     <>
       <PageBanner
         title={tournament.tournament_name}
         tournament_banner_url={tournament.tournament_banner_url}
         logo={tournament.tournament_crest_url}
-      />
+      >
+        <PageHeader 
+          tabs={tournamentTabs} 
+          activeTabId={activeTab} 
+          onChange={setActiveTab}
+        />
+      </PageBanner>
 
-      <PageContent maxWidth="1600" layout="grid-12">
-          {/* Partidos del round seleccionado (Primero en mobile) */}
-          <div className="lg:col-span-6 flex flex-col gap-4 order-1 lg:order-2">
-            {selectedRound ? (
-              <FixtureTable
-                roundName={isMatchday(selectedRound) ? `${selectedRound}` : selectedRound}
-                matchesByDate={matchesByDate}
-                goals={goals}
-                teamLookup={teamLookup}
-                onPrevRound={currentIndex > 0 ? () => setSelectedRound(sortedRounds[currentIndex - 1]) : undefined}
-                onNextRound={currentIndex < sortedRounds.length - 1 ? () => setSelectedRound(sortedRounds[currentIndex + 1]) : undefined}
-              />
-            ) : (
-              <EmptyState message="No hay partidos programados" className="h-64" />
-            )}
-          </div>
-
-          {/* Tabla de posiciones (Segundo en mobile) */}
-          <div className="lg:col-span-6 order-2 lg:order-1">
-            <div className="flex flex-col gap-8">
-              {groupKeys.map(group => (
-                <StandingsTable
-                  key={group}
-                  title={group}
-                  standings={standings[group] ?? []}
+      <PageContent maxWidth="1600">
+        {activeTab === 'general' && (
+          <div className="grid grid-cols-12 gap-8">
+            {/* Partidos del round seleccionado (Primero en mobile) */}
+            <div className="lg:col-span-6 flex flex-col gap-4 order-1 lg:order-2">
+              {selectedRound ? (
+                <FixtureTable
+                  roundName={isMatchday(selectedRound) ? `${selectedRound}` : selectedRound}
+                  matchesByDate={matchesByDate}
+                  goals={goals}
                   teamLookup={teamLookup}
+                  onPrevRound={currentIndex > 0 ? () => setSelectedRound(sortedRounds[currentIndex - 1]) : undefined}
+                  onNextRound={currentIndex < sortedRounds.length - 1 ? () => setSelectedRound(sortedRounds[currentIndex + 1]) : undefined}
                 />
-              ))}
+              ) : (
+                <EmptyState message="No hay partidos programados" className="h-64" />
+              )}
+            </div>
+
+            {/* Tabla de posiciones (Segundo en mobile) */}
+            <div className="lg:col-span-6 order-2 lg:order-1">
+              <div className="flex flex-col gap-8">
+                {groupKeys.map(group => (
+                  <StandingsTable
+                    key={group}
+                    title={group}
+                    standings={standings[group] ?? []}
+                    teamLookup={teamLookup}
+                  />
+                ))}
+              </div>
             </div>
           </div>
+        )}
+
+        {activeTab === 'history' && (
+          <div className="flex flex-col gap-4">
+            <h3 className={`text-2xl font-bold mb-4`}>Ediciones Anteriores</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {historyTournaments.map(t => (
+                <button
+                  key={t.tournament_id}
+                  onClick={() => {
+                    navigate(`/tournament/${t.tournament_id}`)
+                    setActiveTab('general')
+                  }}
+                  className={`flex items-center justify-between p-4 rounded-xl border bg-zinc-900/50 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/50 transition-all text-left`}
+                >
+                  <span className="font-medium">{t.tournament_name}</span>
+                  <span className="text-xs text-zinc-500 font-mono">{t.tournament_id}</span>
+                </button>
+              ))}
+              {historyTournaments.length === 0 && (
+                <EmptyState message="No se encontraron otras ediciones de este torneo" />
+              )}
+            </div>
+          </div>
+        )}
       </PageContent>
     </>
   )

@@ -6,12 +6,14 @@ interface PageBannerProps {
   subtitle?: string;
   tournament_banner_url?: string | null;
   logo?: string | null;
+  children?: React.ReactNode;
 }
 
 export default function PageBanner({
   title = "",
   tournament_banner_url,
-  logo
+  logo,
+  children
 }: PageBannerProps) {
   const { textMain } = useThemeClasses();
   const defaultBanner = "https://cdn.pixabay.com/photo/2024/10/09/23/52/ai-generated-9109556_640.jpg";
@@ -23,9 +25,9 @@ export default function PageBanner({
   }, [tournament_banner_url]);
 
   return (
-    <div className="relative w-full h-80 md:h-120 overflow-hidden group">
+    <div className="relative w-full h-80 md:h-120 group">
       {/* Background Image with Overlay */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 overflow-hidden">
         <img
           src={imgSrc}
           alt="Banner background"
@@ -40,8 +42,8 @@ export default function PageBanner({
       </div>
 
       {/* Content */}
-      <div className="relative h-full flex items-end pb-4 px-6">
-        <div className="flex items-center gap-3">
+      <div className="relative h-full flex flex-col justify-end pb-8 px-6">
+        <div className="flex items-center gap-3 mb-6">
           {logo && (
             <img
               src={logo}
@@ -55,6 +57,12 @@ export default function PageBanner({
             {title}
           </h2>
         </div>
+
+        {children && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {children}
+          </div>
+        )}
       </div>
     </div>
   );

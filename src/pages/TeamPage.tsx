@@ -11,6 +11,7 @@ import type { Goal } from '../../shared/tournament/matchTypes'
 import HistoryTable, { type HistoryStats } from '../components/tables/HistoryTable'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
+import PageHeader from '../layout/PageHeader'
 
 // ------------------------------------------------------------
 // TIPOS
@@ -186,13 +187,13 @@ export default function TeamPage() {
       const dateKey = local.date
       if (dateKey) {
         if (!grouped[dateKey]) grouped[dateKey] = []
-        
+
         // Inyectamos el label de estado para hoy
         const matchWithLabel: MatchWithTournament = {
           ...m,
           match_status_label: getMatchStatusLabel(m.match_status, m.match_date)
         }
-        
+
         grouped[dateKey].push(matchWithLabel)
       }
     })
@@ -257,45 +258,57 @@ export default function TeamPage() {
   const groupedUpcoming = groupMatches(upcomingMatches)
   const historyStats = computeHistory(matches);
 
+  const teamTabs = [
+    { id: 'matches', label: 'Partidos' },
+    { id: 'squad', label: 'Plantel', disabled: true },
+    { id: 'history', label: 'Historia', disabled: true },
+    { id: 'stats', label: 'Estadísticas', disabled: true },
+  ]
+
   return (
     <>
       <PageBanner
         title={team.team_fullname || team.team_name}
         tournament_banner_url={team.team_banner_url || null}
         logo={team.team_crest_url}
-      />
+      >
+        <PageHeader 
+          tabs={teamTabs} 
+          activeTabId="matches" 
+        />
+      </PageBanner>
 
       <PageContent maxWidth="1600" layout="grid-2">
-          {/* Próximos Partidos */}
-          <div className="flex flex-col gap-4">
-            {upcomingMatches.length > 0 ? (
-              <FixtureTable
-                roundName="Próximos Partidos"
-                matchesByDate={groupedUpcoming}
-                goals={goals}
-                teamLookup={teamLookup}
-                fullDate={true}
-              />
-            ) : (
-              <EmptyState message="No hay próximos partidos programados para este equipo" />
-            )}
-          </div>
+        {/* Próximos Partidos */}
+        <div className="flex flex-col gap-4">
+          {upcomingMatches.length > 0 ? (
+            <FixtureTable
+              roundName="Próximos Partidos"
+              matchesByDate={groupedUpcoming}
+              goals={goals}
+              teamLookup={teamLookup}
+              fullDate={true}
+            />
+          ) : (
+            <EmptyState message="No hay próximos partidos programados para este equipo" />
+          )}
+        </div>
 
-          {/* Últimos Resultados */}
-          <div className="flex flex-col gap-4">
-            {finishedMatches.length > 0 ? (
-              <FixtureTable
-                roundName="Últimos Resultados"
-                matchesByDate={groupedFinished}
-                goals={goals}
-                teamLookup={teamLookup}
-                hideDateSeparators={true}
-                sortDescending={true}
-              />
-            ) : (
-              <EmptyState message="No hay resultados recientes para este equipo" />
-            )}
-          </div>
+        {/* Últimos Resultados */}
+        <div className="flex flex-col gap-4">
+          {finishedMatches.length > 0 ? (
+            <FixtureTable
+              roundName="Últimos Resultados"
+              matchesByDate={groupedFinished}
+              goals={goals}
+              teamLookup={teamLookup}
+              hideDateSeparators={true}
+              sortDescending={true}
+            />
+          ) : (
+            <EmptyState message="No hay resultados recientes para este equipo" />
+          )}
+        </div>
 
         {/* Fila inferior: Historial por Rival */}
         {historyStats.length > 0 && (

@@ -1,19 +1,21 @@
 import { useState, type ReactNode } from 'react';
 import ImageCrest from './ImageCrest';
-import { useThemeClasses } from '../../functions/themeStore';
+import { useTheme, useThemeClasses } from '../../functions/themeStore';
+import { ChevronDown, Check } from 'lucide-react';
+import MatchEventsTimeline from './MatchEventsTimeline';
 
 // ============================================================
 // CIMIENTOS — Constantes de diseño compartidas por todo el sistema
 // ============================================================
 
 /** Altura fija inamovible (pactada): 48px */
-const HEIGHT = 'h-12';
+export const HEIGHT = 'h-12';
 
 /** Altura para filas de detalles: 24px */
 const HEIGHT_DETAILS = 'min-h-6';
 
 /** Layout base de toda fila */
-const BASE = 'flex items-center w-full px-3 border-b text-sm';
+export const BASE = 'flex items-center w-full px-3 border-b text-sm';
 
 // Los estilos dependientes del tema ahora se asignan localmente en los componentes
 
@@ -82,7 +84,10 @@ export function StandingsRow({ position, logo, name, stats, className = '', noBo
           {position}
         </span>
         <ImageCrest src={logo} />
-        <span className="truncate">{name}</span>
+        
+        <span className="truncate leading-tight">
+          {name}
+        </span>
       </div>
 
       {/* Estadísticas */}
@@ -167,6 +172,10 @@ export function Stat({
 // ============================================================
 
 interface FixtureRowProps {
+  /** ID del partido */
+  matchId?: string;
+  /** Fecha del partido */
+  matchDate?: string | null;
   /** ID del equipo local (para links) */
   homeId?: string;
   /** Escudo del equipo local */
@@ -204,41 +213,65 @@ interface FixtureRowProps {
  * Estructura: [Local ←] [Marcador] [→ Visitante] [Estado?]
  */
 export function FixtureRow({
-  homeId, homeLogo, homeName, homeScore, homeScorers,
-  awayId, awayLogo, awayName, awayScore, awayScorers,
+  matchId, matchDate,
+  homeId, homeLogo, homeName, homeScore,
+  awayId, awayLogo, awayName, awayScore,
   homePenalty, awayPenalty,
+  homeIdDM, awayIdDM,
   matchTime,
   statusLabel,
   className = '',
   noBorder = false
-}: FixtureRowProps) {
-  const { bgApp, border, textMain, textMuted, textProminent, textError } = useThemeClasses();
-  const [isRevealed, setIsRevealed] = useState(false);
+}: FixtureRowProps & { homeIdDM?: string | number | null; awayIdDM?: string | number | null }) {
+  const { bgApp, border, textMuted, textProminent, textError } = useThemeClasses();
+  const [isTimelineExpanded, setIsTimelineExpanded] = useState(false);
 
   // Componente interno para evitar repetición
-  const TeamLink = ({ id, name, logo, scorers, isRight, revealed }: { id?: string; name: string; logo?: string | null; scorers?: ReactNode; isRight?: boolean; revealed: boolean }) => {
+  const TeamLink = ({ id, name, logo, idDM, isRight }: { id?: string; name: string; logo?: string | null; idDM?: string | number | null; isRight?: boolean }) => {
+    const showApiIds = useTheme(state => state.showApiIds);
+    const { textSuccess, textInfo } = useThemeClasses();
+    const isMapped = id && isNaN(Number(id));
+
+    const renderIdBadge = () => {
+      if (!showApiIds) return null;
+      if (isMapped) {
+        return (
+          <span className={`inline-flex items-center ${textSuccess} ${!isRight ? 'mr-1' : 'ml-1'}`}>
+            <Check size={14} strokeWidth={3} />
+          </span>
+        );
+      }
+      if (idDM) {
+        return (
+          <span className={`font-mono ${textInfo} ${!isRight ? 'mr-1' : 'ml-1'}`}>
+            ({idDM})
+          </span>
+        );
+      }
+      return null;
+    };
+    
     return (
-      <div className={`w-full flex-1 flex items-center gap-2 sm:gap-3 overflow-hidden min-w-0 ${isRight ? 'flex-row-reverse text-right justify-start' : 'justify-start'}`}>
-        {/* Escudo - Única parte con link y cursor-pointer */}
+      <div className={`w-full flex-1 flex items-center gap-1 sm:gap-3 overflow-hidden min-w-0 ${isRight ? 'flex-row-reverse text-right justify-start' : 'justify-start'}`}>
+        {/* Escudo */}
         <div className="shrink-0 relative z-10">
-          {id ? (
+          {isMapped ? (
             <a href={`/team/${id}`} onClick={(e) => { e.stopPropagation(); }} className="cursor-pointer hover:opacity-70 transition-opacity flex items-center justify-center">
               <ImageCrest src={logo} />
             </a>
           ) : (
-            <ImageCrest src={logo} />
+            <div className="flex items-center justify-center">
+              <ImageCrest src={logo} />
+            </div>
           )}
         </div>
 
-        {/* Nombre del equipo (Se oculta si hay scorers y estamos en hover o click) */}
-        <span className={`truncate ${scorers && (revealed ? 'hidden' : 'group-hover:hidden')}`}>{name}</span>
-
-        {/* Goleadores que aparecen al hacer hover o click */}
-        {scorers && (
-          <div className={`${revealed ? 'flex' : 'hidden group-hover:flex'} items-center flex-1 text-[11px] ${textMain} leading-tight italic tracking-wide animate-in fade-in duration-300 ${isRight ? 'justify-end' : 'justify-start'}`}>
-            {scorers}
-          </div>
-        )}
+        {/* Nombre del equipo + Badge/ID */}
+        <span className="truncate text-xs sm:text-sm flex items-center">
+          {!isRight && renderIdBadge()}
+          <span className="truncate">{name}</span>
+          {isRight && renderIdBadge()}
+        </span>
       </div>
     );
   };
@@ -246,53 +279,71 @@ export function FixtureRow({
   const isLive = typeof statusLabel === 'string' && (statusLabel.includes("'") || ['LIVE', 'ET', 'MT', 'PEN'].includes(statusLabel));
 
   return (
-    <div
-      onClick={() => setIsRevealed(!isRevealed)}
-      className={`group cursor-pointer ${BASE} ${HEIGHT} ${bgApp} ${border} ${textMuted} ${noBorder ? '!border-b-0' : ''} ${className}`}
-    >
-      {/* Estado (Apartado extra a la izquierda para LIVE/FINAL) */}
-      <div className={`shrink-0 w-4 text-left text-xs font-bold uppercase tracking-tighter mr-1 ${isLive ? `${textError} animate-pulse` : ''}`}>
-        {statusLabel}
-      </div>
-
-      {/* Contenido principal: Local + Marcador + Visitante */}
-      <div className="flex-grow flex items-center overflow-hidden min-w-0">
-        {/* Equipo Local */}
-        <TeamLink id={homeId} name={homeName} logo={homeLogo} scorers={homeScorers} isRight revealed={isRevealed} />
-
-        {/* Marcador */}
-        <div className="flex-shrink-0 flex justify-center w-16 sm:w-24 gap-1 sm:gap-2 tabular-nums">
-          {/* Penalty Local (Espacio reservado) */}
-          <div className="flex-1 flex justify-end">
-            {(homePenalty !== undefined && homePenalty !== null) && (
-              <span className={`${textMuted} font-normal`}>({homePenalty})</span>
-            )}
-          </div>
-
-          {/* Goles u Horario */}
-          <div className="flex gap-2 font-bold min-w-[32px] justify-center">
-            {(homeScore === null || homeScore === undefined) && (awayScore === null || awayScore === undefined) && matchTime ? (
-              <span className={`${textMuted} font-normal`}>{matchTime}</span>
-            ) : (
-              <>
-                <span className={textProminent}>{homeScore ?? '-'}</span>
-                <span className={`${textMuted} font-normal opacity-40`}>:</span>
-                <span className={textProminent}>{awayScore ?? '-'}</span>
-              </>
-            )}
-          </div>
-
-          {/* Penalty Visita (Espacio reservado) */}
-          <div className="flex-1 flex justify-start">
-            {(awayPenalty !== undefined && awayPenalty !== null) && (
-              <span className={`${textMuted} font-normal`}>({awayPenalty})</span>
-            )}
-          </div>
+    <div className={`flex flex-col w-full ${bgApp} ${border} ${noBorder ? '' : 'border-b'} ${className}`}>
+      <div
+        onClick={() => {
+          if (matchId && matchDate && homeId && awayId) {
+            setIsTimelineExpanded(!isTimelineExpanded);
+          }
+        }}
+        className={`flex items-center w-full px-3 text-sm ${HEIGHT} ${textMuted}`}
+      >
+        {/* Estado (Apartado extra a la izquierda para tiempo) */}
+        <div className={`shrink-0 w-4 text-center text-xs font-bold uppercase tracking-tighter ${isLive ? `${textError} animate-pulse` : ''}`}>
+          {statusLabel}
         </div>
 
-        {/* Equipo Visitante */}
-        <TeamLink id={awayId} name={awayName} logo={awayLogo} scorers={awayScorers} revealed={isRevealed} />
+        {/* Contenido principal: Local + Marcador + Visitante */}
+        <div className="flex-grow flex items-center overflow-hidden min-w-0">
+          {/* Equipo Local */}
+          <TeamLink id={homeId} name={homeName} logo={homeLogo} idDM={homeIdDM} isRight />
+
+          {/* Marcador */}
+          <div className="flex-shrink-0 flex justify-center w-10 sm:w-24 gap-1 sm:gap-2 tabular-nums">
+            {/* Penalty Local (Espacio reservado) */}
+            <div className="flex-1 flex justify-end">
+              {(homePenalty !== undefined && homePenalty !== null) && (
+                <span className={`${textMuted} font-normal text-[10px] sm:text-xs`}>({homePenalty})</span>
+              )}
+            </div>
+
+            {/* Goles u Horario */}
+            <div className="flex gap-1 sm:gap-2 font-bold min-w-[20px] sm:min-w-[32px] justify-center text-xs sm:text-sm">
+              {(homeScore === null || homeScore === undefined) && (awayScore === null || awayScore === undefined) && matchTime ? (
+                <span className={`${textMuted} font-normal`}>{matchTime}</span>
+              ) : (
+                <>
+                  <span className={textProminent}>{homeScore ?? '-'}</span>
+                  <span className={`${textMuted} font-normal opacity-40`}>:</span>
+                  <span className={textProminent}>{awayScore ?? '-'}</span>
+                </>
+              )}
+            </div>
+
+            {/* Penalty Visita (Espacio reservado) */}
+            <div className="flex-1 flex justify-start">
+              {(awayPenalty !== undefined && awayPenalty !== null) && (
+                <span className={`${textMuted} font-normal text-[10px] sm:text-xs`}>({awayPenalty})</span>
+              )}
+            </div>
+          </div>
+
+          {/* Equipo Visitante */}
+          <TeamLink id={awayId} name={awayName} logo={awayLogo} idDM={awayIdDM} />
+        </div>
+
+        {/* Arrow Expander */}
+        <div
+          className={`shrink-0 w-4 flex items-center justify-center cursor-pointer ${matchId && matchDate && homeId && awayId ? 'text-neutral-400 dark:text-neutral-500' : 'opacity-0 pointer-events-none'}`}
+        >
+          <ChevronDown size={16} className={`transition-transform duration-200 ${isTimelineExpanded ? 'rotate-180' : ''}`} />
+        </div>
       </div>
+
+      {/* Timeline Expansion */}
+      {isTimelineExpanded && matchId && matchDate && homeId && awayId && (
+        <MatchEventsTimeline matchId={matchId} matchDate={matchDate} homeId={homeId} awayId={awayId} />
+      )}
     </div>
   );
 }

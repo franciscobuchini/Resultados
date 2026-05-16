@@ -18,7 +18,7 @@ export default function DateNavigator({ dateLabel, onChangeDate }: DateNavigator
       >
         <ChevronLeft size={20} strokeWidth={2.5} />
       </button>
-      <span className={`text-base font-semibold capitalize ${textMain}`}>
+      <span className={`text-base font-semibold capitalize ${textMain} w-44 sm:w-56 text-center`}>
         {dateLabel}
       </span>
       <button

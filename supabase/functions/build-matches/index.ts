@@ -11,12 +11,12 @@ Deno.serve(async (_req) => {
 
     const [tRes, teRes, apiRes] = await Promise.all([
       supabase.from('tournaments').select('tournament_id, tournament_id_api'),
-      supabase.from('teams').select('team_id, team_id_api'),
+      supabase.from('teams').select('team_id, team_id_api_365'),
       supabase.from('apis').select('*')
     ])
     
     const tournamentLookup = new Map((tRes.data || []).map((t: any) => [Number(t.tournament_id_api), t.tournament_id]))
-    const teamLookup = new Map((teRes.data || []).map((t: any) => [Number(t.team_id_api), t.team_id]))
+    const teamLookup = new Map((teRes.data || []).map((t: any) => [Number(t.team_id_api_365), t.team_id]))
 
     if (!apiRes.data || apiRes.data.length === 0) {
       console.log("No hay datos en la tabla 'apis'");
@@ -64,12 +64,10 @@ Deno.serve(async (_req) => {
             match_status: g.statusText || g.status_text || 'Desconocido',
             game_time: gameTime,
             home_id: homeId,
-            home_id_api: g.homeCompetitor?.id || null,
             home_name: g.homeCompetitor?.name || 'Local',
             home_score: (g.homeCompetitor?.score === -1 || g.homeCompetitor?.score === undefined) ? null : g.homeCompetitor.score,
             home_penalty: g.homeCompetitor?.penaltyScore || null,
             away_id: awayId,
-            away_id_api: g.awayCompetitor?.id || null,
             away_name: g.awayCompetitor?.name || 'Visitante',
             away_score: (g.awayCompetitor?.score === -1 || g.awayCompetitor?.score === undefined) ? null : g.awayCompetitor.score,
             away_penalty: g.awayCompetitor?.penaltyScore || null,
