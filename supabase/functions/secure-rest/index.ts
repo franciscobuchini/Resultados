@@ -7,7 +7,7 @@ const ENCRYPTION_KEY = Deno.env.get('ENCRYPTION_KEY') || 'dev_secret_key_change_
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, prefer, range',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, prefer, range, accept-profile, x-retry-count',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE, PATCH',
 };
 
