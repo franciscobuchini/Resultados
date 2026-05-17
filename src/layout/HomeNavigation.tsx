@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from '../functions/supabase'
 import PageHeader from './PageHeader'
+import { groupLatestTournaments } from '../functions/tournaments'
 
 export default function HomeNavigation({ activeTabId = 'matches', onChange }: { activeTabId?: string, onChange?: (id: string) => void }) {
   const navigate = useNavigate()
@@ -9,16 +10,17 @@ export default function HomeNavigation({ activeTabId = 'matches', onChange }: { 
 
   useEffect(() => {
     async function fetchFeatured() {
-      // Traemos los torneos que queremos destacar (puedes ajustar los IDs)
+      // 1. Traemos todos los torneos
       const { data } = await supabase
         .from('tournaments')
         .select('tournament_id, tournament_name')
-        .in('tournament_id', ['ARG.2026.11', 'INT.2026.WC'])
       
       if (data) {
-        setTournaments(data.map(t => ({
-          label: t.tournament_name,
-          id: t.tournament_id
+        const latestTournaments = groupLatestTournaments(data)
+        
+        setTournaments(latestTournaments.map(t => ({
+          label: t.name,
+          id: t.id
         })))
       }
     }
