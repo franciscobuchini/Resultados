@@ -3,7 +3,7 @@ import { isLive, getMatchStatusLabel } from './matchHelpers'
 import type { Match, Goal } from '../../shared/tournament/matchTypes'
 import { supabase } from './supabase'
 import { decryptPayload } from './crypto'
-
+import { getLeaguePriority } from './leagueTiers'
 // ============================================================
 // TYPES — Datos que devuelve la Edge Function get-fixtures
 // ============================================================
@@ -106,11 +106,20 @@ const groupAndAdaptFixtures = (fixtures: Fixture[], localTeamsMap: Map<number, a
     return acc
   }, {} as Record<string, { logo: string; matches: Fixture[] }>)
 
-  // Ligas con partidos en vivo primero
-  const sortedLeagueEntries = Object.entries(byLeague).sort(([, a], [, b]) => {
+  // Ligas ordenadas de forma absoluta por Tier List
+  const sortedLeagueEntries = Object.entries(byLeague).sort(([nameA, a], [nameB, b]) => {
+    // 1. Regla principal absoluta: Tier List
+    const tierA = getLeaguePriority(nameA)
+    const tierB = getLeaguePriority(nameB)
+    if (tierA !== tierB) return tierA - tierB
+
+    // 2. Solo en caso de empate (mismo Tier), priorizamos si alguna tiene partidos en vivo
     const aLive = a.matches.some(m => isLive(m.status)) ? 0 : 1
     const bLive = b.matches.some(m => isLive(m.status)) ? 0 : 1
-    return aLive - bLive
+    if (aLive !== bLive) return aLive - bLive
+    
+    // 3. Si todo empata, orden alfabético
+    return nameA.localeCompare(nameB)
   })
 
   return sortedLeagueEntries.map(([leagueName, { logo, matches }]) => {
