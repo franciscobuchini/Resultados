@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import ImageCrest from './ImageCrest';
 import { useTheme, useThemeClasses } from '../../functions/themeStore';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check, Ban } from 'lucide-react';
 import MatchEventsTimeline from './MatchEventsTimeline';
 
 // ============================================================
@@ -226,7 +226,7 @@ export function FixtureRow({
   className = '',
   noBorder = false
 }: FixtureRowProps & { homeIdDM?: string | number | null; awayIdDM?: string | number | null }) {
-  const { bgApp, bgSurface, border, textMuted, textProminent, textError } = useThemeClasses();
+  const { bgApp, bgSurface, border, textMuted, textProminent, textError, textAlert } = useThemeClasses();
   const [isTimelineExpanded, setIsTimelineExpanded] = useState(false);
 
   // Componente interno para evitar repetición
@@ -292,8 +292,17 @@ export function FixtureRow({
         className={`flex items-center w-full px-3 text-sm ${HEIGHT} ${textMuted}`}
       >
         {/* Estado (Apartado extra a la izquierda para tiempo) */}
-        <div className={`shrink-0 w-4 text-center text-xs font-bold uppercase tracking-tighter ${isLive ? `${textError} animate-pulse` : ''}`}>
-          {statusLabel}
+        <div 
+          title={statusLabel === '✓' ? 'Finalizado' : statusLabel === 'C' ? 'Cancelado' : undefined}
+          className={`shrink-0 w-4 flex items-center justify-center text-center text-xs font-bold uppercase tracking-tighter ${
+            statusLabel === 'C' ? (textAlert || 'text-amber-500') : isLive ? `${textError} animate-pulse` : ''
+          }`}
+        >
+          {statusLabel === 'C' ? (
+            <Ban size={14} strokeWidth={2.5} />
+          ) : (
+            statusLabel
+          )}
         </div>
 
         {/* Contenido principal: Local + Marcador + Visitante */}
@@ -306,7 +315,7 @@ export function FixtureRow({
             {/* Penalty Local (Espacio reservado) */}
             <div className="flex-1 flex justify-end">
               {(homePenalty !== undefined && homePenalty !== null) && (
-                <span className={`${textMuted} font-normal text-[10px] sm:text-xs`}>({homePenalty})</span>
+                <span className={`${textMuted} font-normal text-xs sm:text-sm`}>({homePenalty})</span>
               )}
             </div>
 
@@ -326,7 +335,7 @@ export function FixtureRow({
             {/* Penalty Visita (Espacio reservado) */}
             <div className="flex-1 flex justify-start">
               {(awayPenalty !== undefined && awayPenalty !== null) && (
-                <span className={`${textMuted} font-normal text-[10px] sm:text-xs`}>({awayPenalty})</span>
+                <span className={`${textMuted} font-normal text-xs sm:text-sm`}>({awayPenalty})</span>
               )}
             </div>
           </div>

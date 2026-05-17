@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { supabase } from '../../functions/supabase'
 import Papa from 'papaparse'
 import { useThemeClasses } from '../../functions/themeStore'
+import { Input } from '../ui/Input'
 
 // ── Tipos ──────────────────────────────────────────────
 interface RawMatch {
@@ -432,7 +433,7 @@ export default function FileImporter() {
       {/* Drop Zone */}
       <div onClick={() => fileInputRef.current?.click()}
         className={`mb-8 border-2 border-dashed ${border} ${bgSurface}/20 rounded-2xl p-10 transition-all cursor-pointer flex flex-col items-center justify-center gap-4 group`}>
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".json,.txt,.csv" multiple />
+        <Input variant="raw" type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".json,.txt,.csv" multiple />
         <div className={`w-16 h-16 rounded-full ${bgSurface} flex items-center justify-center ${textMuted} group-hover:scale-110 group-hover:text-white transition-all`}>
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
         </div>
@@ -533,7 +534,7 @@ export default function FileImporter() {
                   ].map(({ label, field, val, w }) => (
                     <div key={field} className={w}>
                       <label className="text-[7px] font-mono text-zinc-600 uppercase block mb-1">{label}</label>
-                      <input value={val} onChange={e => updateEntryTourney(entry.id, field, field==='tournament_tier'? (parseInt(e.target.value)||null):e.target.value)}
+                      <Input variant="raw" value={val} onChange={e => updateEntryTourney(entry.id, field, field==='tournament_tier'? (parseInt(e.target.value)||null):e.target.value)}
                         className={`w-full bg-transparent border-b font-bold text-[10px] text-zinc-300 outline-none pb-0.5 ${field==='tournament_edition'&&!val?'border-red-600':'border-zinc-800'}`} />
                     </div>
                   ))}
@@ -606,7 +607,8 @@ export default function FileImporter() {
                               </td>
                               <td className="p-3 text-zinc-500 italic text-[9px]">
                                 {score > 0 ? (
-                                  <input 
+                                  <Input 
+                                    variant="raw"
                                     value={rowGoals.map(formatGoal).join('; ')}
                                     onChange={e => handleGoalsChange(entry.id, i, e.target.value)}
                                     className={`w-full bg-transparent border-b outline-none text-[9px] px-1 py-0.5 rounded transition-all ${

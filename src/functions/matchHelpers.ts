@@ -41,21 +41,25 @@ export const isLive = (status: string | null): boolean => {
   return codes.includes(s) || !isNaN(Number(s));
 };
 
-/**
- * Devuelve la etiqueta de estado (Minuto o "Final") SOLO si el partido es hoy.
- */
 export const getMatchStatusLabel = (
   status: string | null,
   date: string | null,
   currentMinute?: number | null
 ): string | null => {
-  if (!status || !date) return null;
+  if (!status) return null;
+
+  const s = status.toUpperCase().trim();
+
+  // Si está cancelado o pospuesto, devolvemos 'C' en cualquier fecha
+  if (['CANC', 'CAN', 'CANCELLED', 'POSTPONED'].includes(s)) {
+    return 'C';
+  }
+
+  if (!date) return null;
 
   // Solo nos interesa para el día de hoy
   const today = new Date().toISOString().split('T')[0];
   if (date !== today) return null;
-
-  const s = status.toUpperCase().trim();
 
   // Si está en vivo
   if (isLive(s)) {
@@ -63,7 +67,7 @@ export const getMatchStatusLabel = (
     
     // Si el status mismo es el minuto
     if (!isNaN(Number(s))) return `${s}'`;
-    
+
     // Si tenemos el minuto por parámetro
     if (currentMinute) return `${currentMinute}'`;
 

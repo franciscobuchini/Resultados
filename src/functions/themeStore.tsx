@@ -34,6 +34,7 @@ export interface ThemeClasses {
   textSuccess?: string
   textError?: string
   textInfo?: string
+  textAlert?: string
   bgProminent?: string
   logo: string
 }
@@ -55,6 +56,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
     textInfo: 'text-blue-400',
+    textAlert: 'text-amber-400',
     bgProminent: 'bg-zinc-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
@@ -72,6 +74,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
     textInfo: 'text-blue-400',
+    textAlert: 'text-amber-400',
     bgProminent: 'bg-slate-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
@@ -89,6 +92,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
     textInfo: 'text-blue-400',
+    textAlert: 'text-amber-400',
     bgProminent: 'bg-mauve-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
@@ -106,6 +110,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
     textInfo: 'text-blue-400',
+    textAlert: 'text-amber-400',
     bgProminent: 'bg-mist-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
@@ -123,6 +128,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textSuccess: 'text-green-400',
     textError: 'text-red-400',
     textInfo: 'text-blue-400',
+    textAlert: 'text-amber-400',
     bgProminent: 'bg-olive-800/50',
     bgMain: 'bg-black/10',
     logo: '/src/assets/ResultadosLogoLight.webp',
@@ -144,6 +150,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textSuccess: 'text-green-600',
     textError: 'text-red-600',
     textInfo: 'text-blue-600',
+    textAlert: 'text-amber-600',
     bgProminent: 'bg-slate-100',
     bgMain: 'bg-white/40',
     logo: logoDark,
@@ -161,6 +168,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textSuccess: 'text-green-600',
     textError: 'text-red-600',
     textInfo: 'text-blue-600',
+    textAlert: 'text-amber-600',
     bgProminent: 'bg-taupe-100',
     bgMain: 'bg-white/40',
     logo: logoDark,

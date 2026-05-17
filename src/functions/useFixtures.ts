@@ -31,6 +31,8 @@ export interface Fixture {
   away_teams: { name: string; logo_path: string }
   leagues: { name: string; logo_path: string }
   fixture_events: FixtureEvent[]
+  pen_home_score?: number | null
+  pen_away_score?: number | null
 }
 
 export interface AdaptedLeagueGroup {
@@ -140,12 +142,12 @@ const groupAndAdaptFixtures = (fixtures: Fixture[], localTeamsMap: Map<number, a
         home_name: homeLocal?.team_name || f.home_teams.name,
         home_logo: homeLocal?.team_crest_url || f.home_teams.logo_path,
         home_score: f.home_score,
-        home_penalty: null,
+        home_penalty: f.pen_home_score ?? null,
         away_id: awayLocal?.team_id || f.away_team_id.toString(),
         away_name: awayLocal?.team_name || f.away_teams.name,
         away_logo: awayLocal?.team_crest_url || f.away_teams.logo_path,
         away_score: f.away_score,
-        away_penalty: null,
+        away_penalty: f.pen_away_score ?? null,
         tournament_id: null
       }
     })

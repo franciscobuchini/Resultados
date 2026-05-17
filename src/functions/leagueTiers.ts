@@ -7,8 +7,8 @@
  */
 const TIER_LIST: string[] = [
   // Top absolutos
-  'World Cup',
-  'Copa America',
+  'MUNDIAL',
+  'COPA AMÉRICA',
   
   // Argentina
   'LIGA PROFESIONAL DE FÚTBOL',
@@ -40,6 +40,7 @@ const TIER_LIST: string[] = [
   'AMISTOSO INTERNACIONAL',
   'FA CUP',
   'COPA DEL REY',
+  'COPA DO BRASIL',
 ];
 
 export const getLeaguePriority = (leagueName: string): number => {

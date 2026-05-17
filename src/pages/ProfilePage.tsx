@@ -11,6 +11,7 @@ import UserAvatar from '../components/ui/UserAvatar';
 import { Button } from '../components/ui/Button';
 import { Save } from 'lucide-react';
 import { useAuth } from '../functions/auth';
+import { Input } from '../components/ui/Input';
 
 interface Team {
   team_id: string;
@@ -118,31 +119,28 @@ export default function ProfilePage() {
             
             {/* Club e Hincha */}
             <div className="flex flex-col gap-4">
-              <div className={`p-4 rounded-2xl border ${border} ${bgSurface} relative`}>
-                <div className="flex items-center gap-4">
-                  <div className={`${textMuted} w-6 h-6 flex items-center justify-center shrink-0`}>
-                    {selectedTeam?.team_crest_url ? (
+              <div className="relative">
+                <Input 
+                  type="text" 
+                  placeholder="Busca tu club..."
+                  value={selectedTeam ? (selectedTeam.team_fullname || selectedTeam.team_name) : searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (selectedTeam) setSelectedTeam(null);
+                    setShowResults(true);
+                  }}
+                  onFocus={() => setShowResults(true)}
+                  autoComplete="new-password"
+                  containerClassName="p-4 rounded-2xl"
+                  className="font-medium"
+                  customIcon={
+                    selectedTeam?.team_crest_url ? (
                       <img src={selectedTeam.team_crest_url} className="w-6 h-6 object-contain" alt="" />
                     ) : (
-                      <ShieldQuestion size={20} />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <input 
-                      type="text" 
-                      placeholder="Busca tu club..."
-                      value={selectedTeam ? (selectedTeam.team_fullname || selectedTeam.team_name) : searchQuery}
-                      onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        if (selectedTeam) setSelectedTeam(null);
-                        setShowResults(true);
-                      }}
-                      onFocus={() => setShowResults(true)}
-                      autoComplete="new-password"
-                      className={`bg-transparent border-none outline-none ${textMain} w-full text-sm font-medium`}
-                    />
-                  </div>
-                </div>
+                      <ShieldQuestion size={20} className={textMuted} />
+                    )
+                  }
+                />
                 {showResults && teams.length > 0 && (
                   <div className={`absolute left-0 right-0 top-full mt-2 z-10 rounded-xl border ${border} ${bgSurface} overflow-hidden shadow-2xl`}>
                     {teams.map(team => (
@@ -158,31 +156,28 @@ export default function ProfilePage() {
 
             {/* País */}
             <div className="flex flex-col gap-4">
-              <div className={`p-4 rounded-2xl border ${border} ${bgSurface} relative`}>
-                <div className="flex items-center gap-4">
-                  <div className={`${textMuted} w-6 h-6 flex items-center justify-center shrink-0`}>
-                    {selectedCountry?.country_flag_url ? (
+              <div className="relative">
+                <Input 
+                  type="text" 
+                  placeholder="Busca tu país..."
+                  value={selectedCountry ? selectedCountry.country_name : countryQuery}
+                  onChange={(e) => {
+                    setCountryQuery(e.target.value);
+                    if (selectedCountry) setSelectedCountry(null);
+                    setShowCountryResults(true);
+                  }}
+                  onFocus={() => setShowCountryResults(true)}
+                  autoComplete="new-password"
+                  containerClassName="p-4 rounded-2xl"
+                  className="font-medium"
+                  customIcon={
+                    selectedCountry?.country_flag_url ? (
                       <img src={selectedCountry.country_flag_url} className="w-6 h-auto object-contain" alt="" />
                     ) : (
-                      <Globe size={20} />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <input 
-                      type="text" 
-                      placeholder="Busca tu país..."
-                      value={selectedCountry ? selectedCountry.country_name : countryQuery}
-                      onChange={(e) => {
-                        setCountryQuery(e.target.value);
-                        if (selectedCountry) setSelectedCountry(null);
-                        setShowCountryResults(true);
-                      }}
-                      onFocus={() => setShowCountryResults(true)}
-                      autoComplete="new-password"
-                      className={`bg-transparent border-none outline-none ${textMain} w-full text-sm font-medium`}
-                    />
-                  </div>
-                </div>
+                      <Globe size={20} className={textMuted} />
+                    )
+                  }
+                />
                 {showCountryResults && countries.length > 0 && (
                   <div className={`absolute left-0 right-0 top-full mt-2 z-10 rounded-xl border ${border} ${bgSurface} overflow-hidden shadow-2xl`}>
                     {countries.map(country => (

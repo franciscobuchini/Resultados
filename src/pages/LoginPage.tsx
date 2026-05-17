@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useThemeClasses } from '../functions/themeStore';
 import { useAuth } from '../functions/auth';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
 
 export default function LoginPage() {
-  const { bgApp, bgSurface, border, textMain, textMuted, textAccent, textError, textSuccess, bgSurfaceHover } = useThemeClasses();
+  const { bgApp, bgSurface, border, textMain, textMuted, textAccent, textError, textSuccess } = useThemeClasses();
   const { sendMagicLink, loading, error, clearError, user } = useAuth();
   const navigate = useNavigate();
 
@@ -42,9 +44,7 @@ export default function LoginPage() {
         {/* Estado: Link enviado */}
         {sent && !error ? (
           <div className="flex flex-col items-center text-center gap-4">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${textSuccess}`}
-              style={{ background: 'rgba(34, 197, 94, 0.1)' }}
-            >
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${textSuccess}`}>
               <Check size={32} />
             </div>
             <h1 className={`text-xl font-bold ${textMain}`}>¡Revisá tu email!</h1>
@@ -70,19 +70,16 @@ export default function LoginPage() {
             </div>
 
             {/* Input de Email */}
-            <div className={`flex items-center gap-3 rounded-xl border ${border} px-4 py-3 transition-colors focus-within:ring-1 focus-within:ring-white/20`}>
-              <Mail size={18} className={textMuted} />
-              <input
-                type="email"
-                placeholder="tu@email.com"
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); clearError(); }}
-                required
-                autoFocus
-                autoComplete="email"
-                className={`bg-transparent border-none outline-none ${textMain} w-full text-sm placeholder:${textMuted}`}
-              />
-            </div>
+            <Input
+              type="email"
+              placeholder="tu@email.com"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); clearError(); }}
+              required
+              autoFocus
+              autoComplete="email"
+              icon={Mail}
+            />
 
             {/* Error */}
             {error && (
@@ -90,20 +87,23 @@ export default function LoginPage() {
             )}
 
             {/* Botón */}
-            <button
-              type="submit"
+            <Button
               disabled={loading || !email.trim()}
-              className={`flex items-center justify-center gap-2 rounded-xl border ${border} ${bgSurfaceHover} px-4 py-3 text-sm font-medium ${textMain} transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              {loading ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <>
-                  Enviar link mágico
-                  <ArrowRight size={16} />
-                </>
-              )}
-            </button>
+              value={
+                loading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Enviando...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span>Enviar link mágico</span>
+                    <ArrowRight size={16} />
+                  </div>
+                )
+              }
+              className="w-full justify-center h-12 rounded-xl text-sm"
+            />
           </form>
         )}
       </div>
