@@ -24,8 +24,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <SidebarLeft />
 
         {/* Parte Central del Sitio */}
-        <main className={`flex-1 min-w-0 ${bgMain}`}>
-          <div className="max-w-7xl mx-auto">
+        <main className={`flex-1 min-w-0 ${bgMain} flex flex-col overflow-x-hidden`}>
+          <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col">
             {children}
           </div>
         </main>

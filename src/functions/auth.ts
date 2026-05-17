@@ -18,17 +18,18 @@ interface AuthState {
   user: AuthUser | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, pass: string) => Promise<void>;
-  register: (email: string, pass: string, userName: string) => Promise<void>;
+  /** Envía un magic link al email del usuario */
+  sendMagicLink: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<AuthUser>) => Promise<void>;
+  clearError: () => void;
 }
 
 // --- LÓGICA INTERNA (SERVICE) ---
 const mapUser = (sbUser: User): AuthUser => ({
   id: sbUser.id,
   email: sbUser.email,
-  user_name: sbUser.user_metadata?.user_name || 'Usuario',
+  user_name: sbUser.user_metadata?.user_name || sbUser.email?.split('@')[0] || 'Usuario',
   user_team_id: sbUser.user_metadata?.user_team_id || null,
   user_plan: sbUser.user_metadata?.user_plan || 'free',
   user_province: sbUser.user_metadata?.user_province || null,
@@ -43,29 +44,18 @@ export const useAuth = create<AuthState>()(
       loading: false,
       error: null,
 
-      login: async (email, pass) => {
+      sendMagicLink: async (email) => {
         set({ loading: true, error: null })
         try {
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass })
-          if (error) throw error
-          set({ user: mapUser(data.user), loading: false })
-        } catch (err) {
-          const error = err as Error
-          set({ error: error.message, loading: false })
-          throw err
-        }
-      },
-
-      register: async (email, pass, userName) => {
-        set({ loading: true, error: null })
-        try {
-          const { data, error } = await supabase.auth.signUp({
-            email, password: pass,
-            options: { data: { user_name: userName, user_plan: 'free' } }
+          const { error } = await supabase.auth.signInWithOtp({
+            email,
+            options: {
+              // Redirige al usuario de vuelta a la app después de hacer click en el link
+              emailRedirectTo: window.location.origin,
+            }
           })
           if (error) throw error
-          if (!data.user) throw new Error("No se pudo crear el usuario")
-          set({ user: mapUser(data.user), loading: false })
+          set({ loading: false })
         } catch (err) {
           const error = err as Error
           set({ error: error.message, loading: false })
@@ -89,7 +79,9 @@ export const useAuth = create<AuthState>()(
           set({ error: error.message, loading: false })
           throw err
         }
-      }
+      },
+
+      clearError: () => set({ error: null }),
     }),
     {
       name: 'auth-storage',
@@ -98,7 +90,7 @@ export const useAuth = create<AuthState>()(
   )
 )
 
-// Escucha cambios de sesión de Supabase (ej: si expira el token)
+// Escucha cambios de sesión de Supabase (ej: cuando el usuario hace click en el magic link)
 supabase.auth.onAuthStateChange((_event, session) => {
   if (session?.user) {
     useAuth.setState({ user: mapUser(session.user) })

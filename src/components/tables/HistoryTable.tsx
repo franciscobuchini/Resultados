@@ -43,7 +43,7 @@ export default function HistoryTable({ title = "Historial por Rival", stats }: H
   const sortedStats = [...stats].sort((a, b) => {
     const valA = a[sortField];
     const valB = b[sortField];
-    
+
     if (sortDir === 'desc') {
       return valB - valA;
     } else {
@@ -54,7 +54,7 @@ export default function HistoryTable({ title = "Historial por Rival", stats }: H
   const renderHeaderStat = (label: string, field: SortField) => {
     const isActive = sortField === field;
     return (
-      <Stat 
+      <Stat
         value={
           <div className="flex items-center gap-0.5">
             <span>{label}</span>
@@ -80,7 +80,7 @@ export default function HistoryTable({ title = "Historial por Rival", stats }: H
   );
 
   const { textSuccess, textError } = useThemeClasses();
-  
+
   return (
     <DataBox>
       <StandingsHeaderRow
@@ -90,7 +90,7 @@ export default function HistoryTable({ title = "Historial por Rival", stats }: H
 
       {sortedStats.map((item, idx) => {
         const diffText = item.diff > 0 ? `+${item.diff}` : item.diff;
-        
+
         return (
           <Link key={item.rivalId} to={`/team/${item.rivalId}`} className="block transition-opacity hover:opacity-80">
             <StandingsRow
@@ -100,10 +100,10 @@ export default function HistoryTable({ title = "Historial por Rival", stats }: H
               noBorder={idx === sortedStats.length - 1}
               stats={
                 <StatGroup>
-                  <Stat 
-                    value={diffText} 
-                    prominent 
-                    className={item.diff > 0 ? textSuccess : item.diff < 0 ? textError : ''} 
+                  <Stat
+                    value={diffText}
+                    prominent
+                    className={item.diff > 0 ? textSuccess : item.diff < 0 ? textError : ''}
                   />
                   <Stat value={item.played} />
                   <Stat value={item.won} />

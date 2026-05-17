@@ -203,6 +203,12 @@ export const useThemeClasses = () => {
  */
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const { bgApp, textMain } = useThemeClasses()
+  const setShowApiIds = useTheme(state => state.setShowApiIds)
+
+  useEffect(() => {
+    // Forzamos el switch de IDs a off al iniciar la aplicación para resolver el problema de sesión
+    setShowApiIds(false)
+  }, [setShowApiIds])
 
   useEffect(() => {
     // Al cambiar de tema, actualizamos el body para que el fondo global sea el del tema

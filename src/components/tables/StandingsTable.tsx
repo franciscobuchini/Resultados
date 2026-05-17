@@ -42,7 +42,7 @@ export default function StandingsTable({ title, standings, teamLookup }: Standin
 
       {standings.map((team, idx) => {
         const info = teamLookup[team.team_id.trim()];
-        
+
         return (
           <Link key={team.team_id} to={`/team/${team.team_id}`} className="block transition-opacity hover:opacity-80">
             <StandingsRow
@@ -57,7 +57,7 @@ export default function StandingsTable({ title, standings, teamLookup }: Standin
                   <Stat value={team.won} className="hidden xl:flex" />
                   <Stat value={team.drawn} className="hidden xl:flex" />
                   <Stat value={team.lost} className="hidden xl:flex" />
-                  <Stat 
+                  <Stat
                     value={team.goal_difference > 0 ? `+${team.goal_difference}` : team.goal_difference}
                   />
                 </StatGroup>

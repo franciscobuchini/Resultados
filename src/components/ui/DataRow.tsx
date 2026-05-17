@@ -84,7 +84,7 @@ export function StandingsRow({ position, logo, name, stats, className = '', noBo
           {position}
         </span>
         <ImageCrest src={logo} />
-        
+
         <span className="truncate leading-tight">
           {name}
         </span>
@@ -253,7 +253,7 @@ export function FixtureRow({
       }
       return null;
     };
-    
+
     return (
       <div className={`w-full flex-1 flex items-center gap-1 sm:gap-3 overflow-hidden min-w-0 ${isRight ? 'flex-row-reverse text-right justify-start' : 'justify-start'}`}>
         {/* Escudo */}
@@ -345,11 +345,11 @@ export function FixtureRow({
 
       {/* Timeline Expansion */}
       {isTimelineExpanded && matchId && matchDate && homeId && awayId && (
-        <MatchEventsTimeline 
-          matchId={matchId} 
-          matchDate={matchDate} 
-          homeId={homeId} 
-          awayId={awayId} 
+        <MatchEventsTimeline
+          matchId={matchId}
+          matchDate={matchDate}
+          homeId={homeId}
+          awayId={awayId}
           homeIdDM={homeIdDM}
           awayIdDM={awayIdDM}
           homeScore={homeScore}

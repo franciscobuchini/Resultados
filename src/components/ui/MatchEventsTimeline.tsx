@@ -64,6 +64,96 @@ const goalToEvent = (goal: Goal): FixtureEvent => {
   };
 };
 
+/**
+ * reconcileGoals — Compara los goles de la API con el marcador final.
+ * Si hay más goles registrados que goles en el resultado, los excedentes
+ * se marcan como 'Disallowed Goal' (anulados).
+ *
+ * Usa homeIdDM / awayIdDM (IDs numéricos de la API) para identificar
+ * correctamente a qué equipo pertenece cada evento.
+ */
+const reconcileGoals = (
+  eventsList: FixtureEvent[],
+  homeScore: string | number | null | undefined,
+  awayScore: string | number | null | undefined,
+  homeIdDM: string | number | null | undefined,
+  awayIdDM: string | number | null | undefined,
+): FixtureEvent[] => {
+  // Solo reconciliar si tenemos marcador final y IDs de la API
+  if (homeScore == null || awayScore == null || (!homeIdDM && !awayIdDM)) {
+    return eventsList;
+  }
+
+  const isGoalEvent = (e: FixtureEvent) =>
+    (e.event_type.toLowerCase().includes('goal') || e.event_type.toLowerCase().includes('penalty')) &&
+    !e.event_type.toLowerCase().includes('miss') &&
+    !e.event_type.toLowerCase().includes('disallowed');
+
+  // Colectar goles válidos por equipo usando los IDs numéricos de la API
+  const homeGoalEvents: FixtureEvent[] = [];
+  const awayGoalEvents: FixtureEvent[] = [];
+
+  eventsList.forEach(e => {
+    if (!isGoalEvent(e)) return;
+    const tid = e.team_id.toString();
+    if (homeIdDM && tid === homeIdDM.toString()) {
+      homeGoalEvents.push(e);
+    } else if (awayIdDM && tid === awayIdDM.toString()) {
+      awayGoalEvents.push(e);
+    }
+  });
+
+  const markExcess = (goalEvents: FixtureEvent[], targetCount: number) => {
+    const excess = goalEvents.length - targetCount;
+    if (excess <= 0) return;
+
+    let remaining = excess;
+
+    // 1er pasada: goles sin nombre de jugador
+    for (let i = goalEvents.length - 1; i >= 0 && remaining > 0; i--) {
+      const e = goalEvents[i];
+      if (!e.player_name || e.player_name.trim() === '') {
+        e.event_type = 'Disallowed Goal';
+        remaining--;
+      }
+    }
+
+    // 2da pasada: goles que ocurrieron justo antes o en el mismo minuto que un chequeo de VAR
+    for (let i = goalEvents.length - 1; i >= 0 && remaining > 0; i--) {
+      const e = goalEvents[i];
+      if (e.event_type === 'Disallowed Goal') continue;
+
+      // Buscar si hay un evento VAR en los siguientes 5 minutos para este mismo equipo
+      const hasVAR = eventsList.some(v => 
+        v.event_type.toLowerCase().includes('var') && 
+        v.minute >= e.minute && 
+        v.minute <= e.minute + 5 &&
+        v.team_id.toString() === e.team_id.toString()
+      );
+
+      if (hasVAR) {
+        e.event_type = 'Disallowed Goal';
+        remaining--;
+      }
+    }
+
+    // 3ra pasada: si todavía hay exceso (la API mandó un gol de más sin VAR ni nada),
+    // marcamos el más reciente como anulado, pero MANTENEMOS su nombre.
+    for (let i = goalEvents.length - 1; i >= 0 && remaining > 0; i--) {
+      const e = goalEvents[i];
+      if (e.event_type !== 'Disallowed Goal') {
+        e.event_type = 'Disallowed Goal';
+        remaining--;
+      }
+    }
+  };
+
+  markExcess(homeGoalEvents, Number(homeScore));
+  markExcess(awayGoalEvents, Number(awayScore));
+
+  return eventsList;
+};
+
 export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId, homeIdDM, awayIdDM, homeScore, awayScore, matchNotes }: MatchEventsTimelineProps) {
   const [events, setEvents] = useState<FixtureEvent[]>([]);
   const [loading, setLoading] = useState(!!(matchDate && matchId));
@@ -99,54 +189,9 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
           // API no disponible, seguimos con el fallback
         }
 
-        const processDisallowedGoals = (eventsList: FixtureEvent[]) => {
-          const isGoal = (e: FixtureEvent) => e.event_type.toLowerCase().includes('goal') || e.event_type.toLowerCase().includes('penalty');
-          const isMiss = (e: FixtureEvent) => e.event_type.toLowerCase().includes('miss') || e.event_type.toLowerCase().includes('disallowed');
-          
-          const teamGoals: Record<string, FixtureEvent[]> = {};
-          eventsList.forEach(e => {
-            if (e.event_type.toLowerCase().includes('var')) {
-              e.player_name = 'Chequeo VAR';
-            }
-            if (isGoal(e) && !isMiss(e)) {
-              const tId = e.team_id.toString();
-              if (!teamGoals[tId]) teamGoals[tId] = [];
-              teamGoals[tId].push(e);
-            }
-          });
-
-          const homeIds = [homeId];
-          if (homeIdDM) homeIds.push(homeIdDM.toString());
-          const awayIds = [awayId];
-          if (awayIdDM) awayIds.push(awayIdDM.toString());
-
-          if (homeScore != null) {
-            let homeGoalEvents: FixtureEvent[] = [];
-            homeIds.forEach(id => { if (teamGoals[id]) homeGoalEvents.push(...teamGoals[id]) });
-            if (homeGoalEvents.length > Number(homeScore)) {
-              homeGoalEvents.filter(e => !e.player_name || e.player_name.trim() === '').forEach(e => {
-                e.event_type = 'Disallowed Goal';
-                e.player_name = 'Gol anulado';
-              });
-            }
-          }
-
-          if (awayScore != null) {
-            let awayGoalEvents: FixtureEvent[] = [];
-            awayIds.forEach(id => { if (teamGoals[id]) awayGoalEvents.push(...teamGoals[id]) });
-            if (awayGoalEvents.length > Number(awayScore)) {
-              awayGoalEvents.filter(e => !e.player_name || e.player_name.trim() === '').forEach(e => {
-                e.event_type = 'Disallowed Goal';
-                e.player_name = 'Gol anulado';
-              });
-            }
-          }
-          return eventsList;
-        };
-
-        // 2. Si la API devolvió eventos, usarlos
+        // 2. Si la API devolvió eventos, reconciliar goles con el marcador final
         if (apiEvents.length > 0) {
-          setEvents(processDisallowedGoals(apiEvents));
+          setEvents(reconcileGoals(apiEvents, homeScore, awayScore, homeIdDM, awayIdDM));
           return;
         }
 
@@ -159,7 +204,7 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
 
         if (goalsData && goalsData.length > 0) {
           const mappedEvents = goalsData.map((g: Goal) => goalToEvent(g));
-          setEvents(processDisallowedGoals(mappedEvents));
+          setEvents(mappedEvents);
         } else {
           setEvents([]);
         }
@@ -210,16 +255,67 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
               const isHome = event.team_id.toString() === homeId || (homeIdDM && event.team_id.toString() === homeIdDM.toString());
               const isAway = event.team_id.toString() === awayId || (awayIdDM && event.team_id.toString() === awayIdDM.toString());
               const icon = getEventIcon(event.event_type, event.details?.addition || '', textAccent);
-              
-              if (!icon && !event.player_name) return null;
+
+              let displayPlayerName = event.player_name || '';
+              const tType = event.event_type.toLowerCase();
+
+              // Lógica específica para VAR
+              if (tType.includes('var')) {
+                const reasonRaw = event.details?.addition?.trim() || '';
+                const playerRaw = event.player_name?.trim() || '';
+                
+                // Función para traducir y limpiar el texto del VAR
+                const translateVarReason = (text: string) => {
+                  const t = text.toLowerCase();
+                  if (!t || t.includes('pending') || t === 'check' || t.includes('var')) return null;
+                  if (t.includes('goal')) return 'Posible Gol';
+                  if (t.includes('penalty')) return 'Posible Penal';
+                  if (t.includes('red card') || t.includes('card upgrade')) return 'Posible Roja';
+                  if (t.includes('yellow card')) return 'Posible Amarilla';
+                  
+                  // Si no lo reconoce pero no es un texto basura de la API, lo deja como está
+                  return text;
+                };
+
+                // Priorizamos el 'addition', si no probamos con el 'player_name'
+                const rawText = reasonRaw || playerRaw;
+                const translatedReason = translateVarReason(rawText);
+
+                if (translatedReason) {
+                  // Si logramos extraer y traducir un motivo válido
+                  displayPlayerName = `Chequeo VAR (${translatedReason})`;
+                } else {
+                  // Si decía "Pending VAR" o cosas similares, lo ocultamos
+                  displayPlayerName = 'Chequeo VAR';
+                }
+              } 
+              // Fallback: Si no hay nombre para el resto de eventos, usar el tipo como texto
+              else if (!displayPlayerName || displayPlayerName.trim() === '') {
+                if (tType.includes('substitution')) displayPlayerName = 'Cambio';
+                else if (tType.includes('yellow/red')) displayPlayerName = 'Doble Amarilla';
+                else if (tType.includes('yellowcard')) displayPlayerName = 'Tarjeta Amarilla';
+                else if (tType.includes('redcard')) displayPlayerName = 'Tarjeta Roja';
+                else if (tType.includes('disallowed')) displayPlayerName = 'Gol Anulado';
+                else if (tType.includes('miss')) displayPlayerName = 'Penal Fallado';
+                else if (tType.includes('goal') || tType.includes('penalty')) displayPlayerName = 'Gol';
+                else displayPlayerName = 'Evento';
+              } else {
+                // Si sí hay nombre, añadir sufijos especiales si corresponde
+                if ((tType.includes('goal') || tType.includes('penalty')) && tType.includes('miss')) {
+                  const baseName = displayPlayerName.replace(' (Penal Fallado)', '').trim();
+                  displayPlayerName = baseName === 'Penal Fallado' ? 'Penal Fallado' : `${baseName} (Penal Fallado)`;
+                }
+              }
+
+              if (!icon && !displayPlayerName) return null;
 
               return (
                 <div key={`${event.minute}-${idx}`} className="flex items-center w-full relative z-10 group">
                   <div className="flex-1 flex justify-end items-center gap-1.5 sm:gap-2 pr-2 sm:pr-4 min-w-0 text-[10px] sm:text-xs">
                     {isHome && (
                       <>
-                        <span className={`${textMain} text-right truncate`}>{event.player_name}</span>
-                        <span className="shrink-0 flex items-center justify-center">{icon}</span>
+                        <span className={`${textMain} text-right truncate`}>{displayPlayerName}</span>
+                        {icon && <span className="shrink-0 flex items-center justify-center">{icon}</span>}
                       </>
                     )}
                   </div>
@@ -231,8 +327,8 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
                   <div className="flex-1 flex justify-start items-center gap-1.5 sm:gap-2 pl-2 sm:pl-4 min-w-0 text-[10px] sm:text-xs">
                     {isAway && (
                       <>
-                        <span className="shrink-0 flex items-center justify-center">{icon}</span>
-                        <span className={`${textMain} text-left truncate`}>{event.player_name}</span>
+                        {icon && <span className="shrink-0 flex items-center justify-center">{icon}</span>}
+                        <span className={`${textMain} text-left truncate`}>{displayPlayerName}</span>
                       </>
                     )}
                   </div>

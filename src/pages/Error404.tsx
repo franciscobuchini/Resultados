@@ -5,7 +5,7 @@ import { useThemeClasses } from '../functions/themeStore';
 export default function Error404() {
   const { textMain, textMuted, bgSurfaceHover, border } = useThemeClasses();
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6">
+    <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
       <div className="relative mb-8">
         <h1 className={`text-[12rem] md:text-[18rem] font-black ${textMain} opacity-5 leading-none select-none`}>
           404

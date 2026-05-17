@@ -30,7 +30,7 @@ export default function PageContent({
   };
 
   return (
-    <div className={`${maxWidthClasses[maxWidth]} mx-auto px-0 py-8 md:p-8 ${layoutClasses[layout]}`}>
+    <div className={`w-full ${maxWidthClasses[maxWidth]} mx-auto px-0 py-8 md:px-8 ${layoutClasses[layout]}`}>
       {children}
     </div>
   );

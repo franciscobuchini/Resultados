@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Mail, Calendar, Globe, ShieldQuestion } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Mail, Globe, ShieldQuestion } from 'lucide-react';
 import PageBanner from '../layout/PageBanner';
 import PageContent from '../layout/PageContent';
 import { useThemeClasses } from '../functions/themeStore';
@@ -9,6 +10,7 @@ import { supabase } from '../functions/supabase';
 import UserAvatar from '../components/ui/UserAvatar';
 import { Button } from '../components/ui/Button';
 import { Save } from 'lucide-react';
+import { useAuth } from '../functions/auth';
 
 interface Team {
   team_id: string;
@@ -26,14 +28,13 @@ interface Country {
 
 export default function ProfilePage() {
   const { border, textMain, textMuted, bgSurface, bgSurfaceHover } = useThemeClasses();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  // Datos mock para el perfil
-  const [userData] = useState({
-    name: 'Usuario Demo',
-    email: 'usuario@resultados.ar',
-    joined: '10 Mayo 2024',
-    plan: 'admin'
-  });
+  // Si no está logueado, redirigir al login
+  useEffect(() => {
+    if (!user) navigate('/login');
+  }, [user, navigate]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [teams, setTeams] = useState<Team[]>([]);
@@ -107,8 +108,8 @@ export default function ProfilePage() {
                 crestSize="w-28 h-28"
                 className="mb-2"
               />
-              <h2 className={`text-2xl font-black ${textMain}`}>{userData.name}</h2>
-              <PlanBadge plan={userData.plan} />
+              <h2 className={`text-2xl font-black ${textMain}`}>{user?.user_name || 'Usuario'}</h2>
+              <PlanBadge plan={user?.user_plan || 'free'} />
             </div>
           </div>
 
@@ -200,8 +201,7 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-4">
               <h3 className={`text-xs uppercase tracking-widest font-bold ${textMuted} px-2`}>Cuenta</h3>
               <div className={`p-2 rounded-2xl border ${border} ${bgSurface} flex flex-col gap-1`}>
-                <DropdownOption icon={Mail} label="Email" value={userData.email} />
-                <DropdownOption icon={Calendar} label="Miembro desde" value={userData.joined} />
+                <DropdownOption icon={Mail} label="Email" value={user?.email || '-'} />
               </div>
             </div>
 

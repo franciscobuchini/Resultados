@@ -131,7 +131,7 @@ export default function TorneoTab({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-10 lg:gap-8">
       {/* Partidos del round seleccionado (Primero en mobile) */}
       <div className="flex flex-col gap-4 order-1 lg:order-2">
         {selectedRound ? (
