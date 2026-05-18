@@ -142,12 +142,14 @@ export function Stat({
   prominent = false,
   onClick,
   className = '',
+  title,
 }: {
   value: ReactNode;
   width?: string;
   prominent?: boolean;
   onClick?: () => void;
   className?: string;
+  title?: string;
 }) {
   const { textMuted, textProminent } = useThemeClasses();
 
@@ -162,6 +164,7 @@ export function Stat({
   return (
     <div
       onClick={onClick}
+      title={title}
       className={`${width} flex items-center justify-center ${!hasCustomColor ? baseColor : ''} ${prominent ? 'font-black' : ''} ${onClick ? 'cursor-pointer hover:opacity-70 select-none' : ''} ${className}`}
     >
       {value}
@@ -287,7 +290,7 @@ export function FixtureRow({
   return (
     <div className={`relative flex flex-col w-full ${bgSurface} sm:${bgApp} ${border} ${noBorder ? '' : 'border-b'} ${className}`}>
       <GoalAnimation homeScore={homeScore} awayScore={awayScore} />
-      
+
       <div
         onClick={() => {
           if (matchId && matchDate && homeId && awayId) {

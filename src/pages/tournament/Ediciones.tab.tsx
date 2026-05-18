@@ -7,7 +7,7 @@ import EmptyState from '../../components/ui/EmptyState'
 export const tabConfig: TabConfig = {
   id: 'editions',
   label: 'Ediciones',
-  order: 2,
+  order: 3,
 }
 
 // ------------------------------------------------------------

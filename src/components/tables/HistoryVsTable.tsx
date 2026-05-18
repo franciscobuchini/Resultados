@@ -16,7 +16,7 @@ export interface HistoryStats {
   diff: number; // Won - Lost
 }
 
-interface HistoryTableProps {
+interface HistoryVsTableProps {
   title?: string;
   stats: HistoryStats[];
 }
@@ -24,9 +24,9 @@ interface HistoryTableProps {
 type SortField = 'diff' | 'played' | 'won' | 'drawn' | 'lost';
 
 /**
- * HistoryTable - Tabla de historiales contra otros equipos.
+ * HistoryVsTable - Tabla de historiales contra otros equipos.
  */
-export default function HistoryTable({ title = "Historial por Rival", stats }: HistoryTableProps) {
+export default function HistoryVsTable({ title = "Historial por Rival", stats }: HistoryVsTableProps) {
   const [sortField, setSortField] = useState<SortField>('diff');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 

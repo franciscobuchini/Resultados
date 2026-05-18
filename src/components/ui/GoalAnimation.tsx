@@ -34,13 +34,13 @@ export default function GoalAnimation({ homeScore, awayScore }: GoalAnimationPro
     if (homeChanged || awayChanged) {
       setIsAnimating(true);
       const timer = setTimeout(() => setIsAnimating(false), 4000);
-      
+
       prevHome.current = homeScore;
       prevAway.current = awayScore;
-      
+
       return () => clearTimeout(timer);
     }
-    
+
     // Mantener los valores actualizados para la próxima comparación
     prevHome.current = homeScore;
     prevAway.current = awayScore;
@@ -95,18 +95,18 @@ export default function GoalAnimation({ homeScore, awayScore }: GoalAnimationPro
               .animate-text-vibrate { animation: text-vibrate 0.15s linear infinite; }
             `}
           </style>
-          
+
           {/* Fondo principal reactivo usando el color del tema */}
           <div className={`absolute inset-0 ${goalBg} animate-goal-bg`} />
-          
+
           {/* Anillo expansivo (Radar Pulse) usando el borde del tema */}
           <div className={`absolute w-10 h-10 rounded-full border-solid ${goalRing} animate-pulse-ring`} />
-          
+
           {/* Barrido de luz metálica (Shine/Laser) */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="w-1/2 h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-60 animate-goal-shine" />
           </div>
-          
+
           {/* Contenedor del texto (Entrada y Salida) */}
           <div className="relative z-10 animate-text-entrance">
             {/* Contenedor vibratorio (Terremoto) */}

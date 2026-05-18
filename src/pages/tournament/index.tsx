@@ -209,6 +209,12 @@ export default function TournamentPage() {
       selectedRound,
       setSelectedRound,
     },
+    stats: {
+      tournamentId,
+      matches,
+      goals,
+      teamLookup,
+    },
     editions: {
       tournamentId,
       historyTournaments,

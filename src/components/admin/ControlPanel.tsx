@@ -11,7 +11,7 @@ export default function ControlPanel() {
       <span className={`text-xs ${textMuted} italic`}>
         * Ajustes locales
       </span>
-      <Button 
+      <Button
         icon={showApiIds ? Eye : EyeOff}
         label={showApiIds ? "Mostrando IDs de API" : "Ocultando IDs de API"}
         onClick={() => setShowApiIds(!showApiIds)}

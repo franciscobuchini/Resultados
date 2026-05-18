@@ -1,6 +1,6 @@
 import type { TabConfig } from '../tabTypes'
 import type { Goal } from '../../../shared/tournament/matchTypes'
-import HistoryTable, { type HistoryStats } from '../../components/tables/HistoryTable'
+import HistoryVsTable, { type HistoryStats } from '../../components/tables/HistoryVsTable'
 
 export const tabConfig: TabConfig = {
   id: 'stats',
@@ -108,7 +108,7 @@ export default function EstadisticasTab({ teamId, matches, teamLookup }: Estadis
   return (
     <div className="lg:col-span-2 flex flex-col gap-4">
       {historyStats.length > 0 ? (
-        <HistoryTable stats={historyStats} />
+        <HistoryVsTable stats={historyStats} />
       ) : null}
     </div>
   )

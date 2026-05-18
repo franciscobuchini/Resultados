@@ -35,10 +35,10 @@ export default function UserMenu() {
       {user ? (
         <>
           <Link to="/profile">
-            <DropdownItem onClick={() => {}} icon={User} label="Editar Perfil" />
+            <DropdownItem onClick={() => { }} icon={User} label="Editar Perfil" />
           </Link>
           <Link to="/admin">
-            <DropdownItem onClick={() => {}} icon={Shield} label="Panel Admin" />
+            <DropdownItem onClick={() => { }} icon={Shield} label="Panel Admin" />
           </Link>
           {/* Sesión */}
           <DropdownItem
@@ -51,7 +51,7 @@ export default function UserMenu() {
       ) : (
         <Link to="/login">
           <DropdownItem
-            onClick={() => {}}
+            onClick={() => { }}
             icon={LogIn}
             label="Iniciar Sesión"
             className="rounded-b-xl"

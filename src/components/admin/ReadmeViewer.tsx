@@ -13,6 +13,7 @@ export default function ReadmeViewer() {
           <li>- Teams sin id de SM (JAVI)</li>
           <li>- Hacer el json para tournament_teams de cada torneo (JAVI)</li>
           <li>- Nombres de equipos muy largos (JAVI)</li>
+          <li>- Campeón de cáda mundial agregar </li>
           <br/>
           <li>- El login se va a solucionar cuando agreguemos el dominio oficial en supabase sino no va a funcionar...</li>
           <li>- Admin puede seleccionar texto, resto de usuarios no puede...  </li>
