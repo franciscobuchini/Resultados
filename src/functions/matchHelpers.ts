@@ -57,13 +57,19 @@ export const getMatchStatusLabel = (
 
   if (!date) return null;
 
-  // Solo nos interesa para el día de hoy
-  const today = new Date().toISOString().split('T')[0];
+  // Solo nos interesa para el día de hoy (usando fecha local, no UTC)
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const today = `${year}-${month}-${day}`;
+
   if (date !== today) return null;
 
   // Si está en vivo
   if (isLive(s)) {
     if (s === 'HT') return 'ET'; // Entretiempo
+    if (s === 'PEN_LIVE') return 'P'; // Tanda de penales
     
     // Si el status mismo es el minuto
     if (!isNaN(Number(s))) return `${s}'`;

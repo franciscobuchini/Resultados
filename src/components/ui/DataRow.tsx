@@ -279,7 +279,9 @@ export function FixtureRow({
     );
   };
 
-  const isLive = typeof statusLabel === 'string' && (statusLabel.includes("'") || ['LIVE', 'ET', 'MT', 'PEN'].includes(statusLabel));
+  const isLive = typeof statusLabel === 'string' && (statusLabel.includes("'") || ['LIVE', 'ET', 'MT', 'PEN', 'P'].includes(statusLabel));
+  const isCancelled = statusLabel === 'C';
+  const isFinished = statusLabel === '✓';
 
   return (
     <div className={`flex flex-col w-full ${bgSurface} sm:${bgApp} ${border} ${noBorder ? '' : 'border-b'} ${className}`}>
@@ -289,20 +291,15 @@ export function FixtureRow({
             setIsTimelineExpanded(!isTimelineExpanded);
           }
         }}
-        className={`flex items-center w-full px-3 text-sm ${HEIGHT} ${textMuted}`}
+        className={`flex items-center w-full px-0 sm:px-3 text-sm ${HEIGHT} ${textMuted}`}
       >
         {/* Estado (Apartado extra a la izquierda para tiempo) */}
-        <div 
-          title={statusLabel === '✓' ? 'Finalizado' : statusLabel === 'C' ? 'Cancelado' : undefined}
-          className={`shrink-0 w-4 flex items-center justify-center text-center text-xs font-bold uppercase tracking-tighter ${
-            statusLabel === 'C' ? (textAlert || 'text-amber-500') : isLive ? `${textError} animate-pulse` : ''
-          }`}
+        <div
+          title={isFinished ? 'Finalizado' : isCancelled ? 'Cancelado' : undefined}
+          className={`shrink-0 w-8 sm:w-12 flex items-center justify-center text-center text-xs font-bold uppercase tracking-tighter ${isCancelled ? (textAlert || 'text-amber-500') : isLive ? `${textError} animate-pulse` : ''
+            }`}
         >
-          {statusLabel === 'C' ? (
-            <Ban size={14} strokeWidth={2.5} />
-          ) : (
-            statusLabel
-          )}
+          {isCancelled ? <Ban size={14} strokeWidth={2.5} /> : statusLabel}
         </div>
 
         {/* Contenido principal: Local + Marcador + Visitante */}
@@ -311,7 +308,7 @@ export function FixtureRow({
           <TeamLink id={homeId} name={homeName} logo={homeLogo} idDM={homeIdDM} isRight />
 
           {/* Marcador */}
-          <div className="flex-shrink-0 flex justify-center w-10 sm:w-24 gap-1 sm:gap-2 tabular-nums">
+          <div className="flex-shrink-0 flex justify-center w-16 sm:w-28 gap-1 sm:gap-2 tabular-nums">
             {/* Penalty Local (Espacio reservado) */}
             <div className="flex-1 flex justify-end">
               {(homePenalty !== undefined && homePenalty !== null) && (
@@ -346,7 +343,7 @@ export function FixtureRow({
 
         {/* Arrow Expander */}
         <div
-          className={`shrink-0 w-4 flex items-center justify-center cursor-pointer ${matchId && matchDate && homeId && awayId ? 'text-neutral-400 dark:text-neutral-500' : 'opacity-0 pointer-events-none'}`}
+          className={`shrink-0 w-8 sm:w-12 flex items-center justify-center cursor-pointer ${matchId && matchDate && homeId && awayId ? 'text-neutral-400 dark:text-neutral-500' : 'opacity-0 pointer-events-none'}`}
         >
           <ChevronDown size={16} className={`transition-transform duration-200 ${isTimelineExpanded ? 'rotate-180' : ''}`} />
         </div>

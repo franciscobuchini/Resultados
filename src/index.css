@@ -9,7 +9,7 @@ body {
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  
+
   /* Desactivar selección de texto */
   user-select: none;
   -webkit-user-select: none;
@@ -24,7 +24,8 @@ img {
 }
 
 /* Permitir selección solo en inputs o áreas específicas si fuera necesario */
-input, textarea {
+input,
+textarea {
   user-select: text;
   -webkit-user-select: text;
 }
@@ -33,6 +34,7 @@ input, textarea {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;

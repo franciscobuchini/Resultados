@@ -84,10 +84,13 @@ const reconcileGoals = (
     return eventsList;
   }
 
-  const isGoalEvent = (e: FixtureEvent) =>
-    (e.event_type.toLowerCase().includes('goal') || e.event_type.toLowerCase().includes('penalty')) &&
-    !e.event_type.toLowerCase().includes('miss') &&
-    !e.event_type.toLowerCase().includes('disallowed');
+  const isGoalEvent = (e: FixtureEvent) => {
+    const tType = e.event_type.toLowerCase();
+    return (tType.includes('goal') || tType.includes('penalty')) &&
+           !tType.includes('miss') &&
+           !tType.includes('disallowed') &&
+           !tType.includes('shootout');
+  };
 
   // Colectar goles válidos por equipo usando los IDs numéricos de la API
   const homeGoalEvents: FixtureEvent[] = [];
@@ -180,6 +183,12 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
               apiEvents = fixture.fixture_events
                 .filter((e: FixtureEvent) => e.is_valid)
                 .sort((a: FixtureEvent, b: FixtureEvent) => {
+                  const aIsShootout = a.event_type.toLowerCase().includes('shootout');
+                  const bIsShootout = b.event_type.toLowerCase().includes('shootout');
+                  
+                  if (aIsShootout && !bIsShootout) return 1;
+                  if (!aIsShootout && bIsShootout) return -1;
+
                   if (a.minute !== b.minute) return a.minute - b.minute;
                   return (a.extra_minute || 0) - (b.extra_minute || 0);
                 });
@@ -321,7 +330,9 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
                   </div>
 
                   <div className={`w-10 h-6 flex items-center justify-center shrink-0 text-[10px] sm:text-xs font-bold ${textMuted}`}>
-                    {event.minute}'{event.extra_minute ? `+${event.extra_minute}` : ''}
+                    {tType.includes('shootout') 
+                      ? `P${event.minute}` 
+                      : `${event.minute}'${event.extra_minute ? `+${event.extra_minute}` : ''}`}
                   </div>
 
                   <div className="flex-1 flex justify-start items-center gap-1.5 sm:gap-2 pl-2 sm:pl-4 min-w-0 text-[10px] sm:text-xs">

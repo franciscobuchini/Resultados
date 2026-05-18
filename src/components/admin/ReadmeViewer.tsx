@@ -12,6 +12,7 @@ export default function ReadmeViewer() {
           <li>- Partidos únicos entre campeonatos (JAVI)</li>
           <li>- Teams sin id de SM (JAVI)</li>
           <li>- Hacer el json para tournament_teams de cada torneo (JAVI)</li>
+          <li>- Nombres de equipos muy largos (JAVI)</li>
           <br/>
           <li>- El login se va a solucionar cuando agreguemos el dominio oficial en supabase sino no va a funcionar...</li>
           <li>- Admin puede seleccionar texto, resto de usuarios no puede...  </li>
@@ -24,9 +25,6 @@ export default function ReadmeViewer() {
 
           <p>Notas:</p>
           <li>- Los torneos con letras no pueden empezar con la misma letra, ej: CH = champions league, CL = copa libertadore. La logica lo toma como un mismo torneo pero distinta edicion </li>
-
-
-
         </ul>
       </div>
     </div>

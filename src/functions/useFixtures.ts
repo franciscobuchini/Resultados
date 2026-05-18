@@ -219,15 +219,26 @@ export function useFixtures() {
     return `${year}-${month}-${day}`;
   })
 
-  const fetchFixtures = async (d: string, silent = false) => {
+  const fetchFixtures = async (d: string, silent = false, retryCount = 0) => {
     if (!silent) setLoading(true)
     try {
       const res = await fetch(`${FIXTURES_URL}?date=${d}&t=${Date.now()}`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const encryptedText = await res.text()
       const data = decryptPayload(encryptedText)
-      setFixtures(Array.isArray(data) ? data : [])
+      if (Array.isArray(data)) {
+        setFixtures(data)
+      } else if (retryCount === 0) {
+        // Decryption devolvió null — reintentar una vez después de 3s
+        setTimeout(() => fetchFixtures(d, true, 1), 3000)
+      }
+      // Si no es array y ya reintentamos, mantenemos los datos actuales
     } catch {
-      setFixtures([])
+      // Error de red — reintentar una vez después de 3s
+      if (retryCount === 0) {
+        setTimeout(() => fetchFixtures(d, true, 1), 3000)
+      }
+      // Nunca pisamos fixtures con [] — mantenemos lo que ya teníamos
     }
     if (!silent) setLoading(false)
   }
