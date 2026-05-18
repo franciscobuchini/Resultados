@@ -77,13 +77,29 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
 
       const siblingIds = siblings.map(s => s.tournament_id)
 
-      // Traer TODOS los partidos de todas las ediciones
-      const { data: allMatches } = await supabase
-        .from('matches')
-        .select('tournament_id, home_id, home_name, away_id, away_name, home_score, away_score, match_status')
-        .in('tournament_id', siblingIds)
+      // Traer TODOS los partidos de todas las ediciones (paginado de a 1000 para evitar el límite de Supabase/PostgREST)
+      let allMatches: any[] = []
+      let page = 0
+      const pageSize = 1000
+      
+      while (true) {
+        const { data: matchesChunk, error } = await supabase
+          .from('matches')
+          .select('tournament_id, home_id, home_name, away_id, away_name, home_score, away_score, match_status')
+          .in('tournament_id', siblingIds)
+          .range(page * pageSize, (page + 1) * pageSize - 1)
+        
+        if (error) {
+          console.error('Error fetching matches chunk:', error)
+          break
+        }
+        if (!matchesChunk || matchesChunk.length === 0) break
+        allMatches = allMatches.concat(matchesChunk)
+        if (matchesChunk.length < pageSize) break
+        page++
+      }
 
-      if (!allMatches || allMatches.length === 0) { setHistLoading(false); return }
+      if (allMatches.length === 0) { setHistLoading(false); return }
 
       // Traer equipos para escudos y armar el teamLookup
       const { data: teams } = await supabase.from('teams').select('team_id, team_name, team_crest_url')
