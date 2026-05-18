@@ -10,15 +10,21 @@ export default function ReadmeViewer() {
         <ul className={`space-y-2 ${textMuted}`}>
           <li>- Goles desde 2020 Liga Argentina (JAVI)</li>
           <li>- Partidos únicos entre campeonatos (JAVI)</li>
+          <li>- Nombres de equipos muy largos (JAVI)</li>
           <li>- Teams sin id de SM (JAVI)</li>
           <li>- Hacer el json para tournament_teams de cada torneo (JAVI)</li>
-          <li>- Nombres de equipos muy largos (JAVI)</li>
-          <li>- Campeón de cáda mundial agregar </li>
+
+          <li>- Campeón de cáda mundial agregar (JAVI)</li>
+          <li>- Info de contacto en el footer (JAVI) mail resultados.ar0@gmail.com y twitter @resultados_ar</li>
+          <li>- Botón de donaciones (JAVI)</li>
           <br/>
           <li>- El login se va a solucionar cuando agreguemos el dominio oficial en supabase sino no va a funcionar...</li>
           <li>- Admin puede seleccionar texto, resto de usuarios no puede...  </li>
           <li>- Simplificar columna: tournament_system en supabase (Claude Desktop)</li>
           <li>- Reemplazo definitivo de API 365: usar solo SM (Claude Opus)</li>
+          <li>- Filtro de situaciones del partido</li>
+          <li>- Tabla de divisiones disputadas por año (ARG)</li>
+          <li>- Tabla de mundiales disputados por pais (INT)</li>
 
           <li>- Icons de partidos hacer nuevos</li>
           <li>- IA Futbolera YT</li>
