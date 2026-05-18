@@ -37,6 +37,12 @@ export interface ThemeClasses {
   textAlert?: string
   bgProminent?: string
   logo: string
+
+  // Goal Animation
+  goalBg: string
+  goalRing: string
+  goalTextGradient: string
+  goalTextShadow: string
 }
 
 export const THEMES: Record<ThemeName, ThemeClasses> = {
@@ -60,6 +66,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     bgProminent: 'bg-zinc-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
+    goalBg: 'bg-emerald-500/30',
+    goalRing: 'border-emerald-400',
+    goalTextGradient: 'from-emerald-200 via-green-400 to-teal-600',
+    goalTextShadow: 'drop-shadow-[0_0_20px_rgba(52,211,153,0.9)]',
   },
   'slate-dark': {
     bgApp: 'bg-slate-950',
@@ -78,6 +88,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     bgProminent: 'bg-slate-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
+    goalBg: 'bg-sky-500/30',
+    goalRing: 'border-sky-400',
+    goalTextGradient: 'from-sky-200 via-blue-400 to-indigo-600',
+    goalTextShadow: 'drop-shadow-[0_0_20px_rgba(56,189,248,0.9)]',
   },
   'mauve-dark': {
     bgApp: 'bg-mauve-950',
@@ -96,6 +110,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     bgProminent: 'bg-mauve-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
+    goalBg: 'bg-violet-500/30',
+    goalRing: 'border-violet-400',
+    goalTextGradient: 'from-fuchsia-200 via-violet-400 to-purple-600',
+    goalTextShadow: 'drop-shadow-[0_0_20px_rgba(167,139,250,0.9)]',
   },
   'mist-dark': {
     bgApp: 'bg-mist-950',
@@ -114,6 +132,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     bgProminent: 'bg-mist-800/50',
     bgMain: 'bg-black/10',
     logo: logoLight,
+    goalBg: 'bg-cyan-500/30',
+    goalRing: 'border-cyan-400',
+    goalTextGradient: 'from-cyan-200 via-cyan-400 to-blue-600',
+    goalTextShadow: 'drop-shadow-[0_0_20px_rgba(34,211,238,0.9)]',
   },
   'olive-dark': {
     bgApp: 'bg-olive-950',
@@ -132,6 +154,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     bgProminent: 'bg-olive-800/50',
     bgMain: 'bg-black/10',
     logo: '/src/assets/ResultadosLogoLight.webp',
+    goalBg: 'bg-lime-500/30',
+    goalRing: 'border-lime-400',
+    goalTextGradient: 'from-yellow-200 via-lime-400 to-green-600',
+    goalTextShadow: 'drop-shadow-[0_0_20px_rgba(163,230,53,0.9)]',
   },
 
   // ------------------------------------------------------------
@@ -154,6 +180,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     bgProminent: 'bg-slate-100',
     bgMain: 'bg-white/40',
     logo: logoDark,
+    goalBg: 'bg-blue-500/20',
+    goalRing: 'border-blue-500',
+    goalTextGradient: 'from-sky-500 via-blue-600 to-indigo-700',
+    goalTextShadow: 'drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]',
   },
   'taupe-light': {
     bgApp: 'bg-taupe-100',
@@ -172,6 +202,10 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     bgProminent: 'bg-taupe-100',
     bgMain: 'bg-white/40',
     logo: logoDark,
+    goalBg: 'bg-amber-500/20',
+    goalRing: 'border-amber-500',
+    goalTextGradient: 'from-yellow-500 via-amber-600 to-orange-700',
+    goalTextShadow: 'drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]',
   },
 }
 

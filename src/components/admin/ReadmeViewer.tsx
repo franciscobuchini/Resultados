@@ -19,7 +19,6 @@ export default function ReadmeViewer() {
           <li>- Simplificar columna: tournament_system en supabase (Claude Desktop)</li>
           <li>- Reemplazo definitivo de API 365: usar solo SM (Claude Opus)</li>
 
-          <li>- Animación de gol en el DataRow del partido cuando hay gol</li>
           <li>- Icons de partidos hacer nuevos</li>
           <li>- IA Futbolera YT</li>
 

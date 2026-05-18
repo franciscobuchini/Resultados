@@ -3,6 +3,7 @@ import ImageCrest from './ImageCrest';
 import { useTheme, useThemeClasses } from '../../functions/themeStore';
 import { ChevronDown, Check, Ban } from 'lucide-react';
 import MatchEventsTimeline from './MatchEventsTimeline';
+import GoalAnimation from './GoalAnimation';
 
 // ============================================================
 // CIMIENTOS — Constantes de diseño compartidas por todo el sistema
@@ -284,7 +285,9 @@ export function FixtureRow({
   const isFinished = statusLabel === '✓';
 
   return (
-    <div className={`flex flex-col w-full ${bgSurface} sm:${bgApp} ${border} ${noBorder ? '' : 'border-b'} ${className}`}>
+    <div className={`relative flex flex-col w-full ${bgSurface} sm:${bgApp} ${border} ${noBorder ? '' : 'border-b'} ${className}`}>
+      <GoalAnimation homeScore={homeScore} awayScore={awayScore} />
+      
       <div
         onClick={() => {
           if (matchId && matchDate && homeId && awayId) {
