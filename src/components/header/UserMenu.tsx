@@ -37,9 +37,11 @@ export default function UserMenu() {
           <Link to="/profile">
             <DropdownItem onClick={() => { }} icon={User} label="Editar Perfil" />
           </Link>
-          <Link to="/admin">
-            <DropdownItem onClick={() => { }} icon={Shield} label="Panel Admin" />
-          </Link>
+          {user.user_plan === 'admin' && (
+            <Link to="/admin">
+              <DropdownItem onClick={() => { }} icon={Shield} label="Panel Admin" />
+            </Link>
+          )}
           {/* Sesión */}
           <DropdownItem
             onClick={handleLogout}
