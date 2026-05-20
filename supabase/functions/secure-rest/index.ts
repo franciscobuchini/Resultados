@@ -26,10 +26,13 @@ export default {
       
       const targetUrl = `${SUPABASE_URL}/rest/v1${restPath}${queryString}`;
 
+      // Usar el token del usuario autenticado si existe, si no usar anon key
+      const authHeader = req.headers.get('Authorization') || `Bearer ${SUPABASE_ANON_KEY}`;
+
       const response = await fetch(targetUrl, {
         method: req.method,
         headers: {
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Authorization': authHeader,
           'apikey': SUPABASE_ANON_KEY,
           'Content-Type': 'application/json',
           'Range': req.headers.get('Range') || '',

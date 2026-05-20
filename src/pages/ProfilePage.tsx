@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Globe, ShieldQuestion } from 'lucide-react';
+import { Mail, Globe, ShieldQuestion, User } from 'lucide-react';
 import PageBanner from '../layout/PageBanner';
 import PageContent from '../layout/PageContent';
 import { useThemeClasses } from '../functions/themeStore';
@@ -29,7 +29,7 @@ interface Country {
 
 export default function ProfilePage() {
   const { border, textMain, textMuted, bgSurface, bgSurfaceHover } = useThemeClasses();
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
 
   // Si no está logueado, redirigir al login
@@ -47,11 +47,15 @@ export default function ProfilePage() {
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [showCountryResults, setShowCountryResults] = useState(false);
 
+  const [userName, setUserName] = useState(user?.user_name || '');
+  const [initialName, setInitialName] = useState(user?.user_name || '');
+
   // Estados para controlar cambios
   const [initialTeam, setInitialTeam] = useState<Team | null>(null);
   const [initialCountry, setInitialCountry] = useState<Country | null>(null);
 
-  const hasChanges = selectedTeam?.team_id !== initialTeam?.team_id || 
+  const hasChanges = userName !== initialName ||
+                     selectedTeam?.team_id !== initialTeam?.team_id || 
                      selectedCountry?.country_id !== initialCountry?.country_id;
 
   useEffect(() => {
@@ -116,7 +120,22 @@ export default function ProfilePage() {
 
           {/* Columna Derecha: Ajustes y Secciones */}
           <div className="flex flex-col gap-6">
-            
+
+            {/* Nombre de usuario */}
+            <div className="flex flex-col gap-4">
+              <h3 className={`text-xs uppercase tracking-widest font-bold ${textMuted} px-2`}>Nombre de usuario</h3>
+              <Input
+                type="text"
+                placeholder="Tu nombre de usuario"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                autoComplete="username"
+                containerClassName="p-4 rounded-2xl"
+                className="font-medium"
+                customIcon={<User size={20} className={textMuted} />}
+              />
+            </div>
+
             {/* Club e Hincha */}
             <div className="flex flex-col gap-4">
               <div className="relative">
@@ -216,8 +235,9 @@ export default function ProfilePage() {
                 icon={Save}
                 label="Guardar Cambios"
                 disabled={!hasChanges}
-                onClick={() => {
-                  alert('Cambios guardados (Simulación)');
+                onClick={async () => {
+                  await updateProfile({ user_name: userName });
+                  setInitialName(userName);
                   setInitialTeam(selectedTeam);
                   setInitialCountry(selectedCountry);
                 }}

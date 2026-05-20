@@ -20,6 +20,7 @@ interface AuthState {
   error: string | null;
   /** Envía un magic link al email del usuario */
   sendMagicLink: (email: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<AuthUser>) => Promise<void>;
   clearError: () => void;
@@ -63,6 +64,23 @@ export const useAuth = create<AuthState>()(
         }
       },
 
+      signInWithGoogle: async () => {
+        set({ loading: true, error: null })
+        try {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: window.location.origin,
+            }
+          })
+          if (error) throw error
+        } catch (err) {
+          const error = err as Error
+          set({ error: error.message, loading: false })
+          throw err
+        }
+      },
+
       logout: async () => {
         await supabase.auth.signOut()
         set({ user: null, error: null })
@@ -73,6 +91,21 @@ export const useAuth = create<AuthState>()(
         try {
           const { data, error } = await supabase.auth.updateUser({ data: updates })
           if (error) throw error
+
+          // Sincronizar con public.users
+          const dbUpdates: Record<string, any> = {};
+          if (updates.user_name !== undefined) dbUpdates.user_name = updates.user_name;
+          if (updates.user_team_id !== undefined) dbUpdates.user_team_id = updates.user_team_id;
+          if (updates.user_province !== undefined) dbUpdates.user_province = updates.user_province;
+          if (updates.user_city !== undefined) dbUpdates.user_city = updates.user_city;
+          if (Object.keys(dbUpdates).length > 0) {
+            const { error: dbError } = await supabase
+              .from('users')
+              .update(dbUpdates)
+              .eq('id', data.user.id);
+            if (dbError) console.warn('Error syncing to public.users:', dbError.message);
+          }
+
           set({ user: mapUser(data.user), loading: false })
         } catch (err) {
           const error = err as Error
