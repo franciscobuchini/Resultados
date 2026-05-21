@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react'
 import { isLive, getMatchStatusLabel } from './matchHelpers'
 import type { Match, Goal } from '../../shared/tournament/matchTypes'
 import { supabase } from './supabase'
-import { decryptPayload } from './crypto'
 import { getLeaguePriority } from './leagueTiers'
 // ============================================================
 // TYPES — Datos que devuelve la Edge Function get-fixtures
@@ -47,7 +46,6 @@ export interface AdaptedLeagueGroup {
 // HELPERS
 // ============================================================
 
-const FIXTURES_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures`
 const STATUS_ORDER: Record<string, number> = { LIVE: 0, NS: 1, FT: 2 }
 const POLL_INTERVAL = 60_000
 
@@ -219,29 +217,34 @@ export function useFixtures() {
     return `${year}-${month}-${day}`;
   })
 
-  const fetchFixtures = async (d: string, silent = false, retryCount = 0) => {
-    if (!silent) setLoading(true)
-    try {
-      const res = await fetch(`${FIXTURES_URL}?date=${d}&t=${Date.now()}`)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const encryptedText = await res.text()
-      const data = decryptPayload(encryptedText)
-      if (Array.isArray(data)) {
-        setFixtures(data)
-      } else if (retryCount === 0) {
-        // Decryption devolvió null — reintentar una vez después de 3s
-        setTimeout(() => fetchFixtures(d, true, 1), 3000)
+const fetchFixtures = async (d: string, silent = false, retryCount = 0) => {
+  if (!silent) setLoading(true)
+  try {
+    const res = await fetch(
+      `https://yngltjlglxlpfjawtxpp.supabase.co/functions/v1/get-fixtures?date=${d}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        }
       }
-      // Si no es array y ya reintentamos, mantenemos los datos actuales
-    } catch {
-      // Error de red — reintentar una vez después de 3s
-      if (retryCount === 0) {
-        setTimeout(() => fetchFixtures(d, true, 1), 3000)
-      }
-      // Nunca pisamos fixtures con [] — mantenemos lo que ya teníamos
+    )
+
+    if (!res.ok) throw new Error(`Error ${res.status}`)
+    const data = await res.json()
+
+    if (Array.isArray(data)) {
+      setFixtures(data)
+    } else if (retryCount === 0) {
+      setTimeout(() => fetchFixtures(d, true, 1), 3000)
     }
-    if (!silent) setLoading(false)
+  } catch (err: any) {
+    console.error(`[useFixtures] Error fetching date ${d}:`, err.message)
+    if (retryCount === 0) {
+      setTimeout(() => fetchFixtures(d, true, 1), 3000)
+    }
   }
+  if (!silent) setLoading(false)
+}
 
   // Cargar mapeo de equipos locales
   useEffect(() => {
