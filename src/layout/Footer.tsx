@@ -1,7 +1,7 @@
 import { useTheme, useThemeClasses } from '../functions/themeStore';
 
 export default function Footer() {
-  const { bgApp, border, textMuted } = useThemeClasses();
+  const { bgApp, border } = useThemeClasses();
   const { showApiIds, setShowApiIds } = useTheme();
 
   return (
