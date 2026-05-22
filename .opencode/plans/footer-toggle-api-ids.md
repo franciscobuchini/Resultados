@@ -1,3 +1,11 @@
+# Plan: Toggle de API IDs en el footer (oculto)
+
+## Archivo a modificar
+`src/layout/Footer.tsx`
+
+## Código final
+
+```tsx
 import { useTheme, useThemeClasses } from '../functions/themeStore';
 
 export default function Footer() {
@@ -16,3 +24,10 @@ export default function Footer() {
     </footer>
   );
 }
+```
+
+## Comportamiento
+- **Invisible** (opacity-0) por defecto
+- Aparece sutilmente (opacity-40) solo al hacer hover sobre el footer
+- Muestra "IDs: ON" cuando está activo, "⚙" cuando está oculto
+- Usa el mismo `showApiIds` de `themeStore` que el `ControlPanel` — ambos se sincronizan
