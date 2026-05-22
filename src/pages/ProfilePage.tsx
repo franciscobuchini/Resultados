@@ -47,8 +47,8 @@ export default function ProfilePage() {
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [showCountryResults, setShowCountryResults] = useState(false);
 
-  const [userName, setUserName] = useState(user?.user_name || '');
-  const [initialName, setInitialName] = useState(user?.user_name || '');
+const [userName, setUserName] = useState(user?.user_name?.replace(/^@+/, '') || '');
+const [initialName, setInitialName] = useState(user?.user_name?.replace(/^@+/, '') || '');
 
   // Estados para controlar cambios
   const [initialTeam, setInitialTeam] = useState<Team | null>(null);
@@ -76,8 +76,8 @@ export default function ProfilePage() {
       if (error || !data) return;
 
       // Nombre
-      setUserName(data.user_name || '');
-      setInitialName(data.user_name || '');
+      setUserName(data.user_name?.replace(/^@+/, '') || '');
+setInitialName(data.user_name?.replace(/^@+/, '') || '');
 
       // Equipo
       if (data.user_team_id) {
@@ -198,7 +198,7 @@ export default function ProfilePage() {
               className="mb-2"
             />
             <h2 className={`text-2xl font-black ${textMain}`}>
-              <span className={textMuted}>@</span>{user?.user_name || 'usuario'}
+              <span className={textMuted}>@</span>{user?.user_name?.replace(/^@+/, '') || 'usuario'}
             </h2>
             <PlanBadge plan={user?.user_plan || 'free'} />
           </div>
