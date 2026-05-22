@@ -1,3 +1,4 @@
+import { useEffect, useState, type ElementType } from 'react'
 import { User, Shield, LogOut, LogIn } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Dropdown, DropdownItem, DropdownOption } from '../ui/Dropdown'
@@ -5,22 +6,44 @@ import SyncStatus from './SyncStatus'
 import { ThemeSectionMenu } from './ThemeSelector'
 import { UtcSectionMenu } from './UtcSelector'
 import { useAuth } from '../../functions/auth'
+import { supabase } from '../../functions/supabase'
 
 export default function UserMenu() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [teamCrestUrl, setTeamCrestUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTeamCrest = async () => {
+      if (!user?.user_team_id) {
+        setTeamCrestUrl(null);
+        return;
+      }
+      const { data } = await supabase
+        .from('teams')
+        .select('team_crest_url')
+        .eq('team_id', user.user_team_id)
+        .single();
+      setTeamCrestUrl(data?.team_crest_url ?? null);
+    };
+    fetchTeamCrest();
+  }, [user?.user_team_id]);
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
 
+  const TriggerIcon: ElementType = teamCrestUrl
+    ? () => <img src={teamCrestUrl} className="w-5 h-5 object-contain" alt="" />
+    : User;
+
   return (
     <Dropdown
       align="right"
       widthClass="w-64"
-      icon={User}
-      value={user ? user.user_name : 'Invitado'}
+      icon={TriggerIcon}
+      value={user ? `@${user.user_name}` : 'Invitado'}
     >
       {/* Info: estado de sincronización */}
       <DropdownOption className="rounded-t-xl">

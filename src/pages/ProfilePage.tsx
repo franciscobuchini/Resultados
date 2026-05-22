@@ -193,7 +193,6 @@ export default function ProfilePage() {
           <div className={`p-8 rounded-2xl border ${border} ${bgSurface} flex flex-col items-center text-center gap-2`}>
             <UserAvatar
               crestUrl={selectedTeam?.team_crest_url}
-              flagUrl={selectedCountry?.country_flag_url}
               size="w-32 h-32"
               crestSize="w-28 h-28"
               className="mb-2"
