@@ -18,7 +18,6 @@ interface AuthState {
   user: AuthUser | null;
   loading: boolean;
   error: string | null;
-  /** Envía un magic link al email del usuario */
   sendMagicLink: (email: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
@@ -51,7 +50,6 @@ export const useAuth = create<AuthState>()(
           const { error } = await supabase.auth.signInWithOtp({
             email,
             options: {
-              // Redirige al usuario de vuelta a la app después de hacer click en el link
               emailRedirectTo: window.location.origin,
             }
           })
@@ -84,6 +82,7 @@ export const useAuth = create<AuthState>()(
       logout: async () => {
         await supabase.auth.signOut()
         set({ user: null, error: null })
+        localStorage.removeItem('auth-storage')
       },
 
       updateProfile: async (updates) => {
@@ -92,7 +91,6 @@ export const useAuth = create<AuthState>()(
           const { data, error } = await supabase.auth.updateUser({ data: updates })
           if (error) throw error
 
-          // Sincronizar con public.users
           const dbUpdates: Record<string, any> = {};
           if (updates.user_name !== undefined) dbUpdates.user_name = updates.user_name;
           if (updates.user_team_id !== undefined) dbUpdates.user_team_id = updates.user_team_id;
@@ -123,7 +121,7 @@ export const useAuth = create<AuthState>()(
   )
 )
 
-// Escucha cambios de sesión de Supabase (ej: cuando el usuario hace click en el magic link)
+// Escucha cambios de sesión de Supabase
 supabase.auth.onAuthStateChange((_event, session) => {
   if (session?.user) {
     useAuth.setState({ user: mapUser(session.user) })

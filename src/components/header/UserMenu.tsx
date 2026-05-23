@@ -7,12 +7,12 @@ import { ThemeSectionMenu } from './ThemeSelector'
 import { UtcSectionMenu } from './UtcSelector'
 import { useAuth } from '../../functions/auth'
 import { supabase } from '../../functions/supabase'
-
+ 
 export default function UserMenu() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [teamCrestUrl, setTeamCrestUrl] = useState<string | null>(null);
-
+ 
   useEffect(() => {
     const fetchTeamCrest = async () => {
       if (!user?.user_team_id) {
@@ -28,16 +28,19 @@ export default function UserMenu() {
     };
     fetchTeamCrest();
   }, [user?.user_team_id]);
-
+ 
   const handleLogout = async () => {
-    await logout();
-    navigate('/');
+    try {
+      await logout();
+    } finally {
+      navigate('/');
+    }
   };
-
+ 
   const TriggerIcon: ElementType = teamCrestUrl
     ? () => <img src={teamCrestUrl} className="w-5 h-5 object-contain" alt="" />
     : User;
-
+ 
   return (
     <Dropdown
       align="right"
@@ -49,11 +52,11 @@ export default function UserMenu() {
       <DropdownOption className="rounded-t-xl">
         <SyncStatus />
       </DropdownOption>
-
+ 
       {/* Preferencias */}
       <ThemeSectionMenu />
       <UtcSectionMenu />
-
+ 
       {/* Navegación */}
       {user ? (
         <>
@@ -65,7 +68,6 @@ export default function UserMenu() {
               <DropdownItem onClick={() => { }} icon={Shield} label="Panel Admin" />
             </Link>
           )}
-          {/* Sesión */}
           <DropdownItem
             onClick={handleLogout}
             icon={LogOut}
