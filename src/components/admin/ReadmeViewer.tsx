@@ -11,19 +11,21 @@ export default function ReadmeViewer() {
           <li>- Goles desde 2020 Liga Argentina (JAVI)</li>
           <li>- Partidos únicos entre campeonatos (JAVI)</li>
           <li>- Nombres de equipos muy largos (JAVI)</li>
-          <li>- Teams sin id de SM (JAVI)</li>
-          <li>- Hacer el json para tournament_teams de cada torneo (JAVI)</li>
-
+          <li>- Teams Argentinos sin id de SM (JAVI)</li>
+          <li>- Hacer el json para tournament_teams de cada torneo argentino (JAVI)</li>
           <li>- Info de contacto en el footer (JAVI) mail resultados.ar0@gmail.com y twitter @resultados_ar</li>
           <li>- Botón de donaciones (JAVI)</li>
           <br/>
+          <li>- Asegurarme de que cuando se juegue un partido del mundial los puntos se sumen a la tabla de standings</li>
+          <li>- Consultar qué es mejor para consultar bases de datos para crear una tabla, como distribuir las consultas</li>
           <li>- Simplificar columna: tournament_system en supabase (Claude Desktop)</li>
-          <li>- Reemplazo definitivo de API 365: usar solo SM (Claude Opus)</li>
+          <li>- Sidebar izquierda</li>
+          <li>- IA Futbolera YT</li>
+          <li>- @expediente.gol instagram</li>
           <li>- Filtro de situaciones del partido</li>
           <li>- Tabla de divisiones disputadas por año (ARG)</li>
           <li>- Tabla de mundiales disputados por pais (INT)</li>
-
-          <li>- IA Futbolera YT</li>
+          
 
           <p>Notas:</p>
           <li>- Los torneos con letras no pueden empezar con la misma letra, ej: CH = champions league, CL = copa libertadore. La logica lo toma como un mismo torneo pero distinta edicion </li>
