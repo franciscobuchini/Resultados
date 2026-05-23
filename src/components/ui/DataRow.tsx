@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react';
 import ImageCrest from './ImageCrest';
 import { useTheme, useThemeClasses } from '../../functions/themeStore';
 import { ChevronDown, Check, Ban } from 'lucide-react';
-import MatchEventsTimeline from './MatchEventsTimeline';
+import MatchEventsTimeline from '../tables/MatchEventsTimeline';
 import GoalAnimation from './GoalAnimation';
 
 // ============================================================

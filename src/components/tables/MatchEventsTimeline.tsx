@@ -164,6 +164,7 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
   const { bgApp, bgSurface, textMuted, textMain, textError, textAccent } = useThemeClasses();
 
   useEffect(() => {
+
     if (!matchDate || !matchId) return;
 
     const fetchEvents = async () => {
