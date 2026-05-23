@@ -327,15 +327,6 @@ setInitialName(data.user_name?.replace(/^@+/, '') || '');
 
           {/* Acciones de Cuenta */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-8 mt-4 border-t border-white/5">
-            <Button
-              variant="danger"
-              label="Eliminar cuenta"
-              onClick={() => {
-                if (confirm('¿Estás seguro de que deseas eliminar tu cuenta?')) {
-                  alert('Cuenta eliminada (Simulación)');
-                }
-              }}
-            />
 
             <Button
               icon={Save}
@@ -350,4 +341,4 @@ setInitialName(data.user_name?.replace(/^@+/, '') || '');
       </PageContent>
     </>
   );
-}
+} 
