@@ -14,7 +14,6 @@ export default function ReadmeViewer() {
           <li>- Teams sin id de SM (JAVI)</li>
           <li>- Hacer el json para tournament_teams de cada torneo (JAVI)</li>
 
-          <li>- Campeón de cáda mundial agregar (JAVI)</li>
           <li>- Info de contacto en el footer (JAVI) mail resultados.ar0@gmail.com y twitter @resultados_ar</li>
           <li>- Botón de donaciones (JAVI)</li>
           <br/>
