@@ -30,6 +30,17 @@ textarea {
   -webkit-user-select: text;
 }
 
+/* Permite selección de texto e imágenes cuando el admin lo activa */
+body.admin-unrestricted {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+body.admin-unrestricted img {
+  pointer-events: auto !important;
+  -webkit-user-drag: auto !important;
+}
+
 /* Utilidad para ocultar scrollbars */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
