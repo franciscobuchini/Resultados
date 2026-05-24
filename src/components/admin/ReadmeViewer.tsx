@@ -15,6 +15,7 @@ export default function ReadmeViewer() {
           <li>- Hacer el json para tournament_teams de cada torneo argentino (JAVI)</li>
           <li>- Info de contacto en el footer (JAVI) mail resultados.ar0@gmail.com y twitter @resultados_ar</li>
           <li>- Botón de donaciones (JAVI)</li>
+          <li>- tournament_system para demas competencias (JAVI)</li>
           <br/>
           <li>- Asegurarme de que cuando se juegue un partido del mundial los puntos se sumen a la tabla de standings</li>
           <li>- Consultar qué es mejor para consultar bases de datos para crear una tabla, como distribuir las consultas</li>
@@ -27,7 +28,8 @@ export default function ReadmeViewer() {
           <li>- Tabla de mundiales disputados por pais (INT)</li>
           <li>- Vectorizar logo para transformar color</li>
           <li>- Check UI mobile admin y user</li>
-
+          <li>- Banderas de paises que no existen mas</li>
+          <li>- Rehacer readme viewer para editar desde la web</li>
           <p>Notas:</p>
           <li>- Los torneos con letras no pueden empezar con la misma letra, ej: CH = champions league, CL = copa libertadore. La logica lo toma como un mismo torneo pero distinta edicion </li>
         </ul>
