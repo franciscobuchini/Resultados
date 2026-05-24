@@ -25,7 +25,8 @@ export default function ReadmeViewer() {
           <li>- Filtro de situaciones del partido</li>
           <li>- Tabla de divisiones disputadas por año (ARG)</li>
           <li>- Tabla de mundiales disputados por pais (INT)</li>
-          
+          <li>- Vectorizar logo para transformar color</li>
+          <li>- Check UI mobile admin y user</li>
 
           <p>Notas:</p>
           <li>- Los torneos con letras no pueden empezar con la misma letra, ej: CH = champions league, CL = copa libertadore. La logica lo toma como un mismo torneo pero distinta edicion </li>

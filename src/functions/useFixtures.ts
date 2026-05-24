@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { isLive, getMatchStatusLabel } from './matchHelpers'
-import type { Match, Goal } from '../../shared/tournament/matchTypes'
+import type { Match, Goal } from './computeStandings'
 import { supabase } from './supabase'
 import { getLeaguePriority } from './leagueTiers'
 // ============================================================
@@ -221,7 +221,7 @@ const fetchFixtures = async (d: string, silent = false, retryCount = 0) => {
   if (!silent) setLoading(true)
   try {
     const res = await fetch(
-      `https://yngltjlglxlpfjawtxpp.supabase.co/functions/v1/get-fixtures?date=${d}`,
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${d}`,
       {
         headers: {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,

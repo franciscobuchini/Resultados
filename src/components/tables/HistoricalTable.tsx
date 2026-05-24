@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { StandingsHeaderRow, StandingsRow, StatGroup, Stat } from '../ui/DataRow';
 import DataBox from '../ui/DataBox';
-import type { TeamStanding } from '../../../shared/tournament/computeStandings';
+import type { TeamStanding } from '../../functions/computeStandings';
 
 export interface HistoricalTeamStanding extends TeamStanding {
   tj: number;

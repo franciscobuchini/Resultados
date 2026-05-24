@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowRightLeft, MonitorPlay } from 'lucide-react';
 import { supabase } from '../../functions/supabase';
 import { useThemeClasses } from '../../functions/themeStore';
-import type { Goal } from '../../../shared/tournament/matchTypes';
+import type { Goal } from '../../functions/computeStandings';
 import { decryptPayload } from '../../functions/crypto';
 
 interface FixtureEvent {

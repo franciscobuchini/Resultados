@@ -1,7 +1,6 @@
 import type { TabConfig } from '../tabTypes'
-import type { Match, Goal } from '../../../shared/tournament/matchTypes'
-import type { TournamentSystem, LeaguePhase, Tiebreaker } from '../../../shared/tournament/tournamentTypes'
-import { computeStandings } from '../../../shared/tournament/computeStandings'
+import type { Match, Goal, Tiebreaker } from '../../functions/computeStandings'
+import { computeStandings } from '../../functions/computeStandings'
 import FixtureTable from '../../components/tables/FixtureTable'
 import StandingsTable from '../../components/tables/StandingsTable'
 import EmptyState from '../../components/ui/EmptyState'
@@ -15,7 +14,7 @@ export const tabConfig: TabConfig = {
 }
 
 // ------------------------------------------------------------
-// HELPERS (copiados del antiguo TournamentPage)
+// HELPERS
 // ------------------------------------------------------------
 
 const isFinished = (status: string | null): boolean => {
@@ -35,15 +34,21 @@ const matchdayNumber = (round: string): number => {
   return Infinity
 }
 
-const DEFAULT_TIEBREAKERS: Tiebreaker[] = ['points', 'goal_difference', 'goals_scored']
-const DEFAULT_LEAGUE_PHASE: LeaguePhase = {
-  id: 'default',
-  type: 'league',
-}
+const DEFAULT_TIEBREAKERS: Tiebreaker[] = ['head_to_head_points', 'goal_diff', 'goals_scored']
+const DEFAULT_POINTS = { win: 3, draw: 1, loss: 0 }
 
 // ------------------------------------------------------------
-// PROPS
+// TIPOS
 // ------------------------------------------------------------
+
+interface TournamentSystem {
+  points?: { win: number; draw: number; loss: number }
+  standings_stages?: string[]
+  tiebreakers?: { top_two?: Tiebreaker[]; best_third?: Tiebreaker[] }
+  groups?: {
+    qualify?: Record<string, { destination: string; color: string; label: string }>
+  }
+}
 
 interface TorneoTabProps {
   tournament: {
@@ -65,6 +70,7 @@ export default function TorneoTab({
   tournament, matches, goals, teamLookup, selectedRound, setSelectedRound
 }: TorneoTabProps) {
   const { utcOffset } = useTime()
+  const system = tournament.tournament_system
 
   // Nombres de equipos para computeStandings
   const teamNames: Record<string, string> = {}
@@ -72,7 +78,7 @@ export default function TorneoTab({
     if (t.team_name) teamNames[t.team_id] = t.team_name
   })
 
-  // Si no hay tournament_teams, derivar un grupo único desde los partidos
+  // Grupos desde tournament_teams o derivados desde los partidos
   const groups: Record<string, string[]> = (() => {
     if (tournament.tournament_teams && Object.keys(tournament.tournament_teams).length > 0) {
       return tournament.tournament_teams
@@ -85,22 +91,25 @@ export default function TorneoTab({
   })()
   const groupKeys = Object.keys(groups).sort()
 
-  // Partidos de la fase de liga
-  const leagueMatches = matches.filter(m =>
-    m.match_round !== null && isMatchday(m.match_round) && isFinished(m.match_status)
-  )
+  // Partidos de la fase de grupos — filtramos por standings_stages si existe
+  const standingsStages = system?.standings_stages ?? null
+  const leagueMatches = matches.filter(m => {
+    if (!m.match_round || !isFinished(m.match_status)) return false
+    if (standingsStages) {
+      return standingsStages.some(stage => m.match_round!.includes(stage))
+    }
+    return isMatchday(m.match_round)
+  })
 
   // Tabla de posiciones
-  const system = tournament.tournament_system
-  const leaguePhase = system?.phases.find(p => p.type === 'league') as LeaguePhase | undefined
   const standings = groupKeys.length > 0
     ? computeStandings(
-      leagueMatches,
-      groups,
-      teamNames,
-      leaguePhase ?? DEFAULT_LEAGUE_PHASE,
-      system?.tiebreakers ?? DEFAULT_TIEBREAKERS
-    )
+        leagueMatches,
+        groups,
+        teamNames,
+        system?.tiebreakers?.top_two ?? DEFAULT_TIEBREAKERS,
+        system?.points ?? DEFAULT_POINTS
+      )
     : {}
 
   // Rounds disponibles para el selector
@@ -110,7 +119,7 @@ export default function TorneoTab({
   const sortedRounds = [...matchdayRounds, ...knockoutRounds]
   const currentIndex = sortedRounds.indexOf(selectedRound ?? '')
 
-  // Partidos del round seleccionado, convertidos a hora local
+  // Partidos del round seleccionado convertidos a hora local
   const filteredMatches = matches.filter(m => m.match_round === selectedRound)
   const localizedMatches = filteredMatches.map(m => ({
     match: m,
@@ -123,16 +132,15 @@ export default function TorneoTab({
   for (const { match, local } of localizedMatches) {
     const dateKey = local.date || 'TBD'
     if (!matchesByDate[dateKey]) matchesByDate[dateKey] = []
-    const matchWithLabel: Match = {
+    matchesByDate[dateKey].push({
       ...match,
       match_status_label: getMatchStatusLabel(match.match_status, match.match_date)
-    }
-    matchesByDate[dateKey].push(matchWithLabel)
+    })
   }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-10 lg:gap-8">
-      {/* Partidos del round seleccionado (Primero en mobile) */}
+      {/* Partidos del round seleccionado */}
       <div className="flex flex-col gap-4 order-1 lg:order-2">
         {selectedRound ? (
           <FixtureTable
@@ -148,7 +156,7 @@ export default function TorneoTab({
         )}
       </div>
 
-      {/* Tabla de posiciones (Segundo en mobile) */}
+      {/* Tabla de posiciones */}
       <div className="order-2 lg:order-1">
         <div className="flex flex-col gap-8">
           {groupKeys.map(group => (
@@ -157,6 +165,7 @@ export default function TorneoTab({
               title={group}
               standings={standings[group] ?? []}
               teamLookup={teamLookup}
+              tournamentSystem={system}
             />
           ))}
         </div>

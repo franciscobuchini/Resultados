@@ -1,5 +1,5 @@
 import type { TabConfig } from '../tabTypes'
-import type { Goal } from '../../../shared/tournament/matchTypes'
+import type { Goal } from '../../functions/computeStandings'
 import HistoryVsTable, { type HistoryStats } from '../../components/tables/HistoryVsTable'
 
 export const tabConfig: TabConfig = {

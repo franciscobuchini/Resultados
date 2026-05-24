@@ -1,7 +1,7 @@
 import React from 'react';
 import { DataRowHeader, DataRowSeparator, FixtureRow } from '../ui/DataRow';
 import DataBox from '../ui/DataBox';
-import type { Match, Goal } from '../../../shared/tournament/matchTypes';
+import type { Match, Goal } from '../../functions/computeStandings';
 import { useTime, toLocal } from '../../functions/time';
 import { useThemeClasses } from '../../functions/themeStore';
 import { isPlayedOrPlaying, formatGoalLabel } from '../../functions/matchHelpers';

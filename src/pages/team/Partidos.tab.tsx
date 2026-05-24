@@ -1,5 +1,5 @@
 import type { TabConfig } from '../tabTypes'
-import type { Goal } from '../../../shared/tournament/matchTypes'
+import type { Goal } from '../../functions/computeStandings'
 import FixtureTable from '../../components/tables/FixtureTable'
 import EmptyState from '../../components/ui/EmptyState'
 import { useTime, toLocal } from '../../functions/time'
