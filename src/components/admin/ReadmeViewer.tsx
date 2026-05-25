@@ -102,7 +102,7 @@ export default function ReadmeViewer() {
   );
 
   return (
-    <div className={`max-w-3xl mx-auto px-4 py-8 flex flex-col gap-6 ${textMain}`}>
+    <div className={`mx-auto px-4 py-8 flex flex-col gap-6 ${textMain}`}>
 
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
