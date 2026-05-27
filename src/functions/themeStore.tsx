@@ -1,8 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useEffect, type ReactNode } from 'react'
-import logoLight from '../assets/ResultadosLogoLight.webp'
-import logoDark from '../assets/ResultadosLogoDark.webp'
+import ResultadosIcon from '../assets/ResultadosIcon'
 
 export type ThemeName =
   | 'zinc-dark' | 'slate-dark' | 'mauve-dark' | 'mist-dark' | 'olive-dark'
@@ -29,7 +28,7 @@ export interface ThemeClasses {
   textInfo?: string
   textAlert?: string
   bgProminent?: string
-  logo: string
+  logo: React.ComponentType<{ className?: string }>
   goalBg: string
   goalRing: string
   goalTextGradient: string
@@ -53,7 +52,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textAlert: 'text-amber-400',
     bgProminent: 'bg-zinc-800/50',
     bgMain: 'bg-black/10',
-    logo: logoLight,
+    logo: ResultadosIcon,
     goalBg: 'bg-emerald-500/30',
     goalRing: 'border-emerald-400',
     goalTextGradient: 'from-emerald-200 via-green-400 to-teal-600',
@@ -75,7 +74,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textAlert: 'text-amber-400',
     bgProminent: 'bg-slate-800/50',
     bgMain: 'bg-black/10',
-    logo: logoLight,
+    logo: ResultadosIcon,
     goalBg: 'bg-sky-500/30',
     goalRing: 'border-sky-400',
     goalTextGradient: 'from-sky-200 via-blue-400 to-indigo-600',
@@ -97,7 +96,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textAlert: 'text-amber-400',
     bgProminent: 'bg-mauve-800/50',
     bgMain: 'bg-black/10',
-    logo: logoLight,
+    logo: ResultadosIcon,
     goalBg: 'bg-violet-500/30',
     goalRing: 'border-violet-400',
     goalTextGradient: 'from-fuchsia-200 via-violet-400 to-purple-600',
@@ -119,7 +118,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textAlert: 'text-amber-400',
     bgProminent: 'bg-mist-800/50',
     bgMain: 'bg-black/10',
-    logo: logoLight,
+    logo: ResultadosIcon,
     goalBg: 'bg-cyan-500/30',
     goalRing: 'border-cyan-400',
     goalTextGradient: 'from-cyan-200 via-cyan-400 to-blue-600',
@@ -141,7 +140,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textAlert: 'text-amber-400',
     bgProminent: 'bg-olive-800/50',
     bgMain: 'bg-black/10',
-    logo: logoLight,
+    logo: ResultadosIcon,
     goalBg: 'bg-lime-500/30',
     goalRing: 'border-lime-400',
     goalTextGradient: 'from-yellow-200 via-lime-400 to-green-600',
@@ -163,7 +162,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textAlert: 'text-amber-600',
     bgProminent: 'bg-slate-100',
     bgMain: 'bg-white/40',
-    logo: logoDark,
+    logo: ResultadosIcon,
     goalBg: 'bg-blue-500/20',
     goalRing: 'border-blue-500',
     goalTextGradient: 'from-sky-500 via-blue-600 to-indigo-700',
@@ -185,7 +184,7 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textAlert: 'text-amber-600',
     bgProminent: 'bg-taupe-100',
     bgMain: 'bg-white/40',
-    logo: logoDark,
+    logo: ResultadosIcon,
     goalBg: 'bg-amber-500/20',
     goalRing: 'border-amber-500',
     goalTextGradient: 'from-yellow-500 via-amber-600 to-orange-700',

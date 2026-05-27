@@ -9,8 +9,16 @@ import LoginPage from './pages/LoginPage'
 import Error404 from './pages/Error404'
 import ThemeProvider from './functions/themeStore'
 import ScrollToTop from './functions/scrollToTop'
+import { useEffect } from 'react'
 
 export default function App() {
+  useEffect(() => {
+    const stored = localStorage.getItem('admin-unrestricted') === 'true'
+    if (stored) {
+      document.body.classList.add('admin-unrestricted')
+    }
+  }, [])
+
   return (
     <ThemeProvider>
       <BrowserRouter>

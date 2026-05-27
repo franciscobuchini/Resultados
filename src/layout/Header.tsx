@@ -4,6 +4,7 @@ import UserMenu from '../components/header/UserMenu';
 
 export default function Header() {
   const { bgApp, border, logo } = useThemeClasses();
+  const LogoComponent = logo;
 
   return (
     <header className={`fixed top-0 left-0 right-0 h-16 ${bgApp} bg-opacity-80 backdrop-blur-md border-b ${border} z-50 flex items-center`}>
@@ -19,7 +20,7 @@ export default function Header() {
       <div className="flex-1 flex items-center justify-between px-6 h-full">
         {/* Logo siempre en el centro (al inicio de la sección central) */}
         <a href="/" className="flex items-center shrink-0">
-          <img src={logo} alt="Resultados Logo" className="w-9 h-9 object-contain" />
+          <LogoComponent className="w-9 h-9" />
         </a>
         
         <div className="shrink-0">

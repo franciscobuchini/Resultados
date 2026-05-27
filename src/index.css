@@ -31,7 +31,8 @@ textarea {
 }
 
 /* Permite selección de texto e imágenes cuando el admin lo activa */
-body.admin-unrestricted {
+body.admin-unrestricted,
+body.admin-unrestricted * {
   user-select: text !important;
   -webkit-user-select: text !important;
 }
