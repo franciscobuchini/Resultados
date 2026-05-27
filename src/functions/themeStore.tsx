@@ -9,19 +9,14 @@ export type ThemeName =
   | 'slate-light' | 'taupe-light'
 
 export interface ThemeClasses {
-  // Backgrounds
   bgApp: string
   bgSurface: string
   bgSurfaceHover: string
   bgElement?: string
   bgElementHover?: string
   bgMain?: string
-
-  // Borders
   border: string
   borderSubtle?: string
-
-  // Text
   textMain: string
   textMuted: string
   textDimmed?: string
@@ -29,16 +24,12 @@ export interface ThemeClasses {
   textAccent: string
   textProminent: string
   textHover: string
-
-  // States
   textSuccess?: string
   textError?: string
   textInfo?: string
   textAlert?: string
   bgProminent?: string
   logo: string
-
-  // Goal Animation
   goalBg: string
   goalRing: string
   goalTextGradient: string
@@ -46,9 +37,6 @@ export interface ThemeClasses {
 }
 
 export const THEMES: Record<ThemeName, ThemeClasses> = {
-  // ------------------------------------------------------------
-  // DARK THEMES
-  // ------------------------------------------------------------
   'zinc-dark': {
     bgApp: 'bg-zinc-950',
     bgSurface: 'bg-zinc-900',
@@ -153,16 +141,12 @@ export const THEMES: Record<ThemeName, ThemeClasses> = {
     textAlert: 'text-amber-400',
     bgProminent: 'bg-olive-800/50',
     bgMain: 'bg-black/10',
-    logo: '/src/assets/ResultadosLogoLight.webp',
+    logo: logoLight,
     goalBg: 'bg-lime-500/30',
     goalRing: 'border-lime-400',
     goalTextGradient: 'from-yellow-200 via-lime-400 to-green-600',
     goalTextShadow: 'drop-shadow-[0_0_20px_rgba(163,230,53,0.9)]',
   },
-
-  // ------------------------------------------------------------
-  // LIGHT THEMES
-  // ------------------------------------------------------------
   'slate-light': {
     bgApp: 'bg-slate-100',
     bgSurface: 'bg-white',
@@ -236,25 +220,16 @@ export const useTheme = create<ThemeState>()(
 
 export const useThemeClasses = () => {
   const currentTheme = useTheme(state => state.currentTheme)
-  // Fallback de seguridad por si el tema guardado en localStorage ya no existe
   return THEMES[currentTheme] || THEMES['zinc-dark']
 }
 
-/**
- * ThemeProvider - Componente encargado de sincronizar el tema con el DOM (body)
- */
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const { bgApp, textMain } = useThemeClasses()
-  const setShowApiIds = useTheme(state => state.setShowApiIds)
 
   useEffect(() => {
-    // Forzamos el switch de IDs a off al iniciar la aplicación para resolver el problema de sesión
-    setShowApiIds(false)
-  }, [setShowApiIds])
-
-  useEffect(() => {
-    // Al cambiar de tema, actualizamos el body para que el fondo global sea el del tema
-    const classNames = document.body.className.split(' ').filter(c => !c.startsWith('bg-') && !c.startsWith('text-'))
+    const classNames = document.body.className
+      .split(' ')
+      .filter(c => !c.startsWith('bg-') && !c.startsWith('text-'))
     document.body.className = [...classNames, bgApp, textMain, 'antialiased'].join(' ')
   }, [bgApp, textMain])
 

@@ -183,6 +183,14 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
             if (fixture && fixture.fixture_events) {
               apiEvents = fixture.fixture_events
                 .filter((e: FixtureEvent) => e.is_valid)
+                // Deduplicar por minuto + tipo + jugador + equipo
+                  const seen = new Set<string>()
+                  apiEvents = apiEvents.filter(e => {
+                    const key = `${e.minute}-${e.extra_minute ?? 0}-${e.event_type}-${e.player_name ?? ''}-${e.team_id}`
+                    if (seen.has(key)) return false
+                    seen.add(key)
+                    return true
+                  })
                 .sort((a: FixtureEvent, b: FixtureEvent) => {
                   const aIsShootout = a.event_type.toLowerCase().includes('shootout');
                   const bIsShootout = b.event_type.toLowerCase().includes('shootout');

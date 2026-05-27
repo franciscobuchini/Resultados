@@ -22,13 +22,6 @@ export default function ControlPanel() {
     localStorage.setItem(STORAGE_KEY, String(unrestricted));
   }, [unrestricted]);
 
-  // Limpiar al desmontar (cuando el admin sale del panel)
-  useEffect(() => {
-    return () => {
-      document.body.classList.remove('admin-unrestricted');
-    };
-  }, []);
-
   return (
     <div className="flex items-center justify-start gap-4 w-full">
       <span className={`text-xs ${textMuted} italic`}>
