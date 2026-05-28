@@ -43,7 +43,7 @@ export const isLive = (status: string | null): boolean => {
 
 export const getMatchStatusLabel = (
   status: string | null,
-  date: string | null,
+  _date: string | null,
   currentMinute?: number | null
 ): string | null => {
   if (!status) return null;
