@@ -6,7 +6,6 @@ const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const DR_KEY = Deno.env.get('DATAREDONDA_API_KEY')!
 const DR_URL = 'https://hwzddjztuezdhnevwbjx.supabase.co/rest/v1/rpc/get_fixtures_by_date'
 
-const LEAGUE_ID = 732
 const DAYS_AHEAD = 40
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
@@ -40,9 +39,9 @@ const fetchFromDataRedonda = async (date: string): Promise<any[]> => {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FUNCIÓN 1 — Sincronizar fixtures del Mundial desde DataRedonda
+// FUNCIÓN 1 — Sincronizar fixtures desde DataRedonda
 // ─────────────────────────────────────────────────────────────────────────────
-async function syncFixtures(): Promise<{ synced: number; unresolved: number }> {
+async function syncFixtures(): Promise<{ synced: number; unresolved: number; apiLeagueIds: number[] }> {
 
   const dates: string[] = []
   const cursor = new Date()
@@ -53,24 +52,38 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number }> {
     cursor.setDate(cursor.getDate() + 1)
   }
 
-  const { data: tournament } = await supabase
+  // Obtener todos los torneos activos con tournament_id_api válido
+  const { data: tournaments, error: tErr } = await supabase
     .from('tournaments')
-    .select('tournament_id')
-    .eq('tournament_id_api', LEAGUE_ID)
-    .single()
-  const tournamentId = tournament?.tournament_id ?? null
+    .select('tournament_id, tournament_id_api')
+    .not('tournament_id_api', 'is', null)
+
+  if (tErr) throw new Error(`Error buscando torneos activos: ${tErr.message}`)
+  if (!tournaments || tournaments.length === 0) {
+    console.log('No se encontraron torneos activos con ID de API')
+    return { synced: 0, unresolved: 0, apiLeagueIds: [] }
+  }
+
+  const tournamentMap = new Map<number, string>()
+  const apiLeagueIds: number[] = []
+  for (const t of tournaments) {
+    if (t.tournament_id_api) {
+      tournamentMap.set(Number(t.tournament_id_api), t.tournament_id)
+      apiLeagueIds.push(Number(t.tournament_id_api))
+    }
+  }
 
   const allFixtures: any[] = []
   for (const date of dates) {
     const dayFixtures = await fetchFromDataRedonda(date)
-    const wc = dayFixtures.filter(f => f.leagues?.sportmonks_id === LEAGUE_ID)
-    allFixtures.push(...wc)
-    console.log(`📅 ${date}: ${wc.length} partidos del Mundial`)
+    const matches = dayFixtures.filter(f => f.leagues?.sportmonks_id && tournamentMap.has(Number(f.leagues.sportmonks_id)))
+    allFixtures.push(...matches)
+    console.log(`📅 ${date}: ${matches.length} partidos de torneos activos`)
   }
 
   if (allFixtures.length === 0) {
-    console.log('No se encontraron fixtures del Mundial en el rango')
-    return { synced: 0, unresolved: 0 }
+    console.log('No se encontraron fixtures de torneos activos en el rango')
+    return { synced: 0, unresolved: 0, apiLeagueIds }
   }
 
   const apiTeamIds = new Set<string>()
@@ -108,6 +121,9 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number }> {
       console.warn(`⚠️ Sin resolver: fixture ${f.id} — home: ${homeApiId}, away: ${awayApiId}`)
     }
 
+    const leagueIdApi = f.leagues?.sportmonks_id ? Number(f.leagues.sportmonks_id) : null
+    const tournamentId = leagueIdApi ? tournamentMap.get(leagueIdApi) : null
+
     return {
       match_id: `${matchDate?.replace(/-/g, '')}${homeTeam?.id ?? homeApiId}${awayTeam?.id ?? awayApiId}`,
       match_id_api: f.sportmonks_id ?? null,
@@ -116,7 +132,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number }> {
       match_status: f.status ?? null,
       game_time: f.minute ?? null,
       tournament_id: tournamentId,
-      tournament_id_api: LEAGUE_ID,
+      tournament_id_api: leagueIdApi,
       match_round: f.round ? `Fecha ${f.round}` : null,
       home_id: homeTeam?.id ?? null,
       home_name: homeTeam?.name ?? f.home_teams?.name ?? null,
@@ -136,17 +152,19 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number }> {
   if (error) throw new Error(`Error en upsert: ${error.message}`)
 
   console.log(`✅ Función 1: ${rows.length} fixtures sincronizados (${unresolved} sin resolver)`)
-  return { synced: rows.length, unresolved }
+  return { synced: rows.length, unresolved, apiLeagueIds }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FUNCIÓN 2 — Cleanup: resuelve team_ids que quedaron null
 // ─────────────────────────────────────────────────────────────────────────────
-async function resolveTeamIds(): Promise<number> {
+async function resolveTeamIds(apiLeagueIds: number[]): Promise<number> {
+  if (apiLeagueIds.length === 0) return 0
+
   const { data: pendingFull, error } = await supabase
     .from('matches')
-    .select('match_id, match_date')
-    .eq('tournament_id_api', LEAGUE_ID)
+    .select('match_id, match_id_api, match_date')
+    .in('tournament_id_api', apiLeagueIds)
     .or('home_id.is.null,away_id.is.null')
 
   if (error) throw new Error(`Error buscando pendientes: ${error.message}`)
@@ -160,10 +178,10 @@ async function resolveTeamIds(): Promise<number> {
   let resolved = 0
   for (const date of uniqueDates) {
     const fixtures = await fetchFromDataRedonda(date)
-    const wcFixtures = fixtures.filter(f => f.leagues?.sportmonks_id === LEAGUE_ID)
+    const activeFixtures = fixtures.filter(f => f.leagues?.sportmonks_id && apiLeagueIds.includes(Number(f.leagues.sportmonks_id)))
 
     const apiTeamIds = new Set<string>()
-    for (const f of wcFixtures) {
+    for (const f of activeFixtures) {
       if (f.home_team_id) apiTeamIds.add(String(f.home_team_id))
       if (f.away_team_id) apiTeamIds.add(String(f.away_team_id))
     }
@@ -182,10 +200,12 @@ async function resolveTeamIds(): Promise<number> {
       })
     }
 
-    for (const f of wcFixtures) {
-      const matchId = String(f.id)
-      const isPending = pendingFull.some(m => m.match_id === matchId)
-      if (!isPending) continue
+    for (const f of activeFixtures) {
+      const matchApiId = f.id ? Number(f.id) : (f.sportmonks_id ? Number(f.sportmonks_id) : null)
+      if (!matchApiId) continue
+
+      const pendingMatch = pendingFull.find(m => m.match_id_api === matchApiId)
+      if (!pendingMatch) continue
 
       const homeTeam = f.home_team_id ? teamMap.get(String(f.home_team_id)) : null
       const awayTeam = f.away_team_id ? teamMap.get(String(f.away_team_id)) : null
@@ -198,7 +218,7 @@ async function resolveTeamIds(): Promise<number> {
       const { error: updateError } = await supabase
         .from('matches')
         .update(updates)
-        .eq('match_id', matchId)
+        .eq('match_id', pendingMatch.match_id)
 
       if (!updateError) resolved++
     }
@@ -213,8 +233,8 @@ async function resolveTeamIds(): Promise<number> {
 // ─────────────────────────────────────────────────────────────────────────────
 Deno.serve(async () => {
   try {
-    const { synced, unresolved } = await syncFixtures()
-    const resolved = unresolved > 0 ? await resolveTeamIds() : 0
+    const { synced, unresolved, apiLeagueIds } = await syncFixtures()
+    const resolved = unresolved > 0 ? await resolveTeamIds(apiLeagueIds) : 0
 
     return new Response(
       JSON.stringify({ success: true, synced, resolved }),

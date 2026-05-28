@@ -232,8 +232,12 @@ export function useFixtures() {
       if (!res.ok) throw new Error(`Error ${res.status}`)
       const data = await res.json()
 
-      if (Array.isArray(data)) {
-        setFixtures(data)
+      const fixturesList = Array.isArray(data)
+        ? data
+        : (data && Array.isArray(data.data) ? data.data : null);
+
+      if (fixturesList) {
+        setFixtures(fixturesList)
       } else if (retryCount === 0) {
         setTimeout(() => fetchFixtures(d, true, 1), 3000)
       }

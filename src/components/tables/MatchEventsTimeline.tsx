@@ -175,11 +175,18 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
         let apiEvents: FixtureEvent[] = [];
         try {
           const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${matchDate}`;
-          const res = await fetch(url);
+          const res = await fetch(url, {
+            headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            }
+          });
           if (res.ok) {
             const encryptedText = await res.text();
-            const data = decryptPayload(encryptedText);
-            const fixture = data.find((f: { id: string | number; fixture_events?: FixtureEvent[] }) => f.id.toString() === matchId);
+            const decrypted = decryptPayload(encryptedText);
+            const fixturesList = Array.isArray(decrypted)
+              ? decrypted
+              : (decrypted && Array.isArray(decrypted.data) ? decrypted.data : []);
+            const fixture = fixturesList.find((f: { id: string | number; fixture_events?: FixtureEvent[] }) => f.id.toString() === matchId);
             if (fixture && fixture.fixture_events) {
               apiEvents = fixture.fixture_events
                 .filter((e: FixtureEvent) => e.is_valid)
