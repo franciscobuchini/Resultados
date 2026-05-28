@@ -55,17 +55,6 @@ export const getMatchStatusLabel = (
     return 'C';
   }
 
-  if (!date) return null;
-
-  // Solo nos interesa para el día de hoy (usando fecha local, no UTC)
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const today = `${year}-${month}-${day}`;
-
-  if (date !== today) return null;
-
   // Si está en vivo
   if (isLive(s)) {
     if (s === 'HT') return 'ET'; // Entretiempo
@@ -80,7 +69,7 @@ export const getMatchStatusLabel = (
     return 'LIVE';
   }
 
-  // Si terminó hoy
+  // Si terminó
   if (s === 'FT' || s === 'AET' || s === 'PEN') {
     return '✓';
   }
