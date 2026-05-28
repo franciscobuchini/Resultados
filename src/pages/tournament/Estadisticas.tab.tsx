@@ -112,11 +112,17 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
 
       const sm: Record<string, { teamName: string; teamId: string; tjSet: Set<string>; pts: number; pj: number; pg: number; pe: number; pp: number; gf: number; gc: number; titles: number }> = {}
 
+      // Equipos que se combinan en el historial
+      const TEAM_ALIASES: Record<string, string> = {
+        'INT217': 'INT077', // Alemania Democrática → Alemania
+      }
+
       const ensure = (id: string, name: string, tid: string) => {
-        if (!id) return null
-        if (!sm[id]) sm[id] = { teamName: normalizeTeamName(name), teamId: id, tjSet: new Set(), pts: 0, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, titles: 0 }
-        if (tid) sm[id].tjSet.add(tid)
-        return sm[id]
+        const resolvedId = TEAM_ALIASES[id] ?? id
+        if (!resolvedId) return null
+        if (!sm[resolvedId]) sm[resolvedId] = { teamName: normalizeTeamName(name), teamId: resolvedId, tjSet: new Set(), pts: 0, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, titles: 0 }
+        if (tid) sm[resolvedId].tjSet.add(tid)
+        return sm[resolvedId]
       }
 
       for (const m of allMatches) {

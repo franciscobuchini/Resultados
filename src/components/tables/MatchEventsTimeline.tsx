@@ -87,9 +87,9 @@ const reconcileGoals = (
   const isGoalEvent = (e: FixtureEvent) => {
     const tType = e.event_type.toLowerCase();
     return (tType.includes('goal') || tType.includes('penalty')) &&
-           !tType.includes('miss') &&
-           !tType.includes('disallowed') &&
-           !tType.includes('shootout');
+      !tType.includes('miss') &&
+      !tType.includes('disallowed') &&
+      !tType.includes('shootout');
   };
 
   // Colectar goles válidos por equipo usando los IDs numéricos de la API
@@ -127,9 +127,9 @@ const reconcileGoals = (
       if (e.event_type === 'Disallowed Goal') continue;
 
       // Buscar si hay un evento VAR en los siguientes 5 minutos para este mismo equipo
-      const hasVAR = eventsList.some(v => 
-        v.event_type.toLowerCase().includes('var') && 
-        v.minute >= e.minute && 
+      const hasVAR = eventsList.some(v =>
+        v.event_type.toLowerCase().includes('var') &&
+        v.minute >= e.minute &&
         v.minute <= e.minute + 5 &&
         v.team_id.toString() === e.team_id.toString()
       );
@@ -183,18 +183,18 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
             if (fixture && fixture.fixture_events) {
               apiEvents = fixture.fixture_events
                 .filter((e: FixtureEvent) => e.is_valid)
-                // Deduplicar por minuto + tipo + jugador + equipo
-                  const seen = new Set<string>()
-                  apiEvents = apiEvents.filter(e => {
-                    const key = `${e.minute}-${e.extra_minute ?? 0}-${e.event_type}-${e.player_name ?? ''}-${e.team_id}`
-                    if (seen.has(key)) return false
-                    seen.add(key)
-                    return true
-                  })
+              // Deduplicar por minuto + tipo + jugador + equipo
+              const seen = new Set<string>()
+              apiEvents = apiEvents.filter(e => {
+                const key = `${e.minute}-${e.extra_minute ?? 0}-${e.event_type}-${e.player_name ?? ''}-${e.team_id}`
+                if (seen.has(key)) return false
+                seen.add(key)
+                return true
+              })
                 .sort((a: FixtureEvent, b: FixtureEvent) => {
                   const aIsShootout = a.event_type.toLowerCase().includes('shootout');
                   const bIsShootout = b.event_type.toLowerCase().includes('shootout');
-                  
+
                   if (aIsShootout && !bIsShootout) return 1;
                   if (!aIsShootout && bIsShootout) return -1;
 
@@ -281,7 +281,7 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
               if (tType.includes('var')) {
                 const reasonRaw = event.details?.addition?.trim() || '';
                 const playerRaw = event.player_name?.trim() || '';
-                
+
                 // Función para traducir y limpiar el texto del VAR
                 const translateVarReason = (text: string) => {
                   const t = text.toLowerCase();
@@ -290,7 +290,7 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
                   if (t.includes('penalty')) return 'Posible Penal';
                   if (t.includes('red card') || t.includes('card upgrade')) return 'Posible Roja';
                   if (t.includes('yellow card')) return 'Posible Amarilla';
-                  
+
                   // Si no lo reconoce pero no es un texto basura de la API, lo deja como está
                   return text;
                 };
@@ -306,7 +306,7 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
                   // Si decía "Pending VAR" o cosas similares, lo ocultamos
                   displayPlayerName = 'Chequeo VAR';
                 }
-              } 
+              }
               // Fallback: Si no hay nombre para el resto de eventos, usar el tipo como texto
               else if (!displayPlayerName || displayPlayerName.trim() === '') {
                 if (tType.includes('substitution')) displayPlayerName = 'Cambio';
@@ -339,8 +339,8 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
                   </div>
 
                   <div className={`w-10 h-6 flex items-center justify-center shrink-0 text-[10px] sm:text-xs font-bold ${textMuted}`}>
-                    {tType.includes('shootout') 
-                      ? `P${event.minute}` 
+                    {tType.includes('shootout')
+                      ? `P${event.minute}`
                       : `${event.minute}'${event.extra_minute ? `+${event.extra_minute}` : ''}`}
                   </div>
 

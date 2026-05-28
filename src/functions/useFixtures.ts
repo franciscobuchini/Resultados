@@ -59,19 +59,19 @@ export const formatDateLabel = (d: string): string => {
   };
 
   const now = new Date();
-  const today     = getLocalDate(now);
-  
+  const today = getLocalDate(now);
+
   const yesterdayDate = new Date(now);
   yesterdayDate.setDate(now.getDate() - 1);
   const yesterday = getLocalDate(yesterdayDate);
 
   const tomorrowDate = new Date(now);
   tomorrowDate.setDate(now.getDate() + 1);
-  const tomorrow  = getLocalDate(tomorrowDate);
+  const tomorrow = getLocalDate(tomorrowDate);
 
-  if (d === today)     return 'Hoy'
+  if (d === today) return 'Hoy'
   if (d === yesterday) return 'Ayer'
-  if (d === tomorrow)  return 'Mañana'
+  if (d === tomorrow) return 'Mañana'
   return new Date(d + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })
 }
 
@@ -117,7 +117,7 @@ const groupAndAdaptFixtures = (fixtures: Fixture[], localTeamsMap: Map<number, a
     const aLive = a.matches.some(m => isLive(m.status)) ? 0 : 1
     const bLive = b.matches.some(m => isLive(m.status)) ? 0 : 1
     if (aLive !== bLive) return aLive - bLive
-    
+
     // 3. Si todo empata, orden alfabético
     return nameA.localeCompare(nameB)
   })
@@ -171,13 +171,13 @@ const groupAndAdaptFixtures = (fixtures: Fixture[], localTeamsMap: Map<number, a
       const hId = homeLocal?.team_id || f.home_team_id.toString();
       const aId = awayLocal?.team_id || f.away_team_id.toString();
 
-      acc[hId] = { 
-        team_name: homeLocal?.team_name || f.home_teams.name, 
+      acc[hId] = {
+        team_name: homeLocal?.team_name || f.home_teams.name,
         team_crest_url: homeLocal?.team_crest_url || f.home_teams.logo_path,
         team_id_api_drsm: f.home_team_id
       }
-      acc[aId] = { 
-        team_name: awayLocal?.team_name || f.away_teams.name, 
+      acc[aId] = {
+        team_name: awayLocal?.team_name || f.away_teams.name,
         team_crest_url: awayLocal?.team_crest_url || f.away_teams.logo_path,
         team_id_api_drsm: f.away_team_id
       }
@@ -217,34 +217,34 @@ export function useFixtures() {
     return `${year}-${month}-${day}`;
   })
 
-const fetchFixtures = async (d: string, silent = false, retryCount = 0) => {
-  if (!silent) setLoading(true)
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${d}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+  const fetchFixtures = async (d: string, silent = false, retryCount = 0) => {
+    if (!silent) setLoading(true)
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${d}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          }
         }
+      )
+
+      if (!res.ok) throw new Error(`Error ${res.status}`)
+      const data = await res.json()
+
+      if (Array.isArray(data)) {
+        setFixtures(data)
+      } else if (retryCount === 0) {
+        setTimeout(() => fetchFixtures(d, true, 1), 3000)
       }
-    )
-
-    if (!res.ok) throw new Error(`Error ${res.status}`)
-    const data = await res.json()
-
-    if (Array.isArray(data)) {
-      setFixtures(data)
-    } else if (retryCount === 0) {
-      setTimeout(() => fetchFixtures(d, true, 1), 3000)
+    } catch (err: any) {
+      console.error(`[useFixtures] Error fetching date ${d}:`, err.message)
+      if (retryCount === 0) {
+        setTimeout(() => fetchFixtures(d, true, 1), 3000)
+      }
     }
-  } catch (err: any) {
-    console.error(`[useFixtures] Error fetching date ${d}:`, err.message)
-    if (retryCount === 0) {
-      setTimeout(() => fetchFixtures(d, true, 1), 3000)
-    }
+    if (!silent) setLoading(false)
   }
-  if (!silent) setLoading(false)
-}
 
   // Cargar mapeo de equipos locales
   useEffect(() => {
@@ -253,7 +253,7 @@ const fetchFixtures = async (d: string, silent = false, retryCount = 0) => {
         .from('teams')
         .select('team_id, team_name, team_crest_url, team_id_api_drsm')
         .not('team_id_api_drsm', 'is', null)
-      
+
       if (data) {
         const map = new Map()
         data.forEach(t => map.set(Number(t.team_id_api_drsm), t))

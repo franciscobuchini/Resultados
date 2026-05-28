@@ -1,13 +1,13 @@
 // @ts-nocheck
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
 
-const SUPABASE_URL     = Deno.env.get('SUPABASE_URL')!
-const SUPABASE_KEY     = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const DR_KEY           = Deno.env.get('DATAREDONDA_API_KEY')!
-const DR_URL           = 'https://hwzddjztuezdhnevwbjx.supabase.co/rest/v1/rpc/get_fixtures_by_date'
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
+const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const DR_KEY = Deno.env.get('DATAREDONDA_API_KEY')!
+const DR_URL = 'https://hwzddjztuezdhnevwbjx.supabase.co/rest/v1/rpc/get_fixtures_by_date'
 
-const LEAGUE_ID        = 732
-const DAYS_AHEAD       = 40
+const LEAGUE_ID = 732
+const DAYS_AHEAD = 40
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
@@ -23,14 +23,14 @@ const fetchFromDataRedonda = async (date: string): Promise<any[]> => {
   const res = await fetch(DR_URL, {
     method: 'POST',
     headers: {
-      'apikey':           DR_KEY,
-      'Authorization':    `Bearer ${DR_KEY}`,
-      'Content-Type':     'application/json',
-      'Accept':           'application/json',
-      'Accept-Language':  'es-AR,es;q=0.9,en;q=0.8',
-      'Referer':          'https://www.dataredonda.com/',
-      'Origin':           'https://www.dataredonda.com',
-      'User-Agent':       userAgents[Math.floor(Math.random() * userAgents.length)],
+      'apikey': DR_KEY,
+      'Authorization': `Bearer ${DR_KEY}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Accept-Language': 'es-AR,es;q=0.9,en;q=0.8',
+      'Referer': 'https://www.dataredonda.com/',
+      'Origin': 'https://www.dataredonda.com',
+      'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
     },
     body: JSON.stringify({ art_date: date }),
   })
@@ -46,7 +46,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number }> {
 
   const dates: string[] = []
   const cursor = new Date()
-  const limit  = new Date()
+  const limit = new Date()
   limit.setDate(limit.getDate() + DAYS_AHEAD)
   while (cursor <= limit) {
     dates.push(cursor.toISOString().split('T')[0])
@@ -87,7 +87,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number }> {
   const teamMap = new Map<string, { id: string; name: string }>()
   for (const t of (teamsData ?? [])) {
     if (t.team_id_api_drsm) teamMap.set(String(t.team_id_api_drsm), {
-      id:   String(t.team_id),
+      id: String(t.team_id),
       name: t.team_name ?? null,
     })
   }
@@ -100,8 +100,8 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number }> {
 
     const homeApiId = f.home_team_id ? String(f.home_team_id) : null
     const awayApiId = f.away_team_id ? String(f.away_team_id) : null
-    const homeTeam  = homeApiId ? teamMap.get(homeApiId) : null
-    const awayTeam  = awayApiId ? teamMap.get(awayApiId) : null
+    const homeTeam = homeApiId ? teamMap.get(homeApiId) : null
+    const awayTeam = awayApiId ? teamMap.get(awayApiId) : null
 
     if (!homeTeam || !awayTeam) {
       unresolved++
@@ -109,23 +109,23 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number }> {
     }
 
     return {
-      match_id:          `${matchDate?.replace(/-/g, '')}${homeTeam?.id ?? homeApiId}${awayTeam?.id ?? awayApiId}`,
-      match_id_api:      f.sportmonks_id ?? null,
-      match_date:        matchDate,
-      match_time_utc:    matchTime,
-      match_status:      f.status ?? null,
-      game_time:         f.minute ?? null,
-      tournament_id:     tournamentId,
+      match_id: `${matchDate?.replace(/-/g, '')}${homeTeam?.id ?? homeApiId}${awayTeam?.id ?? awayApiId}`,
+      match_id_api: f.sportmonks_id ?? null,
+      match_date: matchDate,
+      match_time_utc: matchTime,
+      match_status: f.status ?? null,
+      game_time: f.minute ?? null,
+      tournament_id: tournamentId,
       tournament_id_api: LEAGUE_ID,
-      match_round:       f.round ? `Fecha ${f.round}` : null,
-      home_id:           homeTeam?.id ?? null,
-      home_name:         homeTeam?.name ?? f.home_teams?.name ?? null,
-      home_score:        f.home_score ?? null,
-      home_penalty:      f.pen_home_score ?? null,
-      away_id:           awayTeam?.id ?? null,
-      away_name:         awayTeam?.name ?? f.away_teams?.name ?? null,
-      away_score:        f.away_score ?? null,
-      away_penalty:      f.pen_away_score ?? null,
+      match_round: f.round ? `Fecha ${f.round}` : null,
+      home_id: homeTeam?.id ?? null,
+      home_name: homeTeam?.name ?? f.home_teams?.name ?? null,
+      home_score: f.home_score ?? null,
+      home_penalty: f.pen_home_score ?? null,
+      away_id: awayTeam?.id ?? null,
+      away_name: awayTeam?.name ?? f.away_teams?.name ?? null,
+      away_score: f.away_score ?? null,
+      away_penalty: f.pen_away_score ?? null,
     }
   })
 
@@ -177,13 +177,13 @@ async function resolveTeamIds(): Promise<number> {
     const teamMap = new Map<string, { id: string; name: string }>()
     for (const t of (teamsData ?? [])) {
       if (t.team_id_api_drsm) teamMap.set(String(t.team_id_api_drsm), {
-        id:   String(t.team_id),
+        id: String(t.team_id),
         name: t.team_name ?? null,
       })
     }
 
     for (const f of wcFixtures) {
-      const matchId   = String(f.id)
+      const matchId = String(f.id)
       const isPending = pendingFull.some(m => m.match_id === matchId)
       if (!isPending) continue
 
