@@ -25,7 +25,7 @@ export default function Footer() {
           icon={Mail}
           label="resultados.ar0@gmail.com"
           variant="ghost"
-          size="sm"
+          size="md"
           href="mailto:resultados.ar0@gmail.com"
           title="Enviar correo a resultados.ar0@gmail.com"
         />
@@ -34,7 +34,7 @@ export default function Footer() {
           icon={XIcon}
           label="@resultados_ar"
           variant="ghost"
-          size="sm"
+          size="md"
           href="https://x.com/resultados_ar"
           target="_blank"
           rel="noopener noreferrer"
@@ -44,8 +44,8 @@ export default function Footer() {
         <Button
           icon={Coffee}
           label="Cafecito"
-          hideLabelOnMobile={true}
-          size="sm"
+          variant="ghost"
+          size="md"
           onClick={() => window.open('https://cafecito.app/resultados', '_blank')}
         />
       </div>
