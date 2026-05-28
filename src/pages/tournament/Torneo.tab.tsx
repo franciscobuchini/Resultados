@@ -73,9 +73,16 @@ export default function TorneoTab({
   const system = tournament.tournament_system
 
   // Nombres de equipos para computeStandings
+  // Primero desde los partidos del torneo (home_name / away_name)
   const teamNames: Record<string, string> = {}
+  matches.forEach(m => {
+    if (m.home_id && m.home_name) teamNames[m.home_id] = m.home_name
+    if (m.away_id && m.away_name) teamNames[m.away_id] = m.away_name
+  })
+
+  // Fallback: si algún equipo no tiene partidos todavía, usar la DB
   Object.values(teamLookup).forEach(t => {
-    if (t.team_name) teamNames[t.team_id] = t.team_name
+    if (t.team_name && !teamNames[t.team_id]) teamNames[t.team_id] = t.team_name
   })
 
   // Grupos desde tournament_teams o derivados desde los partidos
@@ -104,12 +111,12 @@ export default function TorneoTab({
   // Tabla de posiciones
   const standings = groupKeys.length > 0
     ? computeStandings(
-        leagueMatches,
-        groups,
-        teamNames,
-        system?.tiebreakers?.top_two ?? DEFAULT_TIEBREAKERS,
-        system?.points ?? DEFAULT_POINTS
-      )
+      leagueMatches,
+      groups,
+      teamNames,
+      system?.tiebreakers?.top_two ?? DEFAULT_TIEBREAKERS,
+      system?.points ?? DEFAULT_POINTS
+    )
     : {}
 
   // Rounds disponibles para el selector

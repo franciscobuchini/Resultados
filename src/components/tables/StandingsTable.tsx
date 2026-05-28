@@ -79,7 +79,7 @@ export default function StandingsTable({ title, standings, teamLookup, tournamen
               <StandingsRow
                 position={idx + 1}
                 logo={info?.team_crest_url}
-                name={info?.team_name ?? team.team_name}
+                name={team.team_name ?? info?.team_name}
                 noBorder={idx === standings.length - 1}
                 stats={
                   <StatGroup>

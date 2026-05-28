@@ -31,7 +31,6 @@ const normalizeTeamName = (name: string): string => {
   return trim
 }
 
-/** Deriva la "base" de un tournament_id: PREFIX + primer char del sufijo */
 const getCompetitionBase = (tournamentId: string): { prefix: string; suffix: string } | null => {
   const parts = tournamentId.split('.')
   if (parts.length < 3) return null
@@ -67,32 +66,27 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
       const base = getCompetitionBase(tournamentId)
       if (!base) { setHistLoading(false); return }
 
-      // Buscar todos los torneos hermanos con el mismo prefijo y sufijo
       const { data: siblings } = await supabase
         .from('tournaments')
-        .select('tournament_id, tournament_name')
+        .select('tournament_id, tournament_name, tournament_winner_id')
         .ilike('tournament_id', `${base.prefix}.%.${base.suffix}`)
 
       if (!siblings || siblings.length === 0) { setHistLoading(false); return }
 
       const siblingIds = siblings.map(s => s.tournament_id)
 
-      // Traer TODOS los partidos de todas las ediciones (paginado de a 1000 para evitar el límite de Supabase/PostgREST)
       let allMatches: any[] = []
       let page = 0
       const pageSize = 1000
-      
+
       while (true) {
         const { data: matchesChunk, error } = await supabase
           .from('matches')
           .select('tournament_id, home_id, home_name, away_id, away_name, home_score, away_score, match_status')
           .in('tournament_id', siblingIds)
           .range(page * pageSize, (page + 1) * pageSize - 1)
-        
-        if (error) {
-          console.error('Error fetching matches chunk:', error)
-          break
-        }
+
+        if (error) { console.error('Error fetching matches chunk:', error); break }
         if (!matchesChunk || matchesChunk.length === 0) break
         allMatches = allMatches.concat(matchesChunk)
         if (matchesChunk.length < pageSize) break
@@ -101,11 +95,10 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
 
       if (allMatches.length === 0) { setHistLoading(false); return }
 
-      // Traer equipos para escudos y armar el teamLookup
       const { data: teams } = await supabase.from('teams').select('team_id, team_name, team_crest_url')
       const idByName: Record<string, string> = {}
       const newTeamLookup: Record<string, TeamInfo> = {}
-      
+
       teams?.forEach(t => {
         const norm = normalizeTeamName(t.team_name || '')
         idByName[norm] = t.team_id
@@ -117,45 +110,47 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
       })
       setTeamLookup(newTeamLookup)
 
-      // Calcular standings
       const sm: Record<string, { teamName: string; teamId: string; tjSet: Set<string>; pts: number; pj: number; pg: number; pe: number; pp: number; gf: number; gc: number; titles: number }> = {}
 
-      const ensure = (name: string, id: string, tid: string) => {
-        const norm = normalizeTeamName(name)
-        if (!sm[norm]) sm[norm] = { teamName: norm, teamId: idByName[norm] || id || '', tjSet: new Set(), pts: 0, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, titles: 0 }
-        if (tid) sm[norm].tjSet.add(tid)
-        return sm[norm]
+      const ensure = (id: string, name: string, tid: string) => {
+        if (!id) return null
+        if (!sm[id]) sm[id] = { teamName: normalizeTeamName(name), teamId: id, tjSet: new Set(), pts: 0, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, titles: 0 }
+        if (tid) sm[id].tjSet.add(tid)
+        return sm[id]
       }
 
       for (const m of allMatches) {
-        if (!isFinished(m.match_status) || !m.home_name || !m.away_name) continue
-        const h = ensure(m.home_name, m.home_id, m.tournament_id)
-        const a = ensure(m.away_name, m.away_id, m.tournament_id)
-        const hs = m.home_score ?? 0, as_ = m.away_score ?? 0
-        
+        if (!isFinished(m.match_status) || !m.home_id || !m.away_id) continue
+
+        const hs = m.home_score ?? 0
+        const as_ = m.away_score ?? 0
+
+        // Caso especial: mismo equipo en ambos lados (Alemania tras fusionar Alemania del Este)
+        // La Alemania oficial era el away → se registra su perspectiva: derrota 0-1
+        if (m.home_id === m.away_id) {
+          const team = ensure(m.home_id, m.away_name || m.home_name || '', m.tournament_id)
+          if (!team) continue
+          team.pj++
+          team.pp++
+          team.gf += as_  // goles de Alemania oficial (away)
+          team.gc += hs   // goles en contra
+          continue
+        }
+
+        const h = ensure(m.home_id, m.home_name || '', m.tournament_id)
+        const a = ensure(m.away_id, m.away_name || '', m.tournament_id)
+        if (!h || !a) continue
+
         h.pj++; a.pj++; h.gf += hs; h.gc += as_; a.gf += as_; a.gc += hs
         if (hs > as_) { h.pg++; h.pts += 3; a.pp++ }
         else if (hs < as_) { a.pg++; a.pts += 3; h.pp++ }
         else { h.pe++; h.pts += 1; a.pe++; a.pts += 1 }
       }
 
-      // Títulos (solo mundiales por ahora)
-      if (base.suffix === 'WC') {
-        const WC_CHAMPIONS: Record<string, string> = {
-          'INT.1930.WC': 'Uruguay', 'INT.1934.WC': 'Italia', 'INT.1938.WC': 'Italia',
-          'INT.1950.WC': 'Uruguay', 'INT.1954.WC': 'Alemania', 'INT.1958.WC': 'Brasil',
-          'INT.1962.WC': 'Brasil', 'INT.1966.WC': 'Inglaterra', 'INT.1970.WC': 'Brasil',
-          'INT.1974.WC': 'Alemania', 'INT.1978.WC': 'Argentina', 'INT.1982.WC': 'Italia',
-          'INT.1986.WC': 'Argentina', 'INT.1990.WC': 'Alemania', 'INT.1994.WC': 'Brasil',
-          'INT.1998.WC': 'Francia', 'INT.2002.WC': 'Brasil', 'INT.2006.WC': 'Italia',
-          'INT.2010.WC': 'España', 'INT.2014.WC': 'Alemania', 'INT.2018.WC': 'Francia',
-          'INT.2022.WC': 'Argentina',
-        }
-        Object.values(WC_CHAMPIONS).forEach(champ => {
-          const n = normalizeTeamName(champ)
-          if (sm[n]) sm[n].titles++
-        })
-      }
+      siblings.forEach(s => {
+        if (!s.tournament_winner_id) return
+        if (sm[s.tournament_winner_id]) sm[s.tournament_winner_id].titles++
+      })
 
       const sorted: HistoricalTeamStanding[] = Object.values(sm).map(s => ({
         team_id: s.teamId,
@@ -176,7 +171,7 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
       setHistoricalStandings(sorted)
       setHistLoading(false)
     }
-    
+
     loadHistorical()
   }, [tournamentId])
 

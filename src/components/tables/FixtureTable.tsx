@@ -136,13 +136,13 @@ export default function FixtureTable({
                     matchDate={match.match_date}
                     homeId={match.home_id!}
                     homeLogo={teamLookup[match.home_id!]?.team_crest_url}
-                    homeName={teamLookup[match.home_id!]?.team_name ?? match.home_name}
+                    homeName={match.home_name ?? teamLookup[match.home_id!]?.team_name}
                     homeIdDM={teamLookup[match.home_id!]?.team_id_api_drsm}
                     homeScore={isMatchPlayedOrPlaying ? match.home_score : null}
                     homeScorers={homeScorers}
                     awayId={match.away_id!}
                     awayLogo={teamLookup[match.away_id!]?.team_crest_url}
-                    awayName={teamLookup[match.away_id!]?.team_name ?? match.away_name}
+                    awayName={match.away_name ?? teamLookup[match.away_id!]?.team_name}
                     awayIdDM={teamLookup[match.away_id!]?.team_id_api_drsm}
                     awayScore={isMatchPlayedOrPlaying ? match.away_score : null}
                     awayScorers={awayScorers}
