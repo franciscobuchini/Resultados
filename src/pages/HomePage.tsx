@@ -5,14 +5,12 @@ import FixtureTable from '../components/tables/FixtureTable'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import { LAYOUT_CONFIG } from '../functions/layoutConfig'
-import HomeNavigation from '../layout/HomeNavigation'
 
 export default function HomePage() {
   const { loading, dateLabel, adaptedLeagues, changeDate } = useFixtures()
 
   return (
     <PageContent maxWidth="1600">
-      <HomeNavigation activeTabId="matches" />
 
       <DateNavigator dateLabel={dateLabel} onChangeDate={changeDate} />
 
