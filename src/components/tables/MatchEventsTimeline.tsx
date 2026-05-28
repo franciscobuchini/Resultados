@@ -186,7 +186,20 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
             const fixturesList = Array.isArray(decrypted)
               ? decrypted
               : (decrypted && Array.isArray(decrypted.data) ? decrypted.data : []);
-            const fixture = fixturesList.find((f: { id: string | number; fixture_events?: FixtureEvent[] }) => f.id.toString() === matchId);
+            const fixture = fixturesList.find((f: any) => {
+              if (!f) return false;
+              // 1. Intentar por matchId (caso HomePage donde matchId es el ID de la API)
+              if (f.id && f.id.toString() === matchId) return true;
+              // 2. Intentar por sportmonks_id
+              if (f.sportmonks_id && f.sportmonks_id.toString() === matchId) return true;
+              // 3. Intentar por cruce de equipos de la API (caso páginas de torneo con matchId compuesto)
+              if (homeIdDM && awayIdDM &&
+                  f.home_team_id?.toString() === homeIdDM.toString() &&
+                  f.away_team_id?.toString() === awayIdDM.toString()) {
+                return true;
+              }
+              return false;
+            });
             if (fixture && Array.isArray(fixture.fixture_events)) {
               apiEvents = fixture.fixture_events
                 .filter((e: FixtureEvent) => e.is_valid)
