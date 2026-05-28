@@ -176,7 +176,7 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
         
         // Helper: intenta buscar el fixture en la respuesta de una fecha dada
         const tryFetchForDate = async (dateStr: string): Promise<FixtureEvent[]> => {
-          const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${dateStr}`;
+          const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${dateStr}&encrypt=true`;
           const res = await fetch(url, {
             headers: {
               'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,

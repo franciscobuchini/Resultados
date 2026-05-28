@@ -3,6 +3,7 @@ import { isLive, getMatchStatusLabel } from './matchHelpers'
 import type { Match, Goal } from './computeStandings'
 import { supabase } from './supabase'
 import { getLeaguePriority } from './leagueTiers'
+import { decryptPayload } from './crypto'
 // ============================================================
 // TYPES — Datos que devuelve la Edge Function get-fixtures
 // ============================================================
@@ -221,7 +222,7 @@ export function useFixtures() {
     if (!silent) setLoading(true)
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${d}`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${d}&encrypt=true`,
         {
           headers: {
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
@@ -230,7 +231,8 @@ export function useFixtures() {
       )
 
       if (!res.ok) throw new Error(`Error ${res.status}`)
-      const data = await res.json()
+      const rawText = await res.text()
+      const data = decryptPayload(rawText)
 
       const fixturesList = Array.isArray(data)
         ? data
