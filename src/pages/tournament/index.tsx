@@ -9,6 +9,7 @@ import type { TournamentSystem } from '../../functions/computeStandings'
 import { useTheme } from '../../functions/themeStore'
 import LoadingState from '../../components/ui/LoadingState'
 import PageHeader from '../../layout/PageHeader'
+import ChampionBanner from '../../components/ui/ChampionBanner'
 import { resolveTabModules } from '../tabTypes'
 
 // ------------------------------------------------------------
@@ -37,6 +38,7 @@ interface Tournament {
   tournament_banner_url: string | null
   tournament_teams: Record<string, string[]> | null
   tournament_system: TournamentSystem | null
+  tournament_winner_id: string | null
 }
 
 // ------------------------------------------------------------
@@ -91,7 +93,7 @@ export default function TournamentPage() {
 
       const { data: tournaments } = await supabase
         .from('tournaments')
-        .select('tournament_id, tournament_name, tournament_crest_url, tournament_banner_url, tournament_teams, tournament_system')
+        .select('tournament_id, tournament_name, tournament_crest_url, tournament_banner_url, tournament_teams, tournament_system, tournament_winner_id')
         .eq('tournament_id', tournamentId)
         .limit(1)
 
@@ -227,6 +229,10 @@ export default function TournamentPage() {
   const activeModule = tabModules.find(m => m.tabConfig.id === activeTab) ?? tabModules[0]
   const ActiveComponent = activeModule?.default
 
+  const winner = tournament.tournament_winner_id
+    ? teamLookup[tournament.tournament_winner_id]
+    : null
+
   return (
     <>
       <PageBanner
@@ -240,6 +246,13 @@ export default function TournamentPage() {
           onChange={setActiveTab}
         />
       </PageBanner>
+
+      {winner && (
+        <ChampionBanner
+          teamName={winner.team_name}
+          teamCrestUrl={winner.team_crest_url}
+        />
+      )}
 
       <PageContent maxWidth="1600">
         {ActiveComponent && (
