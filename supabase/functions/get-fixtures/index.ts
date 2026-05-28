@@ -74,7 +74,7 @@ export default {
         if (!date && !startDate) {
           return new Response(
             JSON.stringify({ error: 'Parámetro requerido: ?date=YYYY-MM-DD o ?start=YYYY-MM-DD&end=YYYY-MM-DD' }),
-            { status: 400, headers: { 'Content-Type': 'application/json' } }
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
 
@@ -90,7 +90,7 @@ export default {
           );
           if (upsertError) {
             console.error('[GetFixtures] upsert error for', `dr_${date}`, upsertError);
-            return new Response(JSON.stringify({ error: 'DB upsert failed', details: upsertError.message || upsertError }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+            return new Response(JSON.stringify({ error: 'DB upsert failed', details: upsertError.message || upsertError }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
           }
           console.log('[GetFixtures] upsert OK for', `dr_${date}`);
 
@@ -125,14 +125,14 @@ export default {
 
         return new Response(
           JSON.stringify({ success: true, data, saved: true }),
-          { headers: { 'Content-Type': 'application/json' } }
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
 
       } catch (err: any) {
         console.error('[GetFixtures] Backend error:', err.message);
         return new Response(
           JSON.stringify({ error: err.message }),
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
     }
@@ -159,7 +159,7 @@ export default {
     } catch (err: any) {
       return new Response(
         JSON.stringify({ error: err.message }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
   }
