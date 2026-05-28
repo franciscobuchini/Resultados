@@ -187,7 +187,7 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
               ? decrypted
               : (decrypted && Array.isArray(decrypted.data) ? decrypted.data : []);
             const fixture = fixturesList.find((f: { id: string | number; fixture_events?: FixtureEvent[] }) => f.id.toString() === matchId);
-            if (fixture && fixture.fixture_events) {
+            if (fixture && Array.isArray(fixture.fixture_events)) {
               apiEvents = fixture.fixture_events
                 .filter((e: FixtureEvent) => e.is_valid)
               // Deduplicar por minuto + tipo + jugador + equipo
