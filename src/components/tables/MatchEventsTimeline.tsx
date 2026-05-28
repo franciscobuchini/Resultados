@@ -173,55 +173,68 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
 
         // 1. Intentar cargar eventos de la API de DataRedonda
         let apiEvents: FixtureEvent[] = [];
-        try {
-          const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${matchDate}`;
+        
+        // Helper: intenta buscar el fixture en la respuesta de una fecha dada
+        const tryFetchForDate = async (dateStr: string): Promise<FixtureEvent[]> => {
+          const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${dateStr}`;
           const res = await fetch(url, {
             headers: {
               'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
             }
           });
-          if (res.ok) {
-            const encryptedText = await res.text();
-            const decrypted = decryptPayload(encryptedText);
-            const fixturesList = Array.isArray(decrypted)
-              ? decrypted
-              : (decrypted && Array.isArray(decrypted.data) ? decrypted.data : []);
-            const fixture = fixturesList.find((f: any) => {
-              if (!f) return false;
-              // 1. Intentar por matchId (caso HomePage donde matchId es el ID de la API)
-              if (f.id && f.id.toString() === matchId) return true;
-              // 2. Intentar por sportmonks_id
-              if (f.sportmonks_id && f.sportmonks_id.toString() === matchId) return true;
-              // 3. Intentar por cruce de equipos de la API (caso páginas de torneo con matchId compuesto)
-              if (homeIdDM && awayIdDM &&
-                  f.home_team_id?.toString() === homeIdDM.toString() &&
-                  f.away_team_id?.toString() === awayIdDM.toString()) {
-                return true;
-              }
-              return false;
-            });
-            if (fixture && Array.isArray(fixture.fixture_events)) {
-              apiEvents = fixture.fixture_events
-                .filter((e: FixtureEvent) => e.is_valid)
-              // Deduplicar por minuto + tipo + jugador + equipo
-              const seen = new Set<string>()
-              apiEvents = apiEvents.filter(e => {
-                const key = `${e.minute}-${e.extra_minute ?? 0}-${e.event_type}-${e.player_name ?? ''}-${e.team_id}`
-                if (seen.has(key)) return false
-                seen.add(key)
-                return true
-              })
-                .sort((a: FixtureEvent, b: FixtureEvent) => {
-                  const aIsShootout = a.event_type.toLowerCase().includes('shootout');
-                  const bIsShootout = b.event_type.toLowerCase().includes('shootout');
-
-                  if (aIsShootout && !bIsShootout) return 1;
-                  if (!aIsShootout && bIsShootout) return -1;
-
-                  if (a.minute !== b.minute) return a.minute - b.minute;
-                  return (a.extra_minute || 0) - (b.extra_minute || 0);
-                });
+          if (!res.ok) return [];
+          
+          const rawText = await res.text();
+          const decrypted = decryptPayload(rawText);
+          const fixturesList = Array.isArray(decrypted)
+            ? decrypted
+            : (decrypted && Array.isArray(decrypted.data) ? decrypted.data : []);
+          
+          const fixture = fixturesList.find((f: any) => {
+            if (!f) return false;
+            if (f.id && f.id.toString() === matchId) return true;
+            if (f.sportmonks_id && f.sportmonks_id.toString() === matchId) return true;
+            if (homeIdDM && awayIdDM &&
+                f.home_team_id?.toString() === homeIdDM.toString() &&
+                f.away_team_id?.toString() === awayIdDM.toString()) {
+              return true;
             }
+            return false;
+          });
+          
+          if (!fixture || !Array.isArray(fixture.fixture_events)) return [];
+          
+          let events = fixture.fixture_events.filter((e: FixtureEvent) => e.is_valid);
+          // Deduplicar por minuto + tipo + jugador + equipo
+          const seen = new Set<string>();
+          events = events.filter((e: FixtureEvent) => {
+            const key = `${e.minute}-${e.extra_minute ?? 0}-${e.event_type}-${e.player_name ?? ''}-${e.team_id}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          }).sort((a: FixtureEvent, b: FixtureEvent) => {
+            const aIsShootout = a.event_type.toLowerCase().includes('shootout');
+            const bIsShootout = b.event_type.toLowerCase().includes('shootout');
+            if (aIsShootout && !bIsShootout) return 1;
+            if (!aIsShootout && bIsShootout) return -1;
+            if (a.minute !== b.minute) return a.minute - b.minute;
+            return (a.extra_minute || 0) - (b.extra_minute || 0);
+          });
+          
+          return events;
+        };
+
+        try {
+          // Intentar con la fecha del partido (puede ser UTC)
+          apiEvents = await tryFetchForDate(matchDate!);
+          
+          // Si no se encontró, probar con el día anterior
+          // (DataRedonda usa fecha local, pero match_date puede ser UTC)
+          if (apiEvents.length === 0) {
+            const prevDay = new Date(matchDate + 'T12:00:00');
+            prevDay.setDate(prevDay.getDate() - 1);
+            const prevDateStr = prevDay.toISOString().split('T')[0];
+            apiEvents = await tryFetchForDate(prevDateStr);
           }
         } catch {
           // API no disponible, seguimos con el fallback
