@@ -3,14 +3,27 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useThemeClasses } from '../functions/themeStore';
 import { LAYOUT_CONFIG } from '../functions/layoutConfig';
 import { supabase } from '../functions/supabase';
+import { create } from 'zustand';
+
+interface SidebarState {
+  isOpen: boolean;
+  toggle: () => void;
+  close: () => void;
+}
+
+export const useSidebarStore = create<SidebarState>((set) => ({
+  isOpen: false,
+  toggle: () => set((s) => ({ isOpen: !s.isOpen })),
+  close: () => set({ isOpen: false }),
+}));
 import Scrollbar from './Scrollbar';
 import TournamentList from '../components/ui/TournamentList';
 import { Globe } from 'lucide-react';
 
-export default function SidebarLeft() {
+function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { tournamentId } = useParams<{ tournamentId: string }>();
   const navigate = useNavigate();
-  const { border, textMuted } = useThemeClasses();
+  const { textMuted, border } = useThemeClasses();
 
   const [worldCups, setWorldCups] = useState<{ tournament_id: string; tournament_name: string; tournament_crest_url: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +36,6 @@ export default function SidebarLeft() {
         .like('tournament_id', '%WC');
 
       if (data) {
-        // Ordenar por ID de forma descendente (los más recientes primero)
         const sorted = [...data].sort((a, b) => b.tournament_id.localeCompare(a.tournament_id));
         setWorldCups(sorted);
       }
@@ -33,34 +45,76 @@ export default function SidebarLeft() {
   }, []);
 
   return (
-    <div className={`hidden 2xl:block shrink-0 border-r ${border}`} style={{ width: LAYOUT_CONFIG.sidebarWidth }}>
-      <Scrollbar className="p-6 sticky top-16 max-h-[calc(100vh-64px)]">
-        <div className="flex flex-col gap-4">
-          {/* Header del Sidebar */}
-          <div className={`flex items-center gap-2 px-2 text-xs font-bold uppercase tracking-wider ${textMuted}`}>
-            <Globe size={14} className="opacity-75" />
-            <span>Copas del Mundo</span>
-          </div>
+    <div className="flex flex-col gap-4">
+      <div className={`flex items-center gap-2 px-2 text-xs font-bold uppercase tracking-wider ${textMuted}`}>
+        <Globe size={14} className="opacity-75" />
+        <span>Copas del Mundo</span>
+      </div>
 
-          {/* Listado de Mundiales */}
-          {loading ? (
-            <div className={`p-6 text-center text-xs ${textMuted} animate-pulse rounded-xl border ${border}`}>
-              Cargando torneos...
-            </div>
-          ) : (
-            <TournamentList
-              tournaments={worldCups}
-              activeTournamentId={tournamentId}
-              size="sm"
-              emptyMessage="No se encontraron mundiales"
-              onSelect={(id) => {
-                navigate(`/tournament/${id}`);
-                window.scrollTo(0, 0);
-              }}
-            />
-          )}
+      {loading ? (
+        <div className={`p-6 text-center text-xs ${textMuted} animate-pulse rounded-xl border ${border}`}>
+          Cargando torneos...
         </div>
-      </Scrollbar>
+      ) : (
+        <TournamentList
+          tournaments={worldCups}
+          activeTournamentId={tournamentId}
+          size="sm"
+          emptyMessage="No se encontraron mundiales"
+          onSelect={(id) => {
+            navigate(`/tournament/${id}`);
+            window.scrollTo(0, 0);
+            onNavigate?.();
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+export default function SidebarLeft() {
+  const { border, bgApp } = useThemeClasses();
+  const { isOpen, close } = useSidebarStore();
+
+  // Cerrar drawer al cambiar a desktop
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1536px)');
+    const handler = () => { if (mq.matches) close(); };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [close]);
+
+  // Bloquear scroll del body cuando el drawer está abierto
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <div className={`hidden 2xl:block shrink-0 border-r ${border}`} style={{ width: LAYOUT_CONFIG.sidebarWidth }}>
+        <Scrollbar className="p-6 sticky top-16 max-h-[calc(100vh-64px)]">
+          <SidebarContent />
+        </Scrollbar>
+      </div>
+
+      {/* Mobile full-screen overlay */}
+      {isOpen && (
+        <div className="fixed inset-0 z-40 2xl:hidden">
+
+
+          {/* Full-screen panel */}
+          <div className={`absolute inset-0 top-16 ${bgApp} overflow-y-auto`}>
+
+
+            {/* Content */}
+            <div className="p-6">
+              <SidebarContent onNavigate={close} />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -76,6 +76,10 @@ export function Button({
   // Altura base condicional (la variante 'danger' y 'ghost' son inline/sin alto fijo)
   const heightClass = (isDanger || isGhost) ? 'h-auto' : '';
 
+  // Botón solo con icono → forzar aspecto cuadrado
+  const isIconOnly = !!Icon && !label && !value;
+  const iconOnlyClass = isIconOnly ? 'aspect-square !px-0' : '';
+
   // Dimensiones del icono según el tamaño del botón
   const iconSizes: Record<ButtonSize, number> = {
     sm: 14,
@@ -93,7 +97,7 @@ export function Button({
       rel={rel}
       title={title}
       onClick={!disabled ? onClick : undefined}
-      className={`${baseStyles} ${stateStyles} ${variantClasses} ${sizeClasses} ${heightClass} ${className}`}
+      className={`${baseStyles} ${stateStyles} ${variantClasses} ${sizeClasses} ${heightClass} ${iconOnlyClass} ${className}`}
       {...(href ? {} : { disabled })} // solo pasar disabled nativo si es <button>
     >
       {Icon && <Icon size={iconSize} className={`${iconColorClass} shrink-0`} />}
