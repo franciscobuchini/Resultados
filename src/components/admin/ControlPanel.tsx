@@ -29,12 +29,12 @@ export default function ControlPanel() {
       </span>
       <Button
         icon={showApiIds ? Eye : EyeOff}
-        label={showApiIds ? "Mostrando IDs de API" : "Ocultando IDs de API"}
+        label={showApiIds ? "Mostrar IDs" : "Ocultar IDs"}
         onClick={() => setShowApiIds(!showApiIds)}
       />
       <Button
         icon={unrestricted ? MousePointer : MousePointerBan}
-        label={unrestricted ? "Selección habilitada" : "Selección deshabilitada"}
+        label={unrestricted ? "Habilitado" : "Deshabilitado"}
         onClick={() => setUnrestricted(prev => !prev)}
       />
     </div>
