@@ -37,6 +37,8 @@ export function Button({
 }: ButtonProps) {
   const theme = useThemeClasses();
 
+  if (disabled) return null;
+
   // 1. Estilos estructurales base (con clase 'group' para micro-animaciones e iconos reactivos)
   const baseStyles = 'flex items-center justify-center gap-2 transition-all font-medium group';
   
