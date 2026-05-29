@@ -16,9 +16,9 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   toggle: () => set((s) => ({ isOpen: !s.isOpen })),
   close: () => set({ isOpen: false }),
 }));
-import Scrollbar from './Scrollbar';
 import TournamentList from '../components/ui/TournamentList';
 import { Globe } from 'lucide-react';
+import { Label } from '../components/ui/Label';
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { tournamentId } = useParams<{ tournamentId: string }>();
@@ -46,10 +46,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className={`flex items-center gap-2 px-2 text-xs font-bold uppercase tracking-wider ${textMuted}`}>
-        <Globe size={14} className="opacity-75" />
-        <span>Copas del Mundo</span>
-      </div>
+      <Label content="Copas del Mundo" icon={Globe} />
 
       {loading ? (
         <div className={`p-6 text-center text-xs ${textMuted} animate-pulse rounded-xl border ${border}`}>
@@ -76,6 +73,8 @@ export default function SidebarLeft() {
   const { border, bgApp } = useThemeClasses();
   const { isOpen, close } = useSidebarStore();
 
+  const fromGradient = bgApp.replace('bg-', 'from-');
+
   // Cerrar drawer al cambiar a desktop
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 1536px)');
@@ -94,24 +93,26 @@ export default function SidebarLeft() {
     <>
       {/* Desktop sidebar */}
       <div className={`hidden 2xl:block shrink-0 border-r ${border}`} style={{ width: LAYOUT_CONFIG.sidebarWidth }}>
-        <Scrollbar className="p-6 sticky top-16 max-h-[calc(100vh-64px)]">
-          <SidebarContent />
-        </Scrollbar>
+        <div className="sticky top-16 h-[calc(100vh-64px)] relative flex flex-col">
+          <div className="p-6 overflow-y-auto no-scrollbar flex-1 pb-20">
+            <SidebarContent />
+          </div>
+          {/* Fade overlay */}
+          <div className={`absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t ${fromGradient} to-transparent pointer-events-none z-10`} />
+        </div>
       </div>
 
       {/* Mobile full-screen overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-40 2xl:hidden">
-
-
           {/* Full-screen panel */}
-          <div className={`absolute inset-0 top-16 ${bgApp} overflow-y-auto`}>
-
-
+          <div className={`absolute inset-0 top-16 ${bgApp} flex flex-col relative`}>
             {/* Content */}
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto no-scrollbar flex-1 pb-20">
               <SidebarContent onNavigate={close} />
             </div>
+            {/* Fade overlay */}
+            <div className={`absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t ${fromGradient} to-transparent pointer-events-none z-10`} />
           </div>
         </div>
       )}

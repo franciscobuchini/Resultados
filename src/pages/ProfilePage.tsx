@@ -12,6 +12,7 @@ import { Button } from '../components/ui/Button';
 import { Save } from 'lucide-react';
 import { useAuth } from '../functions/auth';
 import { Input } from '../components/ui/Input';
+import { Label } from '../components/ui/Label';
 
 interface Team {
   team_id: string;
@@ -209,7 +210,7 @@ setInitialName(data.user_name?.replace(/^@+/, '') || '');
 
           {/* Nombre de usuario */}
           <div className="flex flex-col gap-4">
-            <h3 className={`text-xs uppercase tracking-widest font-bold ${textMuted} px-2`}>Nombre de usuario</h3>
+            <Label content="Nombre de usuario" />
             <div className={`flex items-center gap-0 rounded-2xl border ${border} ${bgSurface} px-4 py-4`}>
               <User size={20} className={`${textMuted} shrink-0 mr-3`} />
               <span className={`font-medium ${textMuted} select-none`}>@</span>
@@ -230,7 +231,7 @@ setInitialName(data.user_name?.replace(/^@+/, '') || '');
 
           {/* Club e Hincha */}
           <div className="flex flex-col gap-4">
-            <h3 className={`text-xs uppercase tracking-widest font-bold ${textMuted} px-2`}>Club favorito</h3>
+            <Label content="Club favorito" />
             <div className="relative">
               <Input
                 type="text"
@@ -272,7 +273,7 @@ setInitialName(data.user_name?.replace(/^@+/, '') || '');
 
           {/* País */}
           <div className="flex flex-col gap-4">
-            <h3 className={`text-xs uppercase tracking-widest font-bold ${textMuted} px-2`}>País</h3>
+            <Label content="País" />
             <div className="relative">
               <Input
                 type="text"
@@ -314,7 +315,7 @@ setInitialName(data.user_name?.replace(/^@+/, '') || '');
 
           {/* Info de Cuenta */}
           <div className="flex flex-col gap-4">
-            <h3 className={`text-xs uppercase tracking-widest font-bold ${textMuted} px-2`}>Cuenta</h3>
+            <Label content="Cuenta" />
             <div className={`p-2 rounded-2xl border ${border} ${bgSurface} flex flex-col gap-1`}>
               <DropdownOption icon={Mail} label="Email" value={user?.email || '-'} />
             </div>
