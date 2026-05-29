@@ -42,7 +42,6 @@ export default function FixtureTable({
   teamLookup,
   onPrevRound,
   onNextRound,
-  fullDate = false,
   hideDateSeparators = false,
   sortDescending = false
 }: FixtureTableProps) {
@@ -87,11 +86,9 @@ export default function FixtureTable({
 
         // Formatear el día
         const dateObj = new Date(date + 'T12:00:00');
-        const options: Intl.DateTimeFormatOptions = fullDate
-          ? { weekday: 'long', day: 'numeric', month: 'long' }
-          : { weekday: 'long', day: 'numeric' };
+        const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
 
-        const formattedDay = dateObj.toLocaleDateString('es-ES', options);
+        const formattedDay = dateObj.toLocaleDateString('es-ES', options).replace(/,/g, '');
 
         return (
           <React.Fragment key={date}>

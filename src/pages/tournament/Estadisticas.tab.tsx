@@ -113,9 +113,7 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
       const sm: Record<string, { teamName: string; teamId: string; tjSet: Set<string>; pts: number; pj: number; pg: number; pe: number; pp: number; gf: number; gc: number; titles: number }> = {}
 
       // Equipos que se combinan en el historial
-      const TEAM_ALIASES: Record<string, string> = {
-        'INT217': 'INT077', // Alemania Democrática → Alemania
-      }
+      const TEAM_ALIASES: Record<string, string> = {}
 
       const ensure = (id: string, name: string, tid: string) => {
         const resolvedId = TEAM_ALIASES[id] ?? id
@@ -158,21 +156,23 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
         if (sm[s.tournament_winner_id]) sm[s.tournament_winner_id].titles++
       })
 
-      const sorted: HistoricalTeamStanding[] = Object.values(sm).map(s => ({
-        team_id: s.teamId,
-        team_name: s.teamName,
-        played: s.pj,
-        won: s.pg,
-        drawn: s.pe,
-        lost: s.pp,
-        goals_for: s.gf,
-        goals_against: s.gc,
-        goal_difference: s.gf - s.gc,
-        points: s.pts,
-        tj: s.tjSet.size,
-        titles: s.titles,
-        rend: s.pj > 0 ? (s.pts / (s.pj * 3)) * 100 : 0
-      })).sort((a, b) => b.points - a.points || b.goal_difference - a.goal_difference || b.goals_for - a.goals_for || a.played - b.played)
+      const sorted: HistoricalTeamStanding[] = Object.values(sm)
+        .filter(s => s.teamId !== 'INT217')
+        .map(s => ({
+          team_id: s.teamId,
+          team_name: s.teamName,
+          played: s.pj,
+          won: s.pg,
+          drawn: s.pe,
+          lost: s.pp,
+          goals_for: s.gf,
+          goals_against: s.gc,
+          goal_difference: s.gf - s.gc,
+          points: s.pts,
+          tj: s.tjSet.size,
+          titles: s.titles,
+          rend: s.pj > 0 ? (s.pts / (s.pj * 3)) * 100 : 0
+        })).sort((a, b) => b.points - a.points || b.goal_difference - a.goal_difference || b.goals_for - a.goals_for || a.played - b.played)
 
       setHistoricalStandings(sorted)
       setHistLoading(false)

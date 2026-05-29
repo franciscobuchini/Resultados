@@ -73,7 +73,7 @@ export const formatDateLabel = (d: string): string => {
   if (d === today) return 'Hoy'
   if (d === yesterday) return 'Ayer'
   if (d === tomorrow) return 'Mañana'
-  return new Date(d + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })
+  return new Date(d + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/,/g, '')
 }
 
 /** Determina el tipo de gol a partir de un FixtureEvent de dataredonda */
