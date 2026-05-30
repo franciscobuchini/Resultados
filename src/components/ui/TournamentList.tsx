@@ -1,7 +1,6 @@
 import { useThemeClasses } from '../../functions/themeStore';
 import { Check, ChevronRight } from 'lucide-react';
 import ImageCrest from './ImageCrest';
-import DataBox from './DataBox';
 import EmptyState from './EmptyState';
 
 export interface TournamentListItem {
@@ -41,7 +40,7 @@ export default function TournamentList({
   const iconSize = isSmall ? 14 : 18;
 
   return (
-    <DataBox>
+    <div className={`border-y ${border}`}>
       {tournaments.map((t, idx) => {
         const isActive = t.tournament_id === activeTournamentId;
         return (
@@ -77,6 +76,6 @@ export default function TournamentList({
           <EmptyState message={emptyMessage ?? "No se encontraron torneos"} />
         </div>
       )}
-    </DataBox>
+    </div>
   );
 }

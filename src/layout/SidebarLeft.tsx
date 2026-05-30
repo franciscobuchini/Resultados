@@ -23,7 +23,7 @@ import { Label } from '../components/ui/Label';
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { tournamentId } = useParams<{ tournamentId: string }>();
   const navigate = useNavigate();
-  const { textMuted, border } = useThemeClasses();
+  const { textMuted } = useThemeClasses();
 
   const [worldCups, setWorldCups] = useState<{ tournament_id: string; tournament_name: string; tournament_crest_url: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,10 +46,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Label content="Copas del Mundo" icon={Globe} />
+      <Label content="Copas del Mundo" icon={Globe}/>
 
       {loading ? (
-        <div className={`p-6 text-center text-xs ${textMuted} animate-pulse rounded-xl border ${border}`}>
+        <div className={`text-center text-xs ${textMuted} animate-pulse`}>
           Cargando torneos...
         </div>
       ) : (
@@ -93,12 +93,8 @@ export default function SidebarLeft() {
     <>
       {/* Desktop sidebar */}
       <div className={`hidden 2xl:block shrink-0 border-r ${border}`} style={{ width: LAYOUT_CONFIG.sidebarWidth }}>
-        <div className="sticky top-16 h-[calc(100vh-64px)] relative flex flex-col">
-          <div className="p-6 overflow-y-auto no-scrollbar flex-1 pb-20">
-            <SidebarContent />
-          </div>
-          {/* Fade overlay */}
-          <div className={`absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t ${fromGradient} to-transparent pointer-events-none z-10`} />
+        <div className="py-6">
+          <SidebarContent />
         </div>
       </div>
 
