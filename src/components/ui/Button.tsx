@@ -8,7 +8,7 @@ interface ButtonProps {
   icon?: ElementType;
   label?: string;
   value?: ReactNode;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
   className?: string;
   variant?: ButtonVariant;
   size?: ButtonSize;

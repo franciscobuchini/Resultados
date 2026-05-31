@@ -4,6 +4,7 @@ import { ShieldQuestion, X, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../functions/auth';
 import { useThemeClasses } from '../../functions/themeStore';
 import { supabase } from '../../functions/supabase';
+import { Button } from './Button';
 
 export default function ProfileCTA() {
   const { user } = useAuth();
@@ -76,19 +77,10 @@ export default function ProfileCTA() {
         </div>
 
         {/* Arrow */}
-        <ChevronRight
-          size={16}
-          className={`${textMuted} shrink-0 transition-transform group-hover:translate-x-0.5`}
-        />
+        <Button icon={ChevronRight} variant="ghost" size="sm" />
 
         {/* Dismiss button */}
-        <button
-          onClick={handleDismiss}
-          className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center ${textMuted} hover:${textMain} transition-colors hover:bg-white/5`}
-          aria-label="Cerrar"
-        >
-          <X size={14} />
-        </button>
+        <Button icon={X} variant="ghost" size="sm" onClick={handleDismiss} title="Cerrar" />
       </div>
     </Link>
   );
