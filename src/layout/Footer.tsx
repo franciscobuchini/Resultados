@@ -1,6 +1,7 @@
 import { useThemeClasses } from '../functions/themeStore';
-import { Mail, Coffee } from 'lucide-react';
+import { Mail, Coffee, MessageCircle } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { Link } from 'react-router-dom';
 
 const XIcon = ({ size = 13, className = '' }: { size?: number; className?: string }) => (
   <svg 
@@ -29,7 +30,7 @@ export default function Footer() {
           href="mailto:resultados.ar0@gmail.com"
           title="Enviar correo a resultados.ar0@gmail.com"
         />
-        
+
         <Button
           icon={XIcon}
           label="@resultados_ar"
@@ -48,6 +49,15 @@ export default function Footer() {
           size="md"
           onClick={() => window.open('https://cafecito.app/resultados', '_blank')}
         />
+
+        <Link to="/feedback">
+          <Button
+            icon={MessageCircle}
+            label="Reportar errores"
+            variant="ghost"
+            size="md"
+          />
+        </Link>
       </div>
     </footer>
   );

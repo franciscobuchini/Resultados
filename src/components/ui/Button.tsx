@@ -18,6 +18,7 @@ interface ButtonProps {
   rel?: string;
   title?: string;
   hideLabelOnMobile?: boolean;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export function Button({ 
@@ -33,7 +34,8 @@ export function Button({
   target,
   rel,
   title,
-  hideLabelOnMobile = false
+  hideLabelOnMobile = false,
+  type = 'button'
 }: ButtonProps) {
   const theme = useThemeClasses();
 
@@ -94,6 +96,7 @@ export function Button({
 
   return (
     <Tag
+      {...(href ? {} : { type })}
       href={href}
       target={target}
       rel={rel}

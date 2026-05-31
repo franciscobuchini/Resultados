@@ -6,6 +6,7 @@ import TeamPage from './pages/team'
 import AdminPage from './pages/AdminPage'
 import ProfilePage from './pages/ProfilePage'
 import LoginPage from './pages/LoginPage'
+import FeedbackPage from './pages/FeedbackPage'
 import Error404 from './pages/Error404'
 import ThemeProvider from './functions/themeStore'
 import ScrollToTop from './functions/scrollToTop'
@@ -31,6 +32,7 @@ export default function App() {
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="*" element={<Error404 />} />
           </Routes>
         </MainLayout>
