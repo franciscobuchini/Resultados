@@ -5,12 +5,15 @@ import FixtureTable from '../components/tables/FixtureTable'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import { LAYOUT_CONFIG } from '../functions/layoutConfig'
+import ProfileCTA from '../components/ui/ProfileCTA'
 
 export default function HomePage() {
   const { loading, dateLabel, adaptedLeagues, changeDate } = useFixtures()
 
   return (
     <PageContent maxWidth="1600">
+
+      <ProfileCTA />
 
       <DateNavigator dateLabel={dateLabel} onChangeDate={changeDate} />
 

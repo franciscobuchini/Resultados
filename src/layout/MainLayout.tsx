@@ -5,7 +5,7 @@ import SidebarLeft from './SidebarLeft';
 import SidebarRight from './SidebarRight';
 import { useThemeClasses } from '../functions/themeStore';
 import Scrollbar from './Scrollbar';
-import ProfileCTA from '../components/ui/ProfileCTA';
+
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -27,7 +27,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
         {/* Parte Central del Sitio */}
         <main className={`flex-1 min-w-0 ${bgMain} flex flex-col overflow-x-hidden`}>
           <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col">
-            <ProfileCTA />
             {children}
           </div>
         </main>
