@@ -101,14 +101,24 @@ export default function TeamPage() {
         }
         setTeam(teamData as Team)
 
-        // 2. Traer todos los partidos vinculados al equipo
-        const { data: matchData } = await supabase
-          .from('matches')
-          .select('*')
-          .or(`home_id.eq.${cleanId},away_id.eq.${cleanId}`)
-          .order('match_date', { ascending: false })
+        // 2. Traer todos los partidos vinculados al equipo (paginado)
+        let fetchedMatches: MatchWithTournament[] = []
+        let page = 0
+        const pageSize = 1000
 
-        let fetchedMatches = (matchData || []) as MatchWithTournament[]
+        while (true) {
+          const { data: chunk, error } = await supabase
+            .from('matches')
+            .select('*')
+            .or(`home_id.eq.${cleanId},away_id.eq.${cleanId}`)
+            .order('match_date', { ascending: false })
+            .range(page * pageSize, (page + 1) * pageSize - 1)
+
+          if (error || !chunk || chunk.length === 0) break
+          fetchedMatches = fetchedMatches.concat(chunk as MatchWithTournament[])
+          if (chunk.length < pageSize) break
+          page++
+        }
 
         // Fallback: Si no hay partidos por ID, intentamos por nombre
         if (fetchedMatches.length === 0 && teamData.team_name) {

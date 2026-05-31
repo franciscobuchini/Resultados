@@ -64,7 +64,7 @@ export default function TournamentPage() {
   const { tournamentId } = useParams<{ tournamentId: string }>()
   const [loading, setLoading] = useState(true)
   const [tournament, setTournament] = useState<Tournament | null>(null)
-  const [matches, setMatches] = useState<Match[]>([])
+  const [matches] = useState<Match[]>([])
   const [goals, setGoals] = useState<Goal[]>([])
   const [teamLookup, setTeamLookup] = useState<Record<string, TeamInfo>>({})
   const [selectedRound, setSelectedRound] = useState<string | null>(null)
@@ -137,15 +137,24 @@ export default function TournamentPage() {
         setHistoryTournaments(filtered)
       }
 
-      const { data: matchData } = await supabase
-        .from('matches')
-        .select('*')
-        .eq('tournament_id', tournamentId)
-        .order('match_date', { ascending: true })
-        .order('match_time_utc', { ascending: true })
+      let fetchedMatches: Match[] = []
+        let page = 0
+        const pageSize = 1000
 
-      const fetchedMatches = (matchData || []) as Match[]
-      setMatches(fetchedMatches)
+        while (true) {
+          const { data: chunk, error } = await supabase
+            .from('matches')
+            .select('*')
+            .eq('tournament_id', tournamentId)
+            .order('match_date', { ascending: true })
+            .order('match_time_utc', { ascending: true })
+            .range(page * pageSize, (page + 1) * pageSize - 1)
+
+          if (error || !chunk || chunk.length === 0) break
+          fetchedMatches = fetchedMatches.concat(chunk as Match[])
+          if (chunk.length < pageSize) break
+          page++
+        }
 
       // Traer goles
       const matchIds = fetchedMatches.map(m => m.match_id)
