@@ -8,6 +8,7 @@ import { Button } from './Button';
 interface DropdownContextType {
   activeSection: string | null;
   setActiveSection: (id: string | null) => void;
+  close: () => void;
 }
 
 const DropdownContext = createContext<DropdownContextType | null>(null);
@@ -78,8 +79,13 @@ export function Dropdown({
     setIsOpen(!isOpen);
   };
 
+  const closeDropdown = () => {
+    setIsOpen(false);
+    setActiveSection(null);
+  };
+
   return (
-    <DropdownContext.Provider value={{ activeSection, setActiveSection }}>
+    <DropdownContext.Provider value={{ activeSection, setActiveSection, close: closeDropdown }}>
       <div
         ref={dropdownRef}
         className="relative inline-block text-left"
@@ -174,9 +180,16 @@ export function DropdownItem({
   rightElement,
   className
 }: DropdownItemProps) {
+  const context = useContext(DropdownContext);
+
+  const handleClick = () => {
+    onClick();
+    context?.close();
+  };
+
   return (
     <DropdownOption
-      onClick={onClick}
+      onClick={handleClick}
       isActive={isActive}
       icon={icon}
       label={label}

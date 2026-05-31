@@ -102,7 +102,7 @@ export default function SidebarLeft() {
       {isOpen && (
         <div className="fixed inset-0 z-40 2xl:hidden">
           {/* Full-screen panel */}
-          <div className={`absolute inset-0 top-16 ${bgApp} flex flex-col relative`}>
+          <div className={`absolute inset-0 top-16 ${bgApp} flex flex-col`}>
             {/* Content */}
             <div className="p-6 overflow-y-auto no-scrollbar flex-1 pb-20">
               <SidebarContent onNavigate={close} />
