@@ -46,7 +46,7 @@ export default function UserMenu() {
       align="right"
       widthClass="w-64"
       icon={TriggerIcon}
-      value={user ? `@${user.user_name.replace(/^@+/, '')}` : 'Invitado'}
+      value={user ? `@${user.user_name.replace(/^@+/, '')}` : 'Iniciar Sesión'}
     >
       {/* Info: estado de sincronización */}
       <DropdownOption className="rounded-t-xl">
