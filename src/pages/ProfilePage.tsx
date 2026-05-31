@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Globe, ShieldQuestion, User } from 'lucide-react';
-import PageBanner from '../layout/PageBanner';
 import PageContent from '../layout/PageContent';
 import { useThemeClasses } from '../functions/themeStore';
 import { DropdownOption } from '../components/ui/Dropdown';
@@ -181,13 +180,7 @@ setInitialName(data.user_name?.replace(/^@+/, '') || '');
   };
 
   return (
-    <>
-      <PageBanner
-        title="Mi Perfil"
-        tournament_banner_url="https://www.corrienteshoy.com/galeria/fotos/2023/02/27/o_1677541416.jpg"
-      />
-
-      <PageContent maxWidth="1600" layout="grid-side-left">
+    <PageContent maxWidth="1600" layout="grid-side-left">
 
         {/* Columna Izquierda: Info Básica */}
         <div className="flex flex-col gap-6">
@@ -340,6 +333,5 @@ setInitialName(data.user_name?.replace(/^@+/, '') || '');
 
         </div>
       </PageContent>
-    </>
   );
 } 

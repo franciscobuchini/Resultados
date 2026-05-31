@@ -5,7 +5,6 @@ import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
 import { Label } from '../components/ui/Label';
 import DataBox from '../components/ui/DataBox';
-import PageBanner from '../layout/PageBanner';
 import PageContent from '../layout/PageContent';
 import { MessageCircle, AlertTriangle, CheckCircle2, Send } from 'lucide-react';
 
@@ -49,14 +48,16 @@ export default function FeedbackPage() {
   }
 
   return (
-    <>
-      <PageBanner
-        title="Reportar errores & Feedback"
-        tournament_banner_url="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=400&fit=crop"
-      />
+    <PageContent>
+        <div className="w-full mx-auto flex flex-col gap-6">
+          {/* Header */}
+          <div className="flex items-center gap-3 pb-4">
+            <MessageCircle size={24} className="text-blue-500" />
+            <h1 className={`text-2xl font-semibold ${textMain}`}>
+              Reportar errores & Feedback
+            </h1>
+          </div>
 
-      <PageContent>
-        <div className="max-w-2xl mx-auto flex flex-col gap-6">
           <DataBox>
             <div className="p-6 sm:p-8 space-y-6">
               <form onSubmit={(e) => {
@@ -134,6 +135,5 @@ export default function FeedbackPage() {
         </DataBox>
       </div>
     </PageContent>
-    </>
   );
 }
