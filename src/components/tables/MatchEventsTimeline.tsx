@@ -25,6 +25,7 @@ interface MatchEventsTimelineProps {
   homeScore?: string | number | null;
   awayScore?: string | number | null;
   matchNotes?: string | null;
+  statusLabel?: React.ReactNode;
 }
 
 const getEventIcon = (eventType: string, details: string, textAccent: string) => {
@@ -157,7 +158,7 @@ const reconcileGoals = (
   return eventsList;
 };
 
-export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId, homeIdDM, awayIdDM, homeScore, awayScore, matchNotes }: MatchEventsTimelineProps) {
+export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId, homeIdDM, awayIdDM, homeScore, awayScore, matchNotes, statusLabel }: MatchEventsTimelineProps) {
   const [events, setEvents] = useState<FixtureEvent[]>([]);
   const [loading, setLoading] = useState(!!(matchDate && matchId));
   const [error, setError] = useState(false);
@@ -299,7 +300,7 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
 
           {events.length === 0 ? (
             <div className={`h-12 flex items-center justify-center text-xs ${textMuted}`}>
-              No hay eventos registrados
+              {statusLabel === 'C' ? 'Cancelado' : statusLabel === 'S' ? 'Suspendido' : 'No hay eventos registrados'}
             </div>
           ) : (
             events.map((event, idx) => {

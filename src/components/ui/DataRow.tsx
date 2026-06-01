@@ -4,16 +4,17 @@ import { useTheme, useThemeClasses } from '../../functions/themeStore';
 import { ChevronDown, Check, Ban } from 'lucide-react';
 import MatchEventsTimeline from '../tables/MatchEventsTimeline';
 import GoalAnimation from './GoalAnimation';
+import { LAYOUT_CONFIG } from '../../functions/layoutConfig';
 
 // ============================================================
 // CIMIENTOS — Constantes de diseño compartidas por todo el sistema
 // ============================================================
 
 /** Altura fija inamovible (pactada): 48px */
-export const HEIGHT = 'h-12';
+export const HEIGHT = LAYOUT_CONFIG.dataRowHeight;
 
 /** Altura para filas de detalles: 24px */
-const HEIGHT_DETAILS = 'min-h-6';
+const HEIGHT_DETAILS = LAYOUT_CONFIG.dataRowDetailsHeight;
 
 /** Layout base de toda fila */
 export const BASE = 'flex items-center w-full px-3 border-b text-sm';
@@ -318,7 +319,7 @@ export function FixtureRow({
           {/* Marcador */}
           <div className="flex-shrink-0 flex justify-center w-16 sm:w-28 gap-1 sm:gap-2 tabular-nums">
             {/* Penalty Local (Espacio reservado) */}
-            {!((homeScore === null || homeScore === undefined) && (awayScore === null || awayScore === undefined) && matchTime) && (
+            {!((homeScore === null || homeScore === undefined) && (awayScore === null || awayScore === undefined) && matchTime) && ((homePenalty !== undefined && homePenalty !== null) || (awayPenalty !== undefined && awayPenalty !== null)) && (
               <div className="flex-1 flex justify-end">
                 {(homePenalty !== undefined && homePenalty !== null) && (
                   <span className={`${textMuted} font-normal text-xs sm:text-sm`}>({homePenalty})</span>
@@ -340,7 +341,7 @@ export function FixtureRow({
             </div>
 
             {/* Penalty Visita (Espacio reservado) */}
-            {!((homeScore === null || homeScore === undefined) && (awayScore === null || awayScore === undefined) && matchTime) && (
+            {!((homeScore === null || homeScore === undefined) && (awayScore === null || awayScore === undefined) && matchTime) && ((homePenalty !== undefined && homePenalty !== null) || (awayPenalty !== undefined && awayPenalty !== null)) && (
               <div className="flex-1 flex justify-start">
                 {(awayPenalty !== undefined && awayPenalty !== null) && (
                   <span className={`${textMuted} font-normal text-xs sm:text-sm`}>({awayPenalty})</span>
@@ -373,6 +374,7 @@ export function FixtureRow({
           homeScore={homeScore}
           awayScore={awayScore}
           matchNotes={matchNotes}
+          statusLabel={statusLabel}
         />
       )}
     </div>
