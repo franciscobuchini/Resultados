@@ -64,7 +64,7 @@ export default function TournamentPage() {
   const { tournamentId } = useParams<{ tournamentId: string }>()
   const [loading, setLoading] = useState(true)
   const [tournament, setTournament] = useState<Tournament | null>(null)
-  const [matches] = useState<Match[]>([])
+  const [matches, setMatches] = useState<Match[]>([])
   const [goals, setGoals] = useState<Goal[]>([])
   const [teamLookup, setTeamLookup] = useState<Record<string, TeamInfo>>({})
   const [selectedRound, setSelectedRound] = useState<string | null>(null)
@@ -174,6 +174,9 @@ export default function TournamentPage() {
       const rounds = Array.from(new Set(fetchedMatches.map(m => m.match_round).filter(Boolean))) as string[]
       const firstMatchday = rounds.filter(isMatchday).sort((a, b) => matchdayNumber(a) - matchdayNumber(b))[0]
       setSelectedRound(firstMatchday ?? rounds[0] ?? null)
+      
+      // ← FALTABA: Guardar los partidos en el estado
+      setMatches(fetchedMatches)
 
       // Traer info de equipos
       const teamIds = Array.from(new Set([
