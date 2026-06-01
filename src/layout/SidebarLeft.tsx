@@ -73,8 +73,6 @@ export default function SidebarLeft() {
   const { border, bgApp } = useThemeClasses();
   const { isOpen, close } = useSidebarStore();
 
-  const fromGradient = bgApp.replace('bg-', 'from-');
-
   // Cerrar drawer al cambiar a desktop
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 1536px)');
@@ -107,8 +105,6 @@ export default function SidebarLeft() {
             <div className="p-6 overflow-y-auto no-scrollbar flex-1 pb-20">
               <SidebarContent onNavigate={close} />
             </div>
-            {/* Fade overlay */}
-            <div className={`absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t ${fromGradient} to-transparent pointer-events-none z-10`} />
           </div>
         </div>
       )}
