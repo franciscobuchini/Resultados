@@ -261,17 +261,19 @@ export function FixtureRow({
     return (
       <div className={`w-full flex-1 flex items-center gap-1 sm:gap-3 overflow-hidden min-w-0 ${isRight ? 'flex-row-reverse text-right justify-start' : 'justify-start'}`}>
         {/* Escudo */}
-        <div className="shrink-0 relative z-10">
-          {isMapped ? (
-            <a href={`/team/${id}`} onClick={(e) => { e.stopPropagation(); }} className="cursor-pointer hover:opacity-70 transition-opacity flex items-center justify-center">
-              <ImageCrest src={logo} />
-            </a>
-          ) : (
-            <div className="flex items-center justify-center">
-              <ImageCrest src={logo} />
-            </div>
-          )}
-        </div>
+        {logo && (
+          <div className="shrink-0 relative z-10">
+            {isMapped ? (
+              <a href={`/team/${id}`} onClick={(e) => { e.stopPropagation(); }} className="cursor-pointer hover:opacity-70 transition-opacity flex items-center justify-center">
+                <ImageCrest src={logo} />
+              </a>
+            ) : (
+              <div className="flex items-center justify-center">
+                <ImageCrest src={logo} />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Nombre del equipo + Badge/ID */}
         <span className="truncate text-xs sm:text-sm flex items-center">
@@ -316,11 +318,13 @@ export function FixtureRow({
           {/* Marcador */}
           <div className="flex-shrink-0 flex justify-center w-16 sm:w-28 gap-1 sm:gap-2 tabular-nums">
             {/* Penalty Local (Espacio reservado) */}
-            <div className="flex-1 flex justify-end">
-              {(homePenalty !== undefined && homePenalty !== null) && (
-                <span className={`${textMuted} font-normal text-xs sm:text-sm`}>({homePenalty})</span>
-              )}
-            </div>
+            {!((homeScore === null || homeScore === undefined) && (awayScore === null || awayScore === undefined) && matchTime) && (
+              <div className="flex-1 flex justify-end">
+                {(homePenalty !== undefined && homePenalty !== null) && (
+                  <span className={`${textMuted} font-normal text-xs sm:text-sm`}>({homePenalty})</span>
+                )}
+              </div>
+            )}
 
             {/* Goles u Horario */}
             <div className="flex gap-1 sm:gap-2 font-bold min-w-[20px] sm:min-w-[32px] justify-center text-xs sm:text-sm">
@@ -336,11 +340,13 @@ export function FixtureRow({
             </div>
 
             {/* Penalty Visita (Espacio reservado) */}
-            <div className="flex-1 flex justify-start">
-              {(awayPenalty !== undefined && awayPenalty !== null) && (
-                <span className={`${textMuted} font-normal text-xs sm:text-sm`}>({awayPenalty})</span>
-              )}
-            </div>
+            {!((homeScore === null || homeScore === undefined) && (awayScore === null || awayScore === undefined) && matchTime) && (
+              <div className="flex-1 flex justify-start">
+                {(awayPenalty !== undefined && awayPenalty !== null) && (
+                  <span className={`${textMuted} font-normal text-xs sm:text-sm`}>({awayPenalty})</span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Equipo Visitante */}
