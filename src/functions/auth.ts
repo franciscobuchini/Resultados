@@ -122,10 +122,26 @@ export const useAuth = create<AuthState>()(
 )
 
 // Escucha cambios de sesión de Supabase
-supabase.auth.onAuthStateChange((_event, session) => {
+supabase.auth.onAuthStateChange(async (_event, session) => {
   if (session?.user) {
-    useAuth.setState({ user: mapUser(session.user) })
+    // 1. Establecer el estado inicial rápido con los metadatos de la sesión
+    const initialUser = mapUser(session.user);
+    useAuth.setState({ user: initialUser });
+
+    // 2. Consultar la base de datos para obtener los datos más actualizados
+    // (Por ejemplo, si se cambió el user_plan manualmente en la BD)
+    const { data, error } = await supabase
+      .from('users')
+      .select('user_name, user_team_id, user_plan, user_province, user_city')
+      .eq('id', session.user.id)
+      .single();
+
+    if (data && !error) {
+      useAuth.setState((state) => ({
+        user: state.user ? { ...state.user, ...data } : null
+      }));
+    }
   } else {
-    useAuth.setState({ user: null })
+    useAuth.setState({ user: null });
   }
 })

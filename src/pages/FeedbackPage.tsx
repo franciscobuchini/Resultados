@@ -11,7 +11,7 @@ import { MessageCircle, AlertTriangle, CheckCircle2, Send, AlertCircle } from 'l
 type FeedbackType = 'bug' | 'feedback' | 'feature';
 
 export default function FeedbackPage() {
-  const { bgApp, textMain, textMuted } = useThemeClasses();
+  const { textMain, textMuted } = useThemeClasses();
   const [type, setType] = useState<FeedbackType>('feedback');
   const [description, setDescription] = useState('');
   const [email, setEmail] = useState('');
@@ -52,31 +52,6 @@ export default function FeedbackPage() {
       setLoading(false);
     }
   };
-
-  if (submitted) {
-    return (
-      <div className={`${bgApp} min-h-screen flex items-center justify-center p-4`}>
-        <DataBox className="max-w-md w-full">
-          <div className="p-8 text-center">
-            <CheckCircle2 size={48} className="text-green-500 mx-auto mb-4" />
-            <h2 className={`text-xl font-semibold ${textMain} mb-2`}>
-              ¡Gracias por tu feedback!
-            </h2>
-            <p className={`text-sm ${textMuted} mb-6`}>
-              Recibimos tu mensaje. Lo revisaremos pronto.
-            </p>
-            <Button
-              label="Volver al inicio"
-              variant="outline"
-              size="md"
-              onClick={() => (window.location.href = '/')}
-            />
-          </div>
-        </DataBox>
-      </div>
-    );
-  }
-
   return (
     <PageContent>
         <div className="w-full mx-auto flex flex-col gap-6">
@@ -90,85 +65,105 @@ export default function FeedbackPage() {
 
           <DataBox>
             <div className="p-6 sm:p-8 space-y-6">
-              {/* Error message */}
-              {error && (
-                <div className="flex gap-3 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                  <AlertCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-500">{error}</p>
+              {submitted ? (
+                <div className="flex flex-col items-center justify-center text-center py-12">
+                  <CheckCircle2 size={48} className="text-green-500 mx-auto mb-4" />
+                  <h2 className={`text-xl font-semibold ${textMain} mb-2`}>
+                    ¡Gracias por tu feedback!
+                  </h2>
+                  <p className={`text-sm ${textMuted} mb-6`}>
+                    Recibimos tu mensaje. Lo revisaremos pronto.
+                  </p>
+                  <Button
+                    label="Volver al inicio"
+                    variant="outline"
+                    size="md"
+                    onClick={() => (window.location.href = '/')}
+                  />
                 </div>
+              ) : (
+                <>
+                  {/* Error message */}
+                  {error && (
+                    <div className="flex gap-3 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+                      <AlertCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-red-500">{error}</p>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Tipo de feedback */}
+                    <div className="flex flex-col gap-4">
+                      <Label content="Tipo de mensaje" />
+                      <div className="grid grid-cols-2 gap-3">
+                        <Button
+                          label="Error/Bug"
+                          icon={AlertTriangle}
+                          size="md"
+                          variant={type === 'bug' ? 'outline' : 'ghost'}
+                          className="flex-col !h-auto !px-4 !py-4 justify-start"
+                          onClick={() => setType('bug')}
+                        />
+
+                        <Button
+                          label="Feedback"
+                          icon={MessageCircle}
+                          size="md"
+                          variant={type === 'feedback' ? 'outline' : 'ghost'}
+                          className="flex-col !h-auto !px-4 !py-4 justify-start"
+                          onClick={() => setType('feedback')}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Descripción */}
+                    <div className="flex flex-col gap-4">
+                      <Label content="Descripción" />
+                      <Textarea
+                        id="description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Describe el error o tu feedback..."
+                        rows={5}
+                        required
+                        containerClassName="p-4 rounded-2xl"
+                      />
+                    </div>
+
+                    {/* Email opcional */}
+                    <div className="flex flex-col gap-4">
+                      <Label content="Email (opcional)" />
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="tu@email.com"
+                        containerClassName="p-4 rounded-2xl"
+                      />
+                      <p className={`text-xs ${textMuted}`}>
+                        Solo si queres que te contactemos para seguir el tema
+                      </p>
+                    </div>
+
+                    {/* Submit */}
+                    <div className="flex gap-4 pt-8 border-t border-white/5">
+                      <Button
+                        label={loading ? 'Enviando...' : 'Enviar'}
+                        icon={Send}
+                        variant="outline"
+                        size="md"
+                        disabled={!description.trim() || loading}
+                        className="w-full justify-center"
+                        type="submit"
+                      />
+                    </div>
+                  </form>
+                </>
               )}
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Tipo de feedback */}
-              <div className="flex flex-col gap-4">
-                <Label content="Tipo de mensaje" />
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    label="Error/Bug"
-                    icon={AlertTriangle}
-                    size="md"
-                    variant={type === 'bug' ? 'outline' : 'ghost'}
-                    className="flex-col !h-auto !px-4 !py-4 justify-start"
-                    onClick={() => setType('bug')}
-                  />
-
-                  <Button
-                    label="Feedback"
-                    icon={MessageCircle}
-                    size="md"
-                    variant={type === 'feedback' ? 'outline' : 'ghost'}
-                    className="flex-col !h-auto !px-4 !py-4 justify-start"
-                    onClick={() => setType('feedback')}
-                  />
-                </div>
-              </div>
-
-              {/* Descripción */}
-              <div className="flex flex-col gap-4">
-                <Label content="Descripción" />
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe el error o tu feedback..."
-                  rows={5}
-                  required
-                  containerClassName="p-4 rounded-2xl"
-                />
-              </div>
-
-              {/* Email opcional */}
-              <div className="flex flex-col gap-4">
-                <Label content="Email (opcional)" />
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tu@email.com"
-                  containerClassName="p-4 rounded-2xl"
-                />
-                <p className={`text-xs ${textMuted}`}>
-                  Solo si queres que te contactemos para seguir el tema
-                </p>
-              </div>
-
-              {/* Submit */}
-              <div className="flex gap-4 pt-8 border-t border-white/5">
-                <Button
-                  label={loading ? 'Enviando...' : 'Enviar'}
-                  icon={Send}
-                  variant="outline"
-                  size="md"
-                  disabled={!description.trim() || loading}
-                  className="w-full justify-center"
-                  type="submit"
-                />
-              </div>
-            </form>
-          </div>
-        </DataBox>
-      </div>
+            </div>
+          </DataBox>
+        </div>
     </PageContent>
   );
 }

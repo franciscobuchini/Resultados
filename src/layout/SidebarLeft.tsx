@@ -91,7 +91,7 @@ export default function SidebarLeft() {
     <>
       {/* Desktop sidebar */}
       <div className={`hidden 2xl:block shrink-0 border-r ${border}`} style={{ width: LAYOUT_CONFIG.sidebarWidth }}>
-        <div className="py-6">
+        <div className="pt-6">
           <SidebarContent />
         </div>
       </div>
