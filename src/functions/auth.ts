@@ -119,26 +119,27 @@ supabase.auth.onAuthStateChange(async (_event, session) => {
     console.log('[Auth] Setting initial user from session metadata:', initialUser);
     useAuth.setState({ user: initialUser, initialized: true });
 
-    // 2. Consultar la base de datos para obtener los datos más actualizados
-    // (Por ejemplo, si se cambió el user_plan manualmente en la BD)
-    console.log('[Auth] Fetching database profile for:', session.user.id);
-    const { data, error } = await supabase
-      .from('users')
-      .select('user_name, user_team_id, user_plan, user_country_id')
-      .eq('id', session.user.id)
-      .single();
+    // 2. Consultar la base de datos para obtener los datos más actualizados de forma diferida (evita deadlock)
+    setTimeout(async () => {
+      console.log('[Auth] Fetching database profile for:', session.user.id);
+      const { data, error } = await supabase
+        .from('users')
+        .select('user_name, user_team_id, user_plan, user_country_id')
+        .eq('id', session.user.id)
+        .single();
 
-    if (error) {
-      console.warn('[auth.onAuthStateChange] Error fetching database profile (expected if new user):', error.message, error);
-    } else {
-      console.log('[Auth] Database profile loaded:', data);
-    }
+      if (error) {
+        console.warn('[auth.onAuthStateChange] Error fetching database profile (expected if new user):', error.message, error);
+      } else {
+        console.log('[Auth] Database profile loaded:', data);
+      }
 
-    if (data && !error) {
-      useAuth.setState((state) => ({
-        user: state.user ? { ...state.user, ...data } : null
-      }));
-    }
+      if (data && !error) {
+        useAuth.setState((state) => ({
+          user: state.user ? { ...state.user, ...data } : null
+        }));
+      }
+    }, 0);
   } else {
     console.log('[Auth] No session found');
     useAuth.setState({ user: null, initialized: true });
