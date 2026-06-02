@@ -8,16 +8,16 @@ import ControlPanel from '../components/admin/ControlPanel';
 import { useAuth } from '../functions/auth';
 
 export default function AdminPage() {
-  const { user } = useAuth();
+  const { user, initialized } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user || user.user_plan !== 'admin') {
+    if (initialized && (!user || user.user_plan !== 'admin')) {
       navigate('/', { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, initialized, navigate]);
 
-  if (!user || user.user_plan !== 'admin') return null;
+  if (!initialized || !user || user.user_plan !== 'admin') return null;
 
   return (
     <PageContent maxWidth="1600">

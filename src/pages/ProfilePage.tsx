@@ -29,13 +29,15 @@ interface Country {
 
 export default function ProfilePage() {
   const { border, textMain, textMuted, bgSurface, bgSurfaceHover } = useThemeClasses();
-  const { user, updateProfile } = useAuth();
+  const { user, initialized, updateProfile } = useAuth();
   const navigate = useNavigate();
 
   // Si no está logueado, redirigir al login
   useEffect(() => {
-    if (!user) navigate('/login');
-  }, [user, navigate]);
+    if (initialized && !user) navigate('/login');
+  }, [user, initialized, navigate]);
+
+  if (!initialized || !user) return null;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [teams, setTeams] = useState<Team[]>([]);

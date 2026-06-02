@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useThemeClasses } from '../functions/themeStore';
 import { useAuth } from '../functions/auth';
@@ -5,14 +6,17 @@ import { GoogleLogin } from '../components/ui/GoogleLogin';
 
 export default function LoginPage() {
   const { bgApp, bgSurface, border, textMain, textMuted, textError } = useThemeClasses();
-  const { error, user } = useAuth();
+  const { error, user, initialized } = useAuth();
   const navigate = useNavigate();
 
   // Si ya está logueado, redirigir al perfil
-  if (user) {
-    navigate('/profile');
-    return null;
-  }
+  useEffect(() => {
+    if (initialized && user) {
+      navigate('/profile');
+    }
+  }, [user, initialized, navigate]);
+
+  if (!initialized || user) return null;
 
   return (
     <div className={`flex-1 flex items-center justify-center px-4 ${bgApp}`}>
