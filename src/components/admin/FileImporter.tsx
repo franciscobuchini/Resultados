@@ -192,15 +192,25 @@ export default function FileImporter() {
 
   useEffect(() => {
     (async () => {
-      const [r1, r2, r3] = await Promise.all([
-        supabase.from('teams').select('team_id, team_name').order('team_id'),
-        supabase.from('countries').select('country_id, country_name'),
-        supabase.from('tournaments').select('tournament_id, tournament_name'),
-      ])
-      setTeams((r1.data || []).map(x => ({ team_id: t(x.team_id), team_name: x.team_name })))
-      setCountries((r2.data || []).map(x => ({ country_id: t(x.country_id), country_name: x.country_name })))
-      setExistingTournaments((r3.data || []).map(x => ({ tournament_id: t(x.tournament_id), tournament_name: x.tournament_name })))
-      setLoading(false)
+      try {
+        const [r1, r2, r3] = await Promise.all([
+          supabase.from('teams').select('team_id, team_name').order('team_id'),
+          supabase.from('countries').select('country_id, country_name'),
+          supabase.from('tournaments').select('tournament_id, tournament_name'),
+        ])
+
+        if (r1.error) console.error('[FileImporter] Error fetching teams:', r1.error.message, r1.error)
+        if (r2.error) console.error('[FileImporter] Error fetching countries:', r2.error.message, r2.error)
+        if (r3.error) console.error('[FileImporter] Error fetching tournaments:', r3.error.message, r3.error)
+
+        setTeams((r1.data || []).map(x => ({ team_id: t(x.team_id), team_name: x.team_name })))
+        setCountries((r2.data || []).map(x => ({ country_id: t(x.country_id), country_name: x.country_name })))
+        setExistingTournaments((r3.data || []).map(x => ({ tournament_id: t(x.tournament_id), tournament_name: x.tournament_name })))
+      } catch (err) {
+        console.error('[FileImporter] Unexpected error loading DB data:', err)
+      } finally {
+        setLoading(false)
+      }
     })()
   }, [])
 

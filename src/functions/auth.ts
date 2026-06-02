@@ -136,6 +136,10 @@ supabase.auth.onAuthStateChange(async (_event, session) => {
       .eq('id', session.user.id)
       .single();
 
+    if (error) {
+      console.warn('[auth.onAuthStateChange] Error fetching database profile (expected if new user):', error.message, error);
+    }
+
     if (data && !error) {
       useAuth.setState((state) => ({
         user: state.user ? { ...state.user, ...data } : null

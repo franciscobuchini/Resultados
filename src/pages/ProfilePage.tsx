@@ -67,44 +67,56 @@ const [initialName, setInitialName] = useState(user?.user_name?.replace(/^@+/, '
     const fetchUserData = async () => {
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from('users')
-        .select('user_name, user_team_id, user_country_id')
-        .eq('id', user.id)
-        .single();
-
-      if (error || !data) return;
-
-      // Nombre
-      setUserName(data.user_name?.replace(/^@+/, '') || '');
-setInitialName(data.user_name?.replace(/^@+/, '') || '');
-
-      // Equipo
-      if (data.user_team_id) {
-        const { data: teamData } = await supabase
-          .from('teams')
-          .select('team_id, team_name, team_fullname, team_crest_url, team_country_id')
-          .eq('team_id', data.user_team_id)
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('user_name, user_team_id, user_country_id')
+          .eq('id', user.id)
           .single();
 
-        if (teamData) {
-          setSelectedTeam(teamData);
-          setInitialTeam(teamData);
+        if (error) {
+          console.error('[ProfilePage] Error fetching user data:', error.message, error);
+          return;
         }
-      }
+        if (!data) return;
 
-      // País
-      if (data.user_country_id) {
-        const { data: countryData } = await supabase
-          .from('countries')
-          .select('country_id, country_name, country_flag_url')
-          .eq('country_id', data.user_country_id)
-          .single();
+        // Nombre
+        setUserName(data.user_name?.replace(/^@+/, '') || '');
+        setInitialName(data.user_name?.replace(/^@+/, '') || '');
 
-        if (countryData) {
-          setSelectedCountry(countryData);
-          setInitialCountry(countryData);
+        // Equipo
+        if (data.user_team_id) {
+          const { data: teamData, error: teamError } = await supabase
+            .from('teams')
+            .select('team_id, team_name, team_fullname, team_crest_url, team_country_id')
+            .eq('team_id', data.user_team_id)
+            .single();
+
+          if (teamError) {
+            console.error('[ProfilePage] Error fetching user team:', teamError.message, teamError);
+          } else if (teamData) {
+            setSelectedTeam(teamData);
+            setInitialTeam(teamData);
+          }
         }
+
+        // País
+        if (data.user_country_id) {
+          const { data: countryData, error: countryError } = await supabase
+            .from('countries')
+            .select('country_id, country_name, country_flag_url')
+            .eq('country_id', data.user_country_id)
+            .single();
+
+          if (countryError) {
+            console.error('[ProfilePage] Error fetching user country:', countryError.message, countryError);
+          } else if (countryData) {
+            setSelectedCountry(countryData);
+            setInitialCountry(countryData);
+          }
+        }
+      } catch (err) {
+        console.error('[ProfilePage] Unexpected error in fetchUserData:', err);
       }
     };
 

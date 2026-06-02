@@ -34,18 +34,27 @@ export default function ReadmeViewer() {
 
   useEffect(() => {
     const load = async () => {
-      const { data, error } = await supabase
-        .from('apis')
-        .select('data')
-        .eq('id', STORAGE_ID)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from('apis')
+          .select('data')
+          .eq('id', STORAGE_ID)
+          .maybeSingle();
 
-      console.log('Load result:', data, 'Error:', error);
+        if (error) {
+          console.error('[ReadmeViewer] Error loading tasks:', error.message, error);
+        } else {
+          console.log('[ReadmeViewer] Load result:', data);
+        }
 
-      if (data?.data && Array.isArray(data.data)) {
-        setTasks(data.data as Task[]);
+        if (data?.data && Array.isArray(data.data)) {
+          setTasks(data.data as Task[]);
+        }
+      } catch (err) {
+        console.error('[ReadmeViewer] Unexpected error loading tasks:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     load();
   }, []);
