@@ -30,7 +30,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   useEffect(() => {
     async function fetchWorldCups() {
-      console.log('[Sidebar] fetchWorldCups starting...');
       try {
         const { data, error } = await supabase
           .from('tournaments')
@@ -39,8 +38,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
         if (error) {
           console.error('[Sidebar] Supabase error:', error.message, error);
-        } else {
-          console.log('[Sidebar] fetchWorldCups success, count:', data?.length, 'data:', data);
         }
         if (data) {
           const sorted = [...data].sort((a, b) => b.tournament_id.localeCompare(a.tournament_id));

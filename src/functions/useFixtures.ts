@@ -220,7 +220,6 @@ export function useFixtures() {
 
   const fetchFixtures = async (d: string, silent = false, retryCount = 0) => {
     if (!silent) setLoading(true)
-    console.log('[useFixtures] fetchFixtures starting for date:', d);
     try {
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${d}&encrypt=true`,
@@ -234,7 +233,6 @@ export function useFixtures() {
       if (!res.ok) throw new Error(`Error ${res.status}`)
       const rawText = await res.text()
       const data = decryptPayload(rawText)
-      console.log('[useFixtures] fetchFixtures decrypted count:', Array.isArray(data) ? data.length : (data && typeof data === 'object' ? 'object' : typeof data));
 
       const fixturesList = Array.isArray(data)
         ? data
@@ -257,17 +255,10 @@ export function useFixtures() {
   // Cargar mapeo de equipos locales
   useEffect(() => {
     const fetchLocalTeams = async () => {
-      console.log('[useFixtures] fetchLocalTeams starting...');
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('teams')
         .select('team_id, team_name, team_crest_url, team_id_api_drsm')
         .not('team_id_api_drsm', 'is', null)
-
-      if (error) {
-        console.error('[useFixtures] fetchLocalTeams error:', error.message, error);
-      } else {
-        console.log('[useFixtures] fetchLocalTeams success, count:', data?.length);
-      }
 
       if (data) {
         const map = new Map()
