@@ -30,16 +30,24 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   useEffect(() => {
     async function fetchWorldCups() {
-      const { data } = await supabase
-        .from('tournaments')
-        .select('tournament_id, tournament_name, tournament_crest_url')
-        .like('tournament_id', '%WC');
+      try {
+        const { data, error } = await supabase
+          .from('tournaments')
+          .select('tournament_id, tournament_name, tournament_crest_url')
+          .like('tournament_id', '%WC');
 
-      if (data) {
-        const sorted = [...data].sort((a, b) => b.tournament_id.localeCompare(a.tournament_id));
-        setWorldCups(sorted);
+        if (error) {
+          console.error('[Sidebar] Supabase error:', error.message, error);
+        }
+        if (data) {
+          const sorted = [...data].sort((a, b) => b.tournament_id.localeCompare(a.tournament_id));
+          setWorldCups(sorted);
+        }
+      } catch (err) {
+        console.error('[Sidebar] Fetch exception:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchWorldCups();
   }, []);
