@@ -9,7 +9,6 @@ import type { TournamentSystem } from '../../functions/computeStandings'
 import { useTheme } from '../../functions/themeStore'
 import LoadingState from '../../components/ui/LoadingState'
 import PageHeader from '../../layout/PageHeader'
-import ChampionBanner from '../../components/ui/ChampionBanner'
 import { resolveTabModules } from '../tabTypes'
 
 // ------------------------------------------------------------
@@ -241,10 +240,6 @@ export default function TournamentPage() {
   const activeModule = tabModules.find(m => m.tabConfig.id === activeTab) ?? tabModules[0]
   const ActiveComponent = activeModule?.default
 
-  const winner = tournament.tournament_winner_id
-    ? teamLookup[tournament.tournament_winner_id]
-    : null
-
   return (
     <>
       <PageBanner
@@ -258,13 +253,6 @@ export default function TournamentPage() {
           onChange={setActiveTab}
         />
       </PageBanner>
-
-      {winner && (
-        <ChampionBanner
-          teamName={winner.team_name}
-          teamCrestUrl={winner.team_crest_url}
-        />
-      )}
 
       <PageContent maxWidth="1600">
         {ActiveComponent && (

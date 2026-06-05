@@ -4,6 +4,7 @@ import { computeStandings } from '../../functions/computeStandings'
 import FixtureTable from '../../components/tables/FixtureTable'
 import StandingsTable from '../../components/tables/StandingsTable'
 import EmptyState from '../../components/ui/EmptyState'
+import ChampionBanner from '../../components/ui/ChampionBanner'
 import { useTime, toLocal } from '../../functions/time'
 import { getMatchStatusLabel } from '../../functions/matchHelpers'
 
@@ -54,6 +55,7 @@ interface TorneoTabProps {
   tournament: {
     tournament_teams: Record<string, string[]> | null
     tournament_system: TournamentSystem | null
+    tournament_winner_id: string | null
   }
   matches: Match[]
   goals: Goal[]
@@ -145,8 +147,21 @@ export default function TorneoTab({
     })
   }
 
+  const winner = tournament.tournament_winner_id
+    ? teamLookup[tournament.tournament_winner_id]
+    : null
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-10 lg:gap-8">
+    <div className="flex flex-col gap-8">
+      {winner && (
+        <ChampionBanner
+          teamId={winner.team_id}
+          teamName={winner.team_name}
+          teamCrestUrl={winner.team_crest_url}
+        />
+      )}
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-10 lg:gap-8">
       {/* Partidos del round seleccionado */}
       <div className="flex flex-col gap-4 order-1 lg:order-2">
         {selectedRound ? (
@@ -175,6 +190,7 @@ export default function TorneoTab({
               tournamentSystem={system}
             />
           ))}
+        </div>
         </div>
       </div>
     </div>

@@ -53,7 +53,7 @@ interface EstadisticasTabProps {
 // COMPONENTE
 // ------------------------------------------------------------
 
-export default function EstadisticasTab({ teamId, matches, teamLookup }: EstadisticasTabProps) {
+export default function EstadisticasTab({ teamId, matches, goals, teamLookup }: EstadisticasTabProps) {
   // Lógica de historial por Rival
   const computeHistory = (matchList: MatchWithTournament[]): HistoryStats[] => {
     const statsMap: Record<string, HistoryStats> = {}
@@ -108,7 +108,13 @@ export default function EstadisticasTab({ teamId, matches, teamLookup }: Estadis
   return (
     <div className="lg:col-span-2 flex flex-col gap-4">
       {historyStats.length > 0 ? (
-        <HistoryVsTable stats={historyStats} />
+        <HistoryVsTable
+          stats={historyStats}
+          teamId={teamId}
+          matches={matches as any}
+          goals={goals}
+          teamLookup={teamLookup}
+        />
       ) : null}
     </div>
   )

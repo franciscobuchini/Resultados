@@ -53,12 +53,15 @@ export default function HomePage() {
                 teamLookup={league.teamLookup}
                 hideDateSeparators={true}
               />
+
             ))}
+            <Efemerides date={date} />  
           </div>
         )}
+
       </div>
 
-      <Efemerides date={date} />
+      
     </PageContent>
   )
 }

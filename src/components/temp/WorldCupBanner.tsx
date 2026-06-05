@@ -62,7 +62,7 @@ export default function WorldCupBanner() {
           {/* Text Details */}
           <div className="flex-1 min-w-0 flex flex-col items-center sm:items-start">
             <h3 className={`text-2xl sm:text-3xl font-black tracking-tight leading-none uppercase ${textMain} flex items-center gap-2`}>
-              Mundial 2026
+              FIFA WORLD CUP 2026
             </h3>
 
             {/* Host Countries */}

@@ -25,7 +25,7 @@ interface MatchWithTournament {
   match_date: string
   match_time_utc: string | null
   match_status: string | null
-  match_status_label?: string | null
+  match_status_label?: string | React.ReactNode | null
   home_score: number | null
   away_score: number | null
   home_penalty: number | null
@@ -72,7 +72,7 @@ export default function PartidosTab({ matches, goals, teamLookup }: PartidosTabP
   const { utcOffset } = useTime()
 
   // Helper para agrupar por fecha local
-  const groupMatches = (matchList: MatchWithTournament[]) => {
+  const groupMatches = (matchList: MatchWithTournament[], isResults: boolean = false) => {
     const grouped: Record<string, MatchWithTournament[]> = {}
     matchList.forEach(m => {
       if (!m.match_date) return
@@ -80,9 +80,17 @@ export default function PartidosTab({ matches, goals, teamLookup }: PartidosTabP
       const dateKey = local.date
       if (dateKey) {
         if (!grouped[dateKey]) grouped[dateKey] = []
+        const originalLabel = getMatchStatusLabel(m.match_status, m.match_date)
+        const year = m.match_date ? m.match_date.split('-')[0] : ''
+
         const matchWithLabel: MatchWithTournament = {
           ...m,
-          match_status_label: getMatchStatusLabel(m.match_status, m.match_date)
+          match_status_label: isResults ? (
+            <div className="flex flex-col items-center leading-tight">
+              <span className="text-[10px] font-normal">{year}</span>
+              <span>{originalLabel}</span>
+            </div>
+          ) : originalLabel
         }
         grouped[dateKey].push(matchWithLabel)
       }
@@ -94,8 +102,8 @@ export default function PartidosTab({ matches, goals, teamLookup }: PartidosTabP
   const finishedMatches = matches.filter(m => isFinished(m.match_status)).slice(0, 6)
   const upcomingMatches = [...matches.filter(m => !isFinished(m.match_status))].reverse()
 
-  const groupedFinished = groupMatches(finishedMatches)
-  const groupedUpcoming = groupMatches(upcomingMatches)
+  const groupedFinished = groupMatches(finishedMatches, true)
+  const groupedUpcoming = groupMatches(upcomingMatches, false)
 
   return (
     <>

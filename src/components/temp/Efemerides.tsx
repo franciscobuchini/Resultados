@@ -123,11 +123,13 @@ export default function Efemerides({ date }: { date: string }) {
       return yearB - yearA;
     });
 
-    // Adaptar partidos con las notas de torneo
+    // Adaptar partidos con las notas de torneo y el año como status label
     const adapted = filtered.map(m => {
       const tournamentName = m.tournament_id ? tournamentLookup[m.tournament_id] : null;
+      const year = m.match_date ? m.match_date.split('-')[0] : '✓';
       return {
         ...m,
+        match_status_label: <span className="text-[10px] font-normal">{year}</span>,
         match_notes: tournamentName
           ? `${tournamentName}${m.match_notes ? ` - ${m.match_notes}` : ''}`
           : m.match_notes
@@ -171,8 +173,8 @@ export default function Efemerides({ date }: { date: string }) {
         matchesByDate={matchesByDate}
         goals={goals}
         teamLookup={teamLookup}
-        hideDateSeparators={false}
-        showYearInSeparator={true}
+        hideDateSeparators={true}
+        showYearInSeparator={false}
         sortDescending={true}
       />
     </div>
