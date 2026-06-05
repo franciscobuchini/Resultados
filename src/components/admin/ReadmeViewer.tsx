@@ -14,17 +14,19 @@ interface Task {
   createdAt: string;
 }
 
-const ASSIGNEE_COLORS: Record<Assignee, string> = {
-  FRAN:  'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  JAVI:  'bg-orange-500/20 text-orange-400 border-orange-500/30',
-  AMBOS: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-  NOTA:  'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-};
+// Colors are dynamically determined by themeStore
 
 const STORAGE_ID = 'readme_tasks';
 
 export default function ReadmeViewer() {
-  const { textMain, textMuted, bgSurface, border } = useThemeClasses();
+  const { textMain, textMuted, bgSurface, border, textInfo, textSuccess, textAccent, textAlert, textError } = useThemeClasses();
+
+  const assigneeColors: Record<Assignee, string> = {
+    FRAN:  `${textInfo || 'text-blue-400'} bg-current/20 border-current/30`,
+    JAVI:  `${textSuccess || 'text-green-400'} bg-current/20 border-current/30`,
+    AMBOS: `${textAccent || 'text-purple-400'} bg-current/20 border-current/30`,
+    NOTA:  `${textAlert || 'text-amber-400'} bg-current/20 border-current/30`,
+  };
   const [tasks, setTasks]     = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving]   = useState(false);
@@ -167,7 +169,7 @@ export default function ReadmeViewer() {
               onClick={() => setNewAssignee(a)}
               className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-all ${
                 newAssignee === a
-                  ? ASSIGNEE_COLORS[a]
+                  ? assigneeColors[a]
                   : `${textMuted} border-transparent hover:border-white/10`
               }`}
             >
@@ -198,7 +200,7 @@ export default function ReadmeViewer() {
                 onClick={() => toggleStatus(task.id)}
                 className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
                   task.status === 'done'
-                    ? 'bg-green-500/20 border-green-500/50 text-green-400'
+                    ? `${textSuccess || 'text-green-400'} bg-current/20 border-current/50`
                     : 'border-white/20 hover:border-white/40'
                 }`}
               >
@@ -214,14 +216,14 @@ export default function ReadmeViewer() {
             </p>
 
             {/* Asignado */}
-            <span className={`text-xs px-2 py-0.5 rounded-md border font-medium shrink-0 ${ASSIGNEE_COLORS[task.assignee]}`}>
+            <span className={`text-xs px-2 py-0.5 rounded-md border font-medium shrink-0 ${assigneeColors[task.assignee]}`}>
               {task.assignee}
             </span>
 
             {/* Eliminar */}
             <button
               onClick={() => deleteTask(task.id)}
-              className={`opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-red-500/20 hover:text-red-400 ${textMuted} shrink-0`}
+              className={`opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:${textError || 'text-red-400'} hover:bg-current/20 ${textMuted} shrink-0`}
             >
               <Trash2 size={14} />
             </button>

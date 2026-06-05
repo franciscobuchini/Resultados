@@ -1,5 +1,6 @@
 import { type ReactNode, type ElementType } from 'react';
 import { User, Shield, Star } from 'lucide-react';
+import { useThemeClasses } from '../../functions/themeStore';
 
 interface BadgeProps {
   children: ReactNode;
@@ -9,12 +10,14 @@ interface BadgeProps {
 }
 
 export function Badge({ children, variant = 'default', className = '', icon: Icon }: BadgeProps) {
+  const { textSuccess, textError, textInfo, textAlert, textMuted } = useThemeClasses();
+
   const variants = {
-    success: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500',
-    warning: 'bg-amber-500/10 border-amber-500/20 text-amber-500',
-    error: 'bg-red-500/10 border-red-500/20 text-red-500',
-    info: 'bg-sky-500/10 border-sky-500/20 text-sky-500',
-    default: 'bg-zinc-500/10 border-zinc-500/20 text-zinc-400',
+    success: `${textSuccess || 'text-green-500'} bg-current/10 border-current/20`,
+    warning: `${textAlert || 'text-amber-500'} bg-current/10 border-current/20`,
+    error: `${textError || 'text-red-500'} bg-current/10 border-current/20`,
+    info: `${textInfo || 'text-blue-500'} bg-current/10 border-current/20`,
+    default: `${textMuted || 'text-zinc-500'} bg-current/10 border-current/20`,
   };
 
   return (

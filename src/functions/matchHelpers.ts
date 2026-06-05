@@ -77,3 +77,35 @@ export const getMatchStatusLabel = (
   return null;
 };
 
+// ------------------------------------------------------------
+// ALIASES DE EQUIPOS
+// ------------------------------------------------------------
+
+export const getTeamAliases = (teamLookup: Record<string, any>): Record<string, string> => {
+  const aliases: Record<string, string> = {}
+  let germanyId = ''
+  
+  // Buscar el ID de Alemania
+  for (const [id, info] of Object.entries(teamLookup)) {
+    if (info.team_name === 'Alemania') {
+      germanyId = id
+      break
+    }
+  }
+
+  // Mapear equipos históricos a Alemania
+  if (germanyId) {
+    for (const [id, info] of Object.entries(teamLookup)) {
+      if (info.team_name === 'Alemania Democrática' || info.team_name === 'Alemania Federal') {
+        aliases[id] = germanyId
+      }
+    }
+  }
+
+  return aliases
+}
+
+export const resolveTeamId = (id: string, aliases: Record<string, string>): string => {
+  return aliases[id] || id
+}
+

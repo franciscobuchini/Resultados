@@ -28,7 +28,7 @@ interface Country {
 }
 
 export default function ProfilePage() {
-  const { border, textMain, textMuted, bgSurface, bgSurfaceHover } = useThemeClasses();
+  const { border, textMain, textMuted, bgSurface, bgSurfaceHover, textError } = useThemeClasses();
   const { user, initialized, updateProfile } = useAuth();
   const navigate = useNavigate();
 
@@ -330,7 +330,7 @@ const [initialName, setInitialName] = useState(user?.user_name?.replace(/^@+/, '
 
           {/* Error de guardado */}
           {saveError && (
-            <p className="text-sm text-red-500 px-2">{saveError}</p>
+            <p className={`text-sm ${textError || 'text-red-500'} px-2`}>{saveError}</p>
           )}
 
           {/* Acciones de Cuenta */}

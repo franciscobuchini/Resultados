@@ -101,7 +101,7 @@ export default function HistoryVsTable({
   return (
     <div className="flex flex-col gap-4">
       {/* Fixture de enfrentamientos directos */}
-      {selectedRivalId && teamId && selectedRival && (
+      {selectedRivalId && teamId && selectedRival ? (
         <HistoryVsFixture
           teamId={teamId}
           rivalId={selectedRivalId}
@@ -110,6 +110,10 @@ export default function HistoryVsTable({
           goals={goals}
           teamLookup={teamLookup}
         />
+      ) : (
+        <p className="text-sm italic px-2 opacity-70">
+          Seleccioná un país para ver todos los partidos
+        </p>
       )}
 
       <DataBox>

@@ -210,6 +210,8 @@ interface FixtureRowProps {
   matchTime?: string | null;
   /** Etiqueta de estado (ej: '34'', 'Final', 'LIVE') */
   statusLabel?: ReactNode;
+  /** Estado crudo del partido (para detectar cancelados incluso si statusLabel fue sobrescrito) */
+  matchStatus?: string | null;
   matchNotes?: string | null;
   className?: string;
   noBorder?: boolean;
@@ -227,6 +229,7 @@ export function FixtureRow({
   homeIdDM, awayIdDM,
   matchTime,
   statusLabel,
+  matchStatus,
   matchNotes,
   className = '',
   noBorder = false
@@ -287,7 +290,9 @@ export function FixtureRow({
   };
 
   const isLive = typeof statusLabel === 'string' && (statusLabel.includes("'") || ['LIVE', 'ET', 'MT', 'PEN', 'P'].includes(statusLabel));
-  const isCancelled = statusLabel === 'C';
+  const isCancelledByLabel = statusLabel === 'C' || statusLabel === 'CANCELADO';
+  const isCancelledByStatus = typeof matchStatus === 'string' && ['cancelado', 'cancelled', 'canc', 'can'].includes(matchStatus.toLowerCase().trim());
+  const isCancelled = isCancelledByLabel || isCancelledByStatus;
   const isFinished = statusLabel === '✓';
 
   return (
@@ -305,10 +310,10 @@ export function FixtureRow({
         {/* Estado (Apartado extra a la izquierda para tiempo) */}
         <div
           title={isFinished ? 'Finalizado' : isCancelled ? 'Cancelado' : undefined}
-          className={`shrink-0 w-8 sm:w-12 flex items-center justify-center text-center text-xs font-bold uppercase tracking-tighter ${isCancelled ? (textAlert || 'text-amber-500') : isLive ? `${textError} animate-pulse` : ''
+          className={`shrink-0 w-8 sm:w-12 flex items-center justify-center text-center text-xs font-bold uppercase tracking-tighter ${isCancelledByLabel ? (textAlert || 'text-amber-500') : isLive ? `${textError} animate-pulse` : ''
             }`}
         >
-          {isCancelled ? <Ban size={14} strokeWidth={2.5} /> : statusLabel}
+          {isCancelledByLabel ? null : statusLabel}
         </div>
 
         {/* Contenido principal: Local + Marcador + Visitante */}
@@ -329,7 +334,11 @@ export function FixtureRow({
 
             {/* Goles u Horario */}
             <div className="flex gap-1 sm:gap-2 font-bold min-w-[20px] sm:min-w-[32px] justify-center text-xs sm:text-sm">
-              {(homeScore === null || homeScore === undefined) && (awayScore === null || awayScore === undefined) && matchTime ? (
+              {isCancelled ? (
+                <div className={`${textAlert || 'text-amber-500'} flex items-center justify-center`} title="Cancelado">
+                  <Ban size={16} strokeWidth={2.5} />
+                </div>
+              ) : (homeScore === null || homeScore === undefined) && (awayScore === null || awayScore === undefined) && matchTime ? (
                 <span className={`${textMuted} font-normal`}>{matchTime}</span>
               ) : (
                 <>

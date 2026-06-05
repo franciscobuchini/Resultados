@@ -8,7 +8,7 @@ import { Button } from './Button';
 
 export default function ProfileCTA() {
   const { user } = useAuth();
-  const { border, textMain, textMuted, bgSurface } = useThemeClasses();
+  const { border, textMain, textMuted, bgSurface, textAlert } = useThemeClasses();
   const [needsProfile, setNeedsProfile] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -62,8 +62,8 @@ export default function ProfileCTA() {
     >
       <div className="flex items-center gap-4 px-5 py-4 relative">
         {/* Icon */}
-        <div className="shrink-0 w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center">
-          <ShieldQuestion size={20} className="text-amber-400" />
+        <div className={`shrink-0 w-10 h-10 rounded-xl bg-current/15 flex items-center justify-center ${textAlert || 'text-amber-500'}`}>
+          <ShieldQuestion size={20} />
         </div>
 
         {/* Text */}

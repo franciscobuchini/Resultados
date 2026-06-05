@@ -11,7 +11,7 @@ import { MessageCircle, AlertTriangle, CheckCircle2, Send, AlertCircle } from 'l
 type FeedbackType = 'bug' | 'feedback' | 'feature';
 
 export default function FeedbackPage() {
-  const { textMain, textMuted } = useThemeClasses();
+  const { textMain, textMuted, textInfo, textSuccess, textError } = useThemeClasses();
   const [type, setType] = useState<FeedbackType>('feedback');
   const [description, setDescription] = useState('');
   const [email, setEmail] = useState('');
@@ -57,7 +57,7 @@ export default function FeedbackPage() {
         <div className="w-full mx-auto flex flex-col gap-6">
           {/* Header */}
           <div className="flex items-center gap-3 pb-4">
-            <MessageCircle size={24} className="text-blue-500" />
+            <MessageCircle size={24} className={textInfo || 'text-blue-500'} />
             <h1 className={`text-2xl font-semibold ${textMain}`}>
               Reportar errores & Feedback
             </h1>
@@ -67,7 +67,7 @@ export default function FeedbackPage() {
             <div className="p-6 sm:p-8 space-y-6">
               {submitted ? (
                 <div className="flex flex-col items-center justify-center text-center py-12">
-                  <CheckCircle2 size={48} className="text-green-500 mx-auto mb-4" />
+                  <CheckCircle2 size={48} className={`${textSuccess || 'text-green-500'} mx-auto mb-4`} />
                   <h2 className={`text-xl font-semibold ${textMain} mb-2`}>
                     ¡Gracias por tu feedback!
                   </h2>
@@ -85,9 +85,9 @@ export default function FeedbackPage() {
                 <>
                   {/* Error message */}
                   {error && (
-                    <div className="flex gap-3 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                      <AlertCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-red-500">{error}</p>
+                    <div className={`flex gap-3 p-4 rounded-lg border ${textError || 'text-red-500'} bg-current/10 border-current/20`}>
+                      <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
+                      <p className="text-sm">{error}</p>
                     </div>
                   )}
 

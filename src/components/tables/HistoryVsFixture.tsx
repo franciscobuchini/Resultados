@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import FixtureTable from './FixtureTable';
 import type { Match, Goal } from '../../functions/computeStandings';
+import { getTeamAliases, resolveTeamId } from '../../functions/matchHelpers';
 
 interface HistoryVsFixtureProps {
   teamId: string;
@@ -20,10 +21,13 @@ export default function HistoryVsFixture({
   teamLookup,
 }: HistoryVsFixtureProps) {
   const { filteredMatches, filteredGoals, matchesByDate } = useMemo(() => {
+    const aliases = getTeamAliases(teamLookup);
     const filtered = matches.filter(
-      m =>
-        (m.home_id === teamId && m.away_id === rivalId) ||
-        (m.home_id === rivalId && m.away_id === teamId)
+      m => {
+        const h = resolveTeamId(m.home_id || '', aliases);
+        const a = resolveTeamId(m.away_id || '', aliases);
+        return (h === teamId && a === rivalId) || (h === rivalId && a === teamId);
+      }
     );
 
     // Ordenar por fecha descendente

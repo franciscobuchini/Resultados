@@ -1,6 +1,7 @@
 import type { TabConfig } from '../tabTypes'
 import type { Goal } from '../../functions/computeStandings'
 import HistoryVsTable, { type HistoryStats } from '../../components/tables/HistoryVsTable'
+import { getTeamAliases, resolveTeamId } from '../../functions/matchHelpers'
 
 export const tabConfig: TabConfig = {
   id: 'stats',
@@ -57,15 +58,19 @@ export default function EstadisticasTab({ teamId, matches, goals, teamLookup }: 
   // Lógica de historial por Rival
   const computeHistory = (matchList: MatchWithTournament[]): HistoryStats[] => {
     const statsMap: Record<string, HistoryStats> = {}
+    const cleanId = teamId
+    const aliases = getTeamAliases(teamLookup)
 
     matchList.forEach(m => {
+      // Filtrar partidos que no han terminado
       if (!isFinished(m.match_status)) return
 
-      const cleanId = teamId.trim()
       const isHome = m.home_id === cleanId
-      const rivalId = isHome ? m.away_id : m.home_id
+      const rawRivalId = isHome ? m.away_id : m.home_id
 
-      if (!rivalId) return
+      if (!rawRivalId) return
+      
+      const rivalId = resolveTeamId(rawRivalId, aliases)
 
       if (!statsMap[rivalId]) {
         const info = teamLookup[rivalId]

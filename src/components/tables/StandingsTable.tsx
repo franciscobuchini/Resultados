@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { StandingsHeaderRow, StandingsRow, StatGroup, Stat } from '../ui/DataRow';
 import DataBox from '../ui/DataBox';
+import { useThemeClasses } from '../../functions/themeStore';
 import type { TeamStanding } from '../../functions/computeStandings';
 import type { TournamentSystem } from '../../functions/computeStandings'
 
@@ -29,6 +30,7 @@ const COLOR_MAP: Record<string, { border: string; dot: string }> = {
 };
 
 export default function StandingsTable({ title, standings, teamLookup, tournamentSystem }: StandingsTableProps) {
+  const { textMuted } = useThemeClasses();
   const qualify = tournamentSystem?.groups?.qualify ?? null;
 
   // Leyenda: destinos únicos que aparecen en esta tabla, en orden de posición
@@ -107,7 +109,7 @@ export default function StandingsTable({ title, standings, teamLookup, tournamen
             return (
               <div key={label} className="flex items-center gap-1.5">
                 <div className={`w-2 h-2 rounded-full ${dot}`} />
-                <span className="text-xs text-gray-400">{label}</span>
+                <span className={`text-xs ${textMuted}`}>{label}</span>
               </div>
             );
           })}

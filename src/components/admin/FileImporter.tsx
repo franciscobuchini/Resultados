@@ -179,7 +179,7 @@ function parsePenalties(notes: string, home: string, away: string) {
 }
 
 export default function FileImporter() {
-  const { textMain, textMuted, border, bgSurface } = useThemeClasses()
+  const { textMain, textMuted, border, bgSurface, textSuccess, textError, textAlert, textInfo } = useThemeClasses()
   const [teams, setTeams] = useState<DbTeam[]>([])
   const [countries, setCountries] = useState<DbCountry[]>([])
   const [existingTournaments, setExistingTournaments] = useState<DbTournament[]>([])
@@ -454,7 +454,7 @@ export default function FileImporter() {
       </div>
 
       {result && (
-        <div className={`mb-6 p-4 rounded-xl text-xs font-mono border ${result.ok ? 'bg-emerald-900/20 border-emerald-800/50 text-emerald-400' : 'bg-red-900/20 border-red-800/50 text-red-400'}`}>
+        <div className={`mb-6 p-4 rounded-xl text-xs font-mono border ${result.ok ? `${textSuccess || 'text-green-400'} bg-current/10 border-current/25` : `${textError || 'text-red-400'} bg-current/10 border-current/25`}`}>
           <div className="flex items-center gap-3">
             <span className="text-lg">{result.ok ? '✓' : '⚠'}</span>
             {result.msg}
@@ -464,7 +464,7 @@ export default function FileImporter() {
       )}
 
       {fileError && (
-        <div className="mb-6 p-4 rounded-xl text-xs font-mono border bg-amber-900/20 border-amber-800/50 text-amber-400">
+        <div className={`mb-6 p-4 rounded-xl text-xs font-mono border ${textAlert || 'text-amber-400'} bg-current/10 border-current/25`}>
           <div className="flex items-center gap-3">
             <span className="text-lg">⚠</span>
             {fileError}
@@ -475,12 +475,12 @@ export default function FileImporter() {
 
       {/* Global Actions */}
       {entries.length > 0 && (
-        <div className="mb-6 flex items-center justify-between bg-zinc-900/60 p-4 rounded-xl border border-zinc-800">
-          <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest">
+        <div className={`mb-6 flex items-center justify-between bg-black/20 p-4 rounded-xl border ${border}`}>
+          <div className={`text-[10px] font-mono ${textMuted} uppercase tracking-widest`}>
             {entries.length} archivos cargados en cola
           </div>
           <button onClick={handleImportAll} disabled={uploading}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
+            className="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
             Importar Todo ({entries.length})
           </button>
         </div>
@@ -498,39 +498,39 @@ export default function FileImporter() {
           const ready = entry.tourney.tournament_edition !== '' && red === 0
 
           return (
-            <div key={entry.id} className="bg-zinc-900/40 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
+            <div key={entry.id} className={`${bgSurface}/40 border ${border} rounded-2xl overflow-hidden shadow-xl`}>
               {/* Tournament Row (Consolidated) */}
               <div className="p-4 flex flex-wrap items-center gap-6">
-                <div className="flex-shrink-0 border-r border-zinc-800/50 pr-6 min-w-[200px]">
-                  <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest mb-0.5 block">{entry.fileName}</span>
-                  <h3 className="text-lg font-mono font-black text-white tracking-tighter leading-none">{entry.tourney.generatedId}</h3>
+                <div className={`flex-shrink-0 border-r ${border}/50 pr-6 min-w-[200px]`}>
+                  <span className={`text-[8px] font-mono ${textMuted} uppercase tracking-widest mb-0.5 block`}>{entry.fileName}</span>
+                  <h3 className={`text-lg font-mono font-black ${textMain} tracking-tighter leading-none`}>{entry.tourney.generatedId}</h3>
                 </div>
 
-                <div className="flex items-center gap-4 border-r border-zinc-800/50 pr-6">
+                <div className={`flex items-center gap-4 border-r ${border}/50 pr-6`}>
                   <div className="flex flex-col items-center">
-                    <span className="text-[7px] font-mono text-zinc-500 uppercase mb-0.5">Part.</span>
-                    <span className="text-xl font-black text-zinc-100 leading-none">{entry.mapped.length}</span>
+                    <span className={`text-[7px] font-mono ${textMuted} uppercase mb-0.5`}>Part.</span>
+                    <span className={`text-xl font-black ${textMain} leading-none`}>{entry.mapped.length}</span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="text-[7px] font-mono text-zinc-500 uppercase mb-0.5">Goles</span>
-                    <span className="text-xl font-black text-zinc-100 leading-none">{entry.goals.length}</span>
+                    <span className={`text-[7px] font-mono ${textMuted} uppercase mb-0.5`}>Goles</span>
+                    <span className={`text-xl font-black ${textMain} leading-none`}>{entry.goals.length}</span>
                   </div>
                   {red > 0 && (
-                    <div className="bg-red-500/20 px-2 py-1 rounded flex flex-col items-center">
-                      <span className="text-[7px] font-mono text-red-400 uppercase">Red</span>
-                      <span className="text-xs font-black text-red-400 leading-none">{red}</span>
+                    <div className={`px-2 py-1 rounded flex flex-col items-center bg-current/20 ${textError || 'text-red-400'}`}>
+                      <span className="text-[7px] font-mono uppercase">Red</span>
+                      <span className="text-xs font-black leading-none">{red}</span>
                     </div>
                   )}
                   {yellow > 0 && (
-                    <div className="bg-amber-500/20 px-2 py-1 rounded flex flex-col items-center">
-                      <span className="text-[7px] font-mono text-amber-400 uppercase">Warn</span>
-                      <span className="text-xs font-black text-amber-400 leading-none">{yellow}</span>
+                    <div className={`px-2 py-1 rounded flex flex-col items-center bg-current/20 ${textAlert || 'text-amber-400'}`}>
+                      <span className="text-[7px] font-mono uppercase">Warn</span>
+                      <span className="text-xs font-black leading-none">{yellow}</span>
                     </div>
                   )}
                   {red === 0 && yellow === 0 && (
-                    <div className="bg-emerald-500/20 px-2 py-1 rounded flex flex-col items-center">
-                      <span className="text-[7px] font-mono text-emerald-400 uppercase">Status</span>
-                      <span className="text-xs font-black text-emerald-400 leading-none">OK</span>
+                    <div className={`px-2 py-1 rounded flex flex-col items-center bg-current/20 ${textSuccess || 'text-green-400'}`}>
+                      <span className="text-[7px] font-mono uppercase">Status</span>
+                      <span className="text-xs font-black leading-none">OK</span>
                     </div>
                   )}
                 </div>
@@ -543,42 +543,42 @@ export default function FileImporter() {
                     { label: 'Temporada', field: 'tournament_season', val: entry.tourney.tournament_season, w: 'flex-[1]' },
                   ].map(({ label, field, val, w }) => (
                     <div key={field} className={w}>
-                      <label className="text-[7px] font-mono text-zinc-600 uppercase block mb-1">{label}</label>
+                      <label className={`text-[7px] font-mono ${textMuted} uppercase block mb-1`}>{label}</label>
                       <Input variant="raw" value={val} onChange={e => updateEntryTourney(entry.id, field, field==='tournament_tier'? (parseInt(e.target.value)||null):e.target.value)}
-                        className={`w-full bg-transparent border-b font-bold text-[10px] text-zinc-300 outline-none pb-0.5 ${field==='tournament_edition'&&!val?'border-red-600':'border-zinc-800'}`} />
+                        className={`w-full bg-transparent border-b font-bold text-[10px] ${textMain} outline-none pb-0.5 ${field==='tournament_edition'&&!val? (textError || 'border-red-600') : border}`} />
                     </div>
                   ))}
                 </div>
 
-                <div className="flex items-center gap-3 pl-4 border-l border-zinc-800/50">
+                <div className={`flex items-center gap-3 pl-4 border-l ${border}/50`}>
                   <button onClick={() => setEntries(prev => prev.map(e => e.id === entry.id ? {...e, expanded: !e.expanded} : e))}
-                    className="p-2 text-zinc-500 hover:text-white transition-colors">
+                    className={`p-2 ${textMuted} hover:text-white transition-colors`}>
                     {entry.expanded ? '▲' : '▼'}
                   </button>
                   <button onClick={() => handleImportEntry(entry)} disabled={!ready || uploading}
-                    className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest ${ready ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'}`}>
+                    className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest ${ready ? 'bg-white text-black' : `${bgSurface} ${textMuted} cursor-not-allowed`}`}>
                     {uploading ? '...' : 'SUBIR'}
                   </button>
-                  <button onClick={() => setEntries(prev => prev.filter(e => e.id !== entry.id))} className="text-zinc-700 hover:text-red-400 p-2">✕</button>
+                  <button onClick={() => setEntries(prev => prev.filter(e => e.id !== entry.id))} className={`${textMuted} hover:${textError || 'text-red-400'} p-2`}>✕</button>
                 </div>
               </div>
 
               {/* Collapsible Table */}
               {entry.expanded && (
-                <div className="border-t border-zinc-800 p-4 bg-black/40">
-                   <div className="border border-zinc-800 rounded-xl overflow-hidden max-h-[400px] overflow-y-auto">
-                    <table className="w-full border-collapse text-[10px] font-mono text-zinc-400">
-                      <thead className="bg-zinc-950 sticky top-0">
+                <div className={`border-t ${border} p-4 bg-black/40`}>
+                   <div className={`border ${border} rounded-xl overflow-hidden max-h-[400px] overflow-y-auto`}>
+                    <table className={`w-full border-collapse text-[10px] font-mono ${textMuted}`}>
+                      <thead className={`${bgSurface} sticky top-0`}>
                         <tr>
-                          <th className="p-3 text-left text-zinc-500 uppercase font-bold w-20">round</th>
-                          <th className="p-3 text-left text-zinc-500 uppercase font-bold w-16">fecha</th>
-                          <th className="p-3 text-left text-zinc-500 uppercase font-bold">local</th>
-                          <th className="p-3 text-center text-zinc-500 uppercase font-bold w-12">score</th>
-                          <th className="p-3 text-right text-zinc-500 uppercase font-bold">visita</th>
-                          <th className="p-3 text-left text-zinc-500 uppercase font-bold min-w-[350px]">goles</th>
+                          <th className="p-3 text-left uppercase font-bold w-20">round</th>
+                          <th className="p-3 text-left uppercase font-bold w-16">fecha</th>
+                          <th className="p-3 text-left uppercase font-bold">local</th>
+                          <th className="p-3 text-center uppercase font-bold w-12">score</th>
+                          <th className="p-3 text-right uppercase font-bold">visita</th>
+                          <th className="p-3 text-left uppercase font-bold min-w-[350px]">goles</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-900">
+                      <tbody className={`divide-y ${border}`}>
                         {entry.mapped.map((row, i) => {
                           const hOk = row.home_id!=='', aOk = row.away_id!==''
                           const rowGoals = entry.goals.filter(g => g.match_id === row.match_id)
@@ -586,22 +586,22 @@ export default function FileImporter() {
                           const isWarn = score > 0 && rowGoals.length < score
                           const displayDate = row.match_date.split('-').reverse().slice(0,2).join('/')
                           return (
-                            <tr key={i} className={`group ${!hOk||!aOk?'bg-red-950/20':isWarn?'bg-amber-950/20':'hover:bg-zinc-900/50'}`}>
-                              <td className="p-3 text-zinc-500">{row.match_round}</td>
-                              <td className="p-3 text-zinc-600">{displayDate}</td>
+                            <tr key={i} className={`group ${!hOk||!aOk?`bg-red-950/20 text-red-400`:isWarn?`bg-amber-950/20 text-amber-200`:`hover:${bgSurface}/50`}`}>
+                              <td className="p-3 opacity-80">{row.match_round}</td>
+                              <td className="p-3 opacity-60">{displayDate}</td>
                               <td className="p-3">
                                 {!hOk ? (
                                   <select value={row.home_id} onChange={e => handleTeamChange(entry.id, i, 'home', e.target.value)}
-                                    className="bg-black text-red-400 border border-red-900/50 rounded text-[10px] outline-none">
+                                    className={`bg-black ${textError || 'text-red-400'} border border-current/30 rounded text-[10px] outline-none`}>
                                     <option value="">— {row.home_name} —</option>
                                     {teams.map(t => <option key={t.team_id} value={t.team_id}>{t.team_name}</option>)}
                                   </select>
-                                ) : <span className="text-zinc-100 font-bold">{row.home_name} <span className="text-zinc-600">[{row.home_id}]</span></span>}
+                                ) : <span className={`font-bold ${textMain}`}>{row.home_name} <span className={textMuted}>[{row.home_id}]</span></span>}
                               </td>
-                               <td className="p-3 text-center text-zinc-200 font-bold bg-zinc-900/20">
+                              <td className={`p-3 text-center ${textMain} font-bold bg-black/10`}>
                                 {row.home_score} - {row.away_score}
                                 {(row.home_penalty !== null || row.away_penalty !== null) && (
-                                  <div className="text-[8px] text-zinc-500 font-normal">
+                                  <div className={`text-[8px] ${textMuted} font-normal`}>
                                     ({row.home_penalty ?? 0} - {row.away_penalty ?? 0})
                                   </div>
                                 )}
@@ -609,13 +609,13 @@ export default function FileImporter() {
                               <td className="p-3 text-right">
                                 {!aOk ? (
                                   <select value={row.away_id} onChange={e => handleTeamChange(entry.id, i, 'away', e.target.value)}
-                                    className="bg-black text-red-400 border border-red-900/50 rounded text-[10px] outline-none">
+                                    className={`bg-black ${textError || 'text-red-400'} border border-current/30 rounded text-[10px] outline-none`}>
                                     <option value="">— {row.away_name} —</option>
                                     {teams.map(t => <option key={t.team_id} value={t.team_id}>{t.team_name}</option>)}
                                   </select>
-                                ) : <span className="text-zinc-100 font-bold"><span className="text-zinc-600">[{row.away_id}]</span> {row.away_name}</span>}
+                                ) : <span className={`font-bold ${textMain}`}><span className={textMuted}>[{row.away_id}]</span> {row.away_name}</span>}
                               </td>
-                              <td className="p-3 text-zinc-500 italic text-[9px]">
+                              <td className={`p-3 italic text-[9px] ${textMuted}`}>
                                 {score > 0 ? (
                                   <Input 
                                     variant="raw"
@@ -623,8 +623,8 @@ export default function FileImporter() {
                                     onChange={e => handleGoalsChange(entry.id, i, e.target.value)}
                                     className={`w-full bg-transparent border-b outline-none text-[9px] px-1 py-0.5 rounded transition-all ${
                                       isWarn 
-                                        ? 'bg-amber-500/10 border-amber-500/30 text-amber-200 focus:border-amber-500' 
-                                        : 'border-zinc-800/50 text-zinc-400 focus:border-zinc-600 focus:bg-zinc-800/30'
+                                        ? `${textAlert || 'text-amber-200'} bg-current/10 border-current/30 focus:border-current` 
+                                        : `${border}/50 ${textMuted} focus:border-current focus:bg-current/10`
                                     }`}
                                     placeholder="Goleadores..."
                                   />
