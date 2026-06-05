@@ -10,7 +10,7 @@ import WorldCupBanner from '../components/temp/WorldCupBanner'
 import Efemerides from '../components/temp/Efemerides'
 
 export default function HomePage() {
-  const { loading, dateLabel, adaptedLeagues, changeDate } = useFixtures()
+  const { loading, date, dateLabel, adaptedLeagues, changeDate } = useFixtures()
 
   return (
     <PageContent maxWidth="1600">
@@ -58,7 +58,7 @@ export default function HomePage() {
         )}
       </div>
 
-      <Efemerides />
+      <Efemerides date={date} />
     </PageContent>
   )
 }
