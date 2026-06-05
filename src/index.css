@@ -51,3 +51,16 @@ body.admin-unrestricted img {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Mask image utilities for World Cup banner responsive gradients */
+.wc-banner-mask {
+  mask-image: linear-gradient(to top, transparent 0%, rgba(0,0,0,0.15) 35%, black 100%);
+  -webkit-mask-image: linear-gradient(to top, transparent 0%, rgba(0,0,0,0.15) 35%, black 100%);
+}
+
+@media (min-width: 640px) {
+  .wc-banner-mask {
+    mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.15) 35%, black 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.15) 35%, black 100%);
+  }
+}

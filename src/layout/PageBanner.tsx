@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import LogoBanner from '../components/ui/LogoBanner';
 import { useThemeClasses } from '../functions/themeStore';
 
 interface PageBannerProps {
@@ -44,14 +45,7 @@ export default function PageBanner({
       {/* Content */}
       <div className="relative h-full flex flex-col justify-end pb-8 px-6">
         <div className="flex items-center gap-3 mb-6">
-          {logo && (
-            <img
-              src={logo}
-              alt="Tournament Logo"
-              loading="lazy"
-              className="w-24 h-24 md:w-32 md:h-32 object-contain"
-            />
-          )}
+          <LogoBanner src={logo} alt="Tournament Logo" size="md" />
 
           <h2 className={`text-3xl md:text-5xl font-black ${textMain} uppercase tracking-tighter`}>
             {title}
