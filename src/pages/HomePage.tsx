@@ -7,6 +7,7 @@ import LoadingState from '../components/ui/LoadingState'
 import { LAYOUT_CONFIG } from '../functions/layoutConfig'
 import ProfileCTA from '../components/ui/ProfileCTA'
 import WorldCupBanner from '../components/temp/WorldCupBanner'
+import Efemerides from '../components/temp/Efemerides'
 
 export default function HomePage() {
   const { loading, dateLabel, adaptedLeagues, changeDate } = useFixtures()
@@ -17,6 +18,8 @@ export default function HomePage() {
       <WorldCupBanner />
 
       <ProfileCTA />
+
+
 
       <DateNavigator dateLabel={dateLabel} onChangeDate={changeDate} />
 
@@ -54,6 +57,8 @@ export default function HomePage() {
           </div>
         )}
       </div>
+
+      <Efemerides />
     </PageContent>
   )
 }

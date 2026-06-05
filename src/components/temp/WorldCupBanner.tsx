@@ -40,7 +40,7 @@ export default function WorldCupBanner() {
   return (
     <Link
       to="/tournament/INT.2026.WC"
-      className={`group -mt-8 sm:mt-0 block relative sm:rounded-2xl rounded-none border-y sm:border ${border} ${bgSurface} overflow-hidden`}
+      className={`group -mt-8 sm:mt-0 block relative sm:rounded-2xl rounded-none sm:border ${border} ${bgSurface} overflow-hidden`}
     >
       {/* Background Image with Mask fading to bgSurface */}
       <div className="absolute inset-0 z-0 overflow-hidden">

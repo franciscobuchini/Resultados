@@ -26,6 +26,8 @@ interface FixtureTableProps {
   hideDateSeparators?: boolean;
   /** Ordenar fechas de forma descendente */
   sortDescending?: boolean;
+  /** Mostrar año en los separadores de fecha */
+  showYearInSeparator?: boolean;
 }
 
 /** Formatea un Goal de la DB usando el helper compartido */
@@ -43,7 +45,8 @@ export default function FixtureTable({
   onPrevRound,
   onNextRound,
   hideDateSeparators = false,
-  sortDescending = false
+  sortDescending = false,
+  showYearInSeparator = false
 }: FixtureTableProps) {
   const { utcOffset } = useTime();
   const { bgSurfaceHover, textSuccess } = useThemeClasses();
@@ -88,7 +91,9 @@ export default function FixtureTable({
         const dateObj = new Date(date + 'T12:00:00');
         const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
 
-        const formattedDay = dateObj.toLocaleDateString('es-ES', options).replace(/,/g, '');
+        const formattedDay = showYearInSeparator
+          ? dateObj.getFullYear().toString()
+          : dateObj.toLocaleDateString('es-ES', options).replace(/,/g, '');
 
         return (
           <React.Fragment key={date}>
