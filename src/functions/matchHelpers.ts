@@ -10,7 +10,7 @@
 export const isPlayedOrPlaying = (status: string | null): boolean => {
   if (!status) return false;
   const s = status.toLowerCase().trim();
-  const notStarted = ['ns', 'tbd', 'scheduled', 'postponed', 'cancelled'].includes(s);
+  const notStarted = ['ns', 'tbd', 'scheduled', 'postponed', 'cancelled', 'cancelado'].includes(s);
   return !notStarted && s !== '';
 };
 
@@ -51,7 +51,7 @@ export const getMatchStatusLabel = (
   const s = status.toUpperCase().trim();
 
   // Si está cancelado o pospuesto, devolvemos 'C' en cualquier fecha
-  if (['CANC', 'CAN', 'CANCELLED', 'POSTPONED'].includes(s)) {
+  if (['CANC', 'CAN', 'CANCELLED', 'POSTPONED', 'CANCELADO'].includes(s)) {
     return 'C';
   }
 

@@ -4,7 +4,7 @@ import DataBox from '../ui/DataBox';
 import type { Match, Goal } from '../../functions/computeStandings';
 import { useTime, toLocal } from '../../functions/time';
 import { useThemeClasses } from '../../functions/themeStore';
-import { isPlayedOrPlaying, formatGoalLabel } from '../../functions/matchHelpers';
+import { isPlayedOrPlaying, formatGoalLabel, getMatchStatusLabel } from '../../functions/matchHelpers';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface FixtureTableProps {
@@ -151,7 +151,7 @@ export default function FixtureTable({
                     homePenalty={match.home_penalty}
                     awayPenalty={match.away_penalty}
                     matchTime={local.time}
-                    statusLabel={match.match_status_label}
+                    statusLabel={match.match_status_label ?? getMatchStatusLabel(match.match_status, match.match_date)}
                     matchNotes={match.match_notes}
                     noBorder={isLastInTable}
                   />
