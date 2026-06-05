@@ -179,7 +179,7 @@ function parsePenalties(notes: string, home: string, away: string) {
 }
 
 export default function FileImporter() {
-  const { textMain, textMuted, border, bgSurface, textSuccess, textError, textAlert, textInfo } = useThemeClasses()
+  const { textMain, textMuted, border, bgSurface, textSuccess, textError, textAlert } = useThemeClasses()
   const [teams, setTeams] = useState<DbTeam[]>([])
   const [countries, setCountries] = useState<DbCountry[]>([])
   const [existingTournaments, setExistingTournaments] = useState<DbTournament[]>([])
