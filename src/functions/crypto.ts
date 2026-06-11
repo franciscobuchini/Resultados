@@ -20,7 +20,7 @@ export function decryptPayload(encryptedText: string): any {
     const decryptedJsonString = bytes.toString(CryptoJS.enc.Utf8);
     return JSON.parse(decryptedJsonString);
   } catch (e) {
-    console.error('Error desencriptando payload:', e);
+
     return null;
   }
 }

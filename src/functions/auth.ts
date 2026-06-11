@@ -96,7 +96,7 @@ export const useAuth = create<AuthState>((set) => ({
           .from('users')
           .update(dbUpdates)
           .eq('id', data.user.id);
-        if (dbError) console.warn('Error syncing to public.users:', dbError.message);
+        if (dbError) {}
       }
 
       set({ user: mapUser(data.user), loading: false })
@@ -126,7 +126,7 @@ supabase.auth.onAuthStateChange(async (_event, session) => {
         .single();
 
       if (error) {
-        console.warn('[auth.onAuthStateChange] Error fetching database profile (expected if new user):', error.message, error);
+
       }
 
       if (data && !error) {

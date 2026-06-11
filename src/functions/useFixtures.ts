@@ -244,7 +244,7 @@ export function useFixtures() {
         setTimeout(() => fetchFixtures(d, true, 1), 3000)
       }
     } catch (err: any) {
-      console.error(`[useFixtures] Error fetching date ${d}:`, err.message)
+
       if (retryCount === 0) {
         setTimeout(() => fetchFixtures(d, true, 1), 3000)
       }

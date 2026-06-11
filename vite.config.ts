@@ -68,7 +68,7 @@ export default defineConfig(({ mode }) => {
                   res.setHeader('Content-Type', 'application/json');
                   res.end(JSON.stringify({ ok: true }));
                 } catch (error) {
-                  console.error('Error in mock api/contact:', error);
+
                   res.statusCode = 500;
                   res.setHeader('Content-Type', 'application/json');
                   res.end(JSON.stringify({ ok: false, error: error instanceof Error ? error.message : 'Unknown error' }));

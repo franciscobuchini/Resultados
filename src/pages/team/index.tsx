@@ -8,6 +8,8 @@ import type { Goal } from '../../functions/computeStandings'
 import LoadingState from '../../components/ui/LoadingState'
 import PageHeader from '../../layout/PageHeader'
 import { resolveTabModules } from '../tabTypes'
+import { decryptPayload } from '../../functions/crypto'
+import { getMatchStatusLabel } from '../../functions/matchHelpers'
 
 // ------------------------------------------------------------
 // AUTO-DISCOVERY DE TABS
@@ -101,6 +103,22 @@ export default function TeamPage() {
         }
         setTeam(teamData as Team)
 
+        // Cargar mapeo de equipos (team_id_api_drsm → team_id local)
+        const { data: teamsData } = await supabase
+          .from('teams')
+          .select('team_id, team_id_api_drsm')
+          .not('team_id_api_drsm', 'is', null)
+
+        const teamMapApiToLocal = new Map<number, string>()
+        if (teamsData) {
+          teamsData.forEach(t => {
+            if (t.team_id_api_drsm) {
+              teamMapApiToLocal.set(Number(t.team_id_api_drsm), t.team_id)
+            }
+          })
+        }
+
+
         // 2. Traer todos los partidos vinculados al equipo (paginado)
         let fetchedMatches: MatchWithTournament[] = []
         let page = 0
@@ -175,8 +193,101 @@ export default function TeamPage() {
           }
         }
         setTeamLookup(lookup)
+
+        setLoading(false)
+
+        // ===== FETCH DE DATOS EN VIVO: PRIMERO FECHAS CERCANAS (AWAIT), LUEGO RESTO EN BACKGROUND =====
+        ;(async () => {
+          try {
+
+            const uniqueDates = Array.from(new Set(fetchedMatches.map(m => m.match_date).filter(Boolean))) as string[]
+
+
+            // Helper para fetchear y actualizar una fecha
+            const fetchAndUpdateDate = async (date: string) => {
+              try {
+                const res = await fetch(
+                  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-fixtures?date=${date}&encrypt=true`,
+                  {
+                    headers: {
+                      'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+                    }
+                  }
+                )
+
+                if (!res.ok) return
+
+                const rawText = await res.text()
+                const data = decryptPayload(rawText)
+                const fixtures = Array.isArray(data) ? data : (data?.data && Array.isArray(data.data) ? data.data : [])
+
+                if (fixtures.length === 0) return
+
+
+
+                // Mapear fixtures por (date, homeId_local, awayId_local)
+                const fixturesByTeams = new Map<string, any>()
+                fixtures.forEach((f: any) => {
+                  const homeIdLocal = teamMapApiToLocal.get(f.home_team_id)?.toString() || f.home_team_id.toString()
+                  const awayIdLocal = teamMapApiToLocal.get(f.away_team_id)?.toString() || f.away_team_id.toString()
+                  const key = `${date}|${homeIdLocal}|${awayIdLocal}`
+                  fixturesByTeams.set(key, f)
+                })
+
+                // Actualizar matches
+                setMatches(prevMatches => {
+                  let updatedCount = 0
+                  const updated = prevMatches.map(m => {
+                    if (m.match_date !== date) return m
+
+                    const key = `${date}|${m.home_id}|${m.away_id}`
+                    const fixture = fixturesByTeams.get(key)
+
+                    if (fixture) {
+                      updatedCount++
+                      return {
+                        ...m,
+                        home_score: fixture.home_score ?? m.home_score,
+                        away_score: fixture.away_score ?? m.away_score,
+                        match_status: fixture.status ?? m.match_status,
+                        match_status_label: getMatchStatusLabel(fixture.status ?? m.match_status, m.match_date, fixture.current_minute)
+                      }
+                    }
+                    return m
+                  })
+                  if (updatedCount > 0) {
+
+                  }
+                  return updated
+                })
+              } catch (err) {
+
+              }
+            }
+
+            // PRIMERO: Cargar fechas cercanas (hoy, mañana, pasado mañana) CON AWAIT
+            const today = new Date().toISOString().split('T')[0]
+            const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+            const dayAfter = new Date(Date.now() + 172800000).toISOString().split('T')[0]
+            const nearDates = [today, tomorrow, dayAfter].filter(d => uniqueDates.includes(d))
+
+            for (const date of nearDates) {
+              await fetchAndUpdateDate(date)
+            }
+
+            // LUEGO: Cargar el resto en background (sin await)
+            const remainingDates = uniqueDates.filter(d => !nearDates.includes(d))
+            for (const date of remainingDates) {
+              fetchAndUpdateDate(date).catch(() => {})
+            }
+
+
+          } catch (err) {
+
+          }
+        })()
       } catch (error) {
-        console.error('Error fetching team data:', error)
+
       } finally {
         setLoading(false)
       }

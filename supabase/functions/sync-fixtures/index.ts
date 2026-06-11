@@ -60,7 +60,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
 
   if (tErr) throw new Error(`Error buscando torneos activos: ${tErr.message}`)
   if (!tournaments || tournaments.length === 0) {
-    console.log('No se encontraron torneos activos con ID de API')
+
     return { synced: 0, unresolved: 0, apiLeagueIds: [] }
   }
 
@@ -78,11 +78,11 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
     const dayFixtures = await fetchFromDataRedonda(date)
     const matches = dayFixtures.filter(f => f.leagues?.sportmonks_id && tournamentMap.has(Number(f.leagues.sportmonks_id)))
     allFixtures.push(...matches)
-    console.log(`📅 ${date}: ${matches.length} partidos de torneos activos`)
+
   }
 
   if (allFixtures.length === 0) {
-    console.log('No se encontraron fixtures de torneos activos en el rango')
+
     return { synced: 0, unresolved: 0, apiLeagueIds }
   }
 
@@ -118,7 +118,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
 
     if (!homeTeam || !awayTeam) {
       unresolved++
-      console.warn(`⚠️ Sin resolver: fixture ${f.id} — home: ${homeApiId}, away: ${awayApiId}`)
+
     }
 
     const leagueIdApi = f.leagues?.sportmonks_id ? Number(f.leagues.sportmonks_id) : null
@@ -151,7 +151,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
 
   if (error) throw new Error(`Error en upsert: ${error.message}`)
 
-  console.log(`✅ Función 1: ${rows.length} fixtures sincronizados (${unresolved} sin resolver)`)
+
   return { synced: rows.length, unresolved, apiLeagueIds }
 }
 
@@ -169,7 +169,7 @@ async function resolveTeamIds(apiLeagueIds: number[]): Promise<number> {
 
   if (error) throw new Error(`Error buscando pendientes: ${error.message}`)
   if (!pendingFull || pendingFull.length === 0) {
-    console.log('✅ Función 2: no hay partidos pendientes')
+
     return 0
   }
 
@@ -224,7 +224,7 @@ async function resolveTeamIds(apiLeagueIds: number[]): Promise<number> {
     }
   }
 
-  console.log(`✅ Función 2: ${resolved} partidos resueltos`)
+
   return resolved
 }
 
@@ -241,7 +241,7 @@ Deno.serve(async () => {
       { headers: { 'Content-Type': 'application/json' } }
     )
   } catch (err) {
-    console.error('❌ Error:', err)
+
     return new Response(
       JSON.stringify({ success: false, error: String(err) }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

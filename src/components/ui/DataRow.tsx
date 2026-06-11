@@ -213,6 +213,8 @@ interface FixtureRowProps {
   /** Estado crudo del partido (para detectar cancelados incluso si statusLabel fue sobrescrito) */
   matchStatus?: string | null;
   matchNotes?: string | null;
+  /** Goles del partido para animación */
+  goals?: any[];
   className?: string;
   noBorder?: boolean;
 }
@@ -231,6 +233,7 @@ export function FixtureRow({
   statusLabel,
   matchStatus,
   matchNotes,
+  goals = [],
   className = '',
   noBorder = false
 }: FixtureRowProps & { homeIdDM?: string | number | null; awayIdDM?: string | number | null }) {
@@ -297,7 +300,7 @@ export function FixtureRow({
 
   return (
     <div className={`relative flex flex-col w-full ${bgSurface} sm:${bgApp} ${border} ${noBorder ? '' : 'border-b'} ${className}`}>
-      <GoalAnimation homeScore={homeScore} awayScore={awayScore} />
+      <GoalAnimation matchId={matchId} goals={goals} />
 
       <div
         onClick={() => {

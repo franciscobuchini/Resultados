@@ -44,16 +44,16 @@ export default function ReadmeViewer() {
           .maybeSingle();
 
         if (error) {
-          console.error('[ReadmeViewer] Error loading tasks:', error.message, error);
+
         } else {
-          console.log('[ReadmeViewer] Load result:', data);
+
         }
 
         if (data?.data && Array.isArray(data.data)) {
           setTasks(data.data as Task[]);
         }
       } catch (err) {
-        console.error('[ReadmeViewer] Unexpected error loading tasks:', err);
+
       } finally {
         setLoading(false);
       }
@@ -63,13 +63,13 @@ export default function ReadmeViewer() {
 
   const save = async (updated: Task[]) => {
     setSaving(true);
-    const { error } = await supabase
+    await supabase
       .from('apis')
       .upsert(
         { id: STORAGE_ID, data: updated, updated_at: new Date().toISOString() },
         { onConflict: 'id' }
       );
-    console.log('Save error:', error);
+
     setSaving(false);
   };
 

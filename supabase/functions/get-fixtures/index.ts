@@ -81,7 +81,7 @@ export default {
         let data;
 
         if (date) {
-          console.log(`[GetFixtures] Backend: Consultando fecha ${date}`);
+
           data = await fetchFromDataRedonda(date, drKey);
 
           const { data: upsertData, error: upsertError } = await supabase.from('apis').upsert(
@@ -89,13 +89,13 @@ export default {
             { onConflict: 'id' }
           );
           if (upsertError) {
-            console.error('[GetFixtures] upsert error for', `dr_${date}`, upsertError);
+
             return new Response(JSON.stringify({ error: 'DB upsert failed', details: upsertError.message || upsertError }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
           }
-          console.log('[GetFixtures] upsert OK for', `dr_${date}`);
+
 
         } else if (startDate && endDate) {
-          console.log(`[GetFixtures] Backend: Consultando rango ${startDate} → ${endDate}`);
+
 
           const dates: string[] = [];
           const current = new Date(startDate);
@@ -114,10 +114,10 @@ export default {
               { onConflict: 'id' }
             );
             if (upsertDayError) {
-              console.error('[GetFixtures] upsert error for', `dr_${d}`, upsertDayError);
+
               // continue processing other dates even if one fails
             } else {
-              console.log('[GetFixtures] upsert OK for', `dr_${d}`);
+
             }
           }
           data = allData;
@@ -129,7 +129,7 @@ export default {
         );
 
       } catch (err: any) {
-        console.error('[GetFixtures] Backend error:', err.message);
+
         return new Response(
           JSON.stringify({ error: err.message }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -148,7 +148,7 @@ export default {
         return new Response(encrypted, { headers: { ...corsHeaders, 'X-Cache': 'HIT' } });
       }
 
-      console.log(`[GetFixtures] Frontend: Consultando fecha ${date}`);
+
       const data = await fetchFromDataRedonda(date, drKey);
 
       cache.set(date, { data, ts: now });

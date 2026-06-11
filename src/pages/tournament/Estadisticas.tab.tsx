@@ -86,7 +86,7 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
           .in('tournament_id', siblingIds)
           .range(page * pageSize, (page + 1) * pageSize - 1)
 
-        if (error) { console.error('Error fetching matches chunk:', error); break }
+        if (error) { break }
         if (!matchesChunk || matchesChunk.length === 0) break
         allMatches = allMatches.concat(matchesChunk)
         if (matchesChunk.length < pageSize) break

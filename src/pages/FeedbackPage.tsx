@@ -47,7 +47,7 @@ export default function FeedbackPage() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido al enviar el mensaje';
       setError(errorMessage);
-      console.error('Error:', errorMessage);
+
     } finally {
       setLoading(false);
     }

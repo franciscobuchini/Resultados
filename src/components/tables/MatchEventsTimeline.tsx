@@ -261,7 +261,7 @@ export default function MatchEventsTimeline({ matchId, matchDate, homeId, awayId
           setEvents([]);
         }
       } catch (err) {
-        console.error(err);
+
         setError(true);
       } finally {
         setLoading(false);

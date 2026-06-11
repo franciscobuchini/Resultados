@@ -80,7 +80,7 @@ export default function Efemerides({ date }: { date: string }) {
           }
         }
       } catch (err) {
-        console.error('Error initializing efemerides data:', err);
+
       } finally {
         setLoading(false);
       }

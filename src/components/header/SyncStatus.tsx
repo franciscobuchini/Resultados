@@ -30,7 +30,7 @@ export default function SyncStatus() {
           setLastSync(`${d}/${mo} ${local.time}`)
         }
       } catch (err) {
-        console.error(err)
+
       } finally {
         setLoading(false)
       }

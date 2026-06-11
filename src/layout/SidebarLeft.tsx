@@ -37,14 +37,14 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           .like('tournament_id', '%WC');
 
         if (error) {
-          console.error('[Sidebar] Supabase error:', error.message, error);
+
         }
         if (data) {
           const sorted = [...data].sort((a, b) => b.tournament_id.localeCompare(a.tournament_id));
           setWorldCups(sorted);
         }
       } catch (err) {
-        console.error('[Sidebar] Fetch exception:', err);
+
       } finally {
         setLoading(false);
       }

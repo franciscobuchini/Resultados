@@ -199,15 +199,15 @@ export default function FileImporter() {
           supabase.from('tournaments').select('tournament_id, tournament_name'),
         ])
 
-        if (r1.error) console.error('[FileImporter] Error fetching teams:', r1.error.message, r1.error)
-        if (r2.error) console.error('[FileImporter] Error fetching countries:', r2.error.message, r2.error)
-        if (r3.error) console.error('[FileImporter] Error fetching tournaments:', r3.error.message, r3.error)
+        if (r1.error) {}
+        if (r2.error) {}
+        if (r3.error) {}
 
         setTeams((r1.data || []).map(x => ({ team_id: t(x.team_id), team_name: x.team_name })))
         setCountries((r2.data || []).map(x => ({ country_id: t(x.country_id), country_name: x.country_name })))
         setExistingTournaments((r3.data || []).map(x => ({ tournament_id: t(x.tournament_id), tournament_name: x.tournament_name })))
       } catch (err) {
-        console.error('[FileImporter] Unexpected error loading DB data:', err)
+
       } finally {
         setLoading(false)
       }
@@ -252,10 +252,10 @@ export default function FileImporter() {
       })
       raw = parsed.data
       if (raw.length === 0) {
-        console.warn('CSV parse result is empty:', parsed)
+
         throw new Error('El archivo CSV está vacío o no se pudo procesar.')
       }
-      console.log('CSV Parsed (first 2 rows):', raw.slice(0, 2))
+
     } else {
       try {
         raw = JSON.parse(text.trim()) as Record<string, unknown>[]

@@ -77,7 +77,7 @@ const [initialName, setInitialName] = useState(user?.user_name?.replace(/^@+/, '
           .single();
 
         if (error) {
-          console.error('[ProfilePage] Error fetching user data:', error.message, error);
+
           return;
         }
         if (!data) return;
@@ -95,7 +95,7 @@ const [initialName, setInitialName] = useState(user?.user_name?.replace(/^@+/, '
             .single();
 
           if (teamError) {
-            console.error('[ProfilePage] Error fetching user team:', teamError.message, teamError);
+
           } else if (teamData) {
             setSelectedTeam(teamData);
             setInitialTeam(teamData);
@@ -111,14 +111,14 @@ const [initialName, setInitialName] = useState(user?.user_name?.replace(/^@+/, '
             .single();
 
           if (countryError) {
-            console.error('[ProfilePage] Error fetching user country:', countryError.message, countryError);
+
           } else if (countryData) {
             setSelectedCountry(countryData);
             setInitialCountry(countryData);
           }
         }
       } catch (err) {
-        console.error('[ProfilePage] Unexpected error in fetchUserData:', err);
+
       }
     };
 

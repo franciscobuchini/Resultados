@@ -1,50 +1,42 @@
 import { useEffect, useState, useRef } from 'react';
 import { useThemeClasses } from '../../functions/themeStore';
+import type { Goal } from '../../functions/computeStandings';
 
 interface GoalAnimationProps {
-  homeScore?: number | string | null;
-  awayScore?: number | string | null;
+  matchId?: string;
+  goals?: Goal[];
 }
 
-export default function GoalAnimation({ homeScore, awayScore }: GoalAnimationProps) {
+export default function GoalAnimation({ matchId, goals = [] }: GoalAnimationProps) {
   const [isAnimating, setIsAnimating] = useState(false);
-  const prevHome = useRef(homeScore);
-  const prevAway = useRef(awayScore);
+  const prevGoalsCount = useRef(0);
   const isFirstRender = useRef(true);
   const { goalBg, goalRing, goalTextGradient, goalTextShadow } = useThemeClasses();
 
   useEffect(() => {
-    // En la primera carga no animamos, solo guardamos el estado inicial
+    // En la primera carga no animamos
     if (isFirstRender.current) {
       isFirstRender.current = false;
-      prevHome.current = homeScore;
-      prevAway.current = awayScore;
+      const matchGoals = goals.filter(g => g.match_id === matchId);
+      prevGoalsCount.current = matchGoals.length;
       return;
     }
 
-    const homeNum = Number(homeScore);
-    const awayNum = Number(awayScore);
-    const prevHomeNum = Number(prevHome.current);
-    const prevAwayNum = Number(prevAway.current);
+    // Contar goles del match actual
+    const matchGoals = goals.filter(g => g.match_id === matchId);
+    const currentGoalsCount = matchGoals.length;
 
-    // Detectar si alguno de los dos equipos sumó un gol
-    const homeChanged = !isNaN(homeNum) && !isNaN(prevHomeNum) && homeNum > prevHomeNum;
-    const awayChanged = !isNaN(awayNum) && !isNaN(prevAwayNum) && awayNum > prevAwayNum;
-
-    if (homeChanged || awayChanged) {
+    // Solo animar si hay más goles que antes
+    if (currentGoalsCount > prevGoalsCount.current && currentGoalsCount > 0) {
       setIsAnimating(true);
       const timer = setTimeout(() => setIsAnimating(false), 4000);
-
-      prevHome.current = homeScore;
-      prevAway.current = awayScore;
-
+      prevGoalsCount.current = currentGoalsCount;
       return () => clearTimeout(timer);
     }
 
-    // Mantener los valores actualizados para la próxima comparación
-    prevHome.current = homeScore;
-    prevAway.current = awayScore;
-  }, [homeScore, awayScore]);
+    // Actualizar cuenta para la próxima comparación
+    prevGoalsCount.current = currentGoalsCount;
+  }, [goals, matchId]);
 
   return (
     <>

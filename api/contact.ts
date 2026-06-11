@@ -50,7 +50,7 @@ export default async function handler(
     const contactReceiver = process.env.CONTACT_RECEIVER || emailUser;
 
     if (!emailUser || !emailPass) {
-      console.error('Variables de entorno EMAIL_USER o EMAIL_PASS no configuradas');
+
       return res.status(500).json({ 
         ok: false, 
         error: 'Error en la configuración del servidor' 
@@ -58,7 +58,7 @@ export default async function handler(
     }
 
     if (!contactReceiver) {
-      console.error('No hay destinatario configurado (EMAIL_USER o CONTACT_RECEIVER)');
+
       return res.status(500).json({ 
         ok: false, 
         error: 'Error en la configuración del servidor' 
@@ -125,7 +125,7 @@ Enviado desde: Resultados.ar
     // Respuesta exitosa
     return res.status(200).json({ ok: true });
   } catch (error) {
-    console.error('Error al enviar email:', error);
+
     return res.status(500).json({ 
       ok: false, 
       error: 'Error al enviar el email. Intenta más tarde.' 
