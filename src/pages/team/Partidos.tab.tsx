@@ -85,12 +85,9 @@ export default function PartidosTab({ matches, goals, teamLookup }: PartidosTabP
 
         const matchWithLabel: MatchWithTournament = {
           ...m,
-          match_status_label: isResults ? (
-            <div className="flex flex-col items-center leading-tight">
-              <span className="text-[10px] font-normal">{year}</span>
-              <span>{originalLabel}</span>
-            </div>
-          ) : originalLabel
+          match_status_label: isResults
+            ? <span className="text-[10px] font-normal">{year}</span>
+            : originalLabel
         }
         grouped[dateKey].push(matchWithLabel)
       }
