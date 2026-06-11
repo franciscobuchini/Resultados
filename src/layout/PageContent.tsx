@@ -9,8 +9,8 @@ interface PageContentProps {
   layout?: 'single' | 'grid-2' | 'grid-3' | 'grid-side-left';
 }
 
-export default function PageContent({ 
-  children, 
+export default function PageContent({
+  children,
   maxWidth = '3xl',
   layout = 'single'
 }: PageContentProps) {

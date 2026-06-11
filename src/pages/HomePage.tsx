@@ -55,13 +55,13 @@ export default function HomePage() {
               />
 
             ))}
-            <Efemerides date={date} />  
+            <Efemerides date={date} />
           </div>
         )}
 
       </div>
 
-      
+
     </PageContent>
   )
 }

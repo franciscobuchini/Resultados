@@ -217,10 +217,28 @@ export const useTheme = create<ThemeState>()(
   )
 )
 
+
+const applyMobileOpacity = (cls: string): string => {
+  if (!cls) return cls
+  return cls.split(' ').map(c => {
+    if (c.startsWith('border-') && !c.includes('/')) {
+      return `${c}/50 sm:${c}`
+    }
+    return c
+  }).join(' ')
+}
+
 export const useThemeClasses = () => {
   const currentTheme = useTheme(state => state.currentTheme)
-  return THEMES[currentTheme] || THEMES['zinc-dark']
+  const theme = THEMES[currentTheme] || THEMES['zinc-dark']
+  return {
+    ...theme,
+    border: applyMobileOpacity(theme.border),
+    borderSubtle: theme.borderSubtle ? applyMobileOpacity(theme.borderSubtle) : undefined,
+    goalRing: applyMobileOpacity(theme.goalRing)
+  }
 }
+
 
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const { bgApp, textMain } = useThemeClasses()

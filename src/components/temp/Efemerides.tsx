@@ -98,9 +98,15 @@ export default function Efemerides({ date }: { date: string }) {
 
     const aliases = getTeamAliases(teamLookup);
 
-    // Filtrar por aniversario (mismo día y mes)
+    // Filtrar por aniversario (mismo día y mes, pero solo partidos anteriores a hoy)
     const filtered = allMatches
-      .filter(m => m.match_date && m.match_date.endsWith(mmdd))
+      .filter(m => {
+        if (!m.match_date) return false;
+        // Verificar que el día y mes coincidan
+        if (!m.match_date.endsWith(mmdd)) return false;
+        // Verificar que el partido sea anterior a hoy (efeméride = pasado)
+        return m.match_date < new Date().toISOString().split('T')[0];
+      })
       .sort((a, b) => {
         const yA = a.match_date ? parseInt(a.match_date.split('-')[0]) : 0;
         const yB = b.match_date ? parseInt(b.match_date.split('-')[0]) : 0;
