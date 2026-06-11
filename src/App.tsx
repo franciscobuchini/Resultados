@@ -11,6 +11,7 @@ import Error404 from './pages/Error404'
 import ThemeProvider from './functions/themeStore'
 import ScrollToTop from './functions/scrollToTop'
 import { useEffect } from 'react'
+import { Analytics } from "@vercel/analytics/react"
 
 export default function App() {
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="*" element={<Error404 />} />
           </Routes>
+          <Analytics />
         </MainLayout>
       </BrowserRouter>
     </ThemeProvider>
