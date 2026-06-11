@@ -42,7 +42,7 @@ const fetchFromDataRedonda = async (date: string): Promise<any[]> => {
 // ─────────────────────────────────────────────────────────────────────────────
 // FUNCIÓN 1 — Sincronizar fixtures desde DataRedonda
 // ─────────────────────────────────────────────────────────────────────────────
-async function syncFixtures(): Promise<{ synced: number; unresolved: number; apiLeagueIds: number[] }> {
+async function syncFixtures(): Promise<{ synced: number; unresolved: number; apiLeagueIds: number[]; allFixtures: any[]; teamMap: Map<string, { id: string; name: string }> }> {
 
   const dates: string[] = []
   const cursor = new Date()
@@ -62,7 +62,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
   if (tErr) throw new Error(`Error buscando torneos activos: ${tErr.message}`)
   if (!tournaments || tournaments.length === 0) {
     console.log('No se encontraron torneos activos con ID de API')
-    return { synced: 0, unresolved: 0, apiLeagueIds: [] }
+    return { synced: 0, unresolved: 0, apiLeagueIds: [], allFixtures: [], teamMap: new Map() }
   }
 
   const tournamentMap = new Map<number, string>()
@@ -84,7 +84,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
 
   if (allFixtures.length === 0) {
     console.log('No se encontraron fixtures de torneos activos en el rango')
-    return { synced: 0, unresolved: 0, apiLeagueIds }
+    return { synced: 0, unresolved: 0, apiLeagueIds, allFixtures: [], teamMap: new Map() }
   }
 
   const apiTeamIds = new Set<string>()
@@ -153,7 +153,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
   if (error) throw new Error(`Error en upsert: ${error.message}`)
 
   console.log(`✅ Función 1: ${rows.length} fixtures sincronizados (${unresolved} sin resolver)`)
-  return { synced: rows.length, unresolved, apiLeagueIds }
+  return { synced: rows.length, unresolved, apiLeagueIds, allFixtures, teamMap }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -230,15 +230,94 @@ async function resolveTeamIds(apiLeagueIds: number[]): Promise<number> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// FUNCIÓN 3 — Sincronizar goles desde fixture_events
+// ─────────────────────────────────────────────────────────────────────────────
+async function syncGoals(allFixtures: any[], teamMap: Map<string, { id: string; name: string }>): Promise<number> {
+  const goalRows: any[] = []
+
+  for (const f of allFixtures) {
+    const events = f.fixture_events ?? []
+    const goalEvents = events.filter((e: any) => e.event_type === 'Goal' && e.is_valid)
+    console.log(`⚽ Fixture ${f.sportmonks_id}: ${events.length} eventos, ${goalEvents.length} goles`)
+    if (goalEvents.length === 0) continue
+
+    const startTime = f.start_time ?? ''
+    const matchDate = startTime ? startTime.split('T')[0]?.replace(/-/g, '') : null
+    if (!matchDate) continue
+
+    const homeApiId = f.home_team_id ? String(f.home_team_id) : null
+    const awayApiId = f.away_team_id ? String(f.away_team_id) : null
+    const homeTeam = homeApiId ? teamMap.get(homeApiId) : null
+    const awayTeam = awayApiId ? teamMap.get(awayApiId) : null
+
+    // Si no se resolvieron los equipos, no podemos construir el match_id ni el goal_id
+    if (!homeTeam || !awayTeam) continue
+
+    const matchId = `${matchDate}${homeTeam.id}${awayTeam.id}`
+
+    // Ordenar goles por minuto para asignar número correlativo global
+    const sorted = [...goalEvents].sort((a: any, b: any) => (a.minute ?? 0) - (b.minute ?? 0))
+
+    let homeCount = 0
+    let awayCount = 0
+
+    for (const event of sorted) {
+      const scorerApiId = String(event.team_id)
+      const isHome = scorerApiId === homeApiId
+      const side = isHome ? 'H' : 'A'
+
+      if (isHome) homeCount++
+      else awayCount++
+
+      const goalNumber = isHome ? homeCount : awayCount
+      const goalId = `${matchId}_${side}${goalNumber}`
+
+      // Determinar tipo de gol
+      let goalType = 'G'
+      const info = event.details?.info?.toLowerCase() ?? ''
+      const addition = event.details?.addition?.toLowerCase() ?? ''
+      if (info.includes('penalty') || addition.includes('penalty')) goalType = 'P'
+      else if (info.includes('own goal') || addition.includes('own goal')) goalType = 'C'
+
+      const scoringTeamId = isHome ? homeTeam.id : awayTeam.id
+
+      goalRows.push({
+        goal_id: goalId,
+        match_id: matchId,
+        team_id: scoringTeamId,
+        goal_minute: event.minute ?? null,
+        player_name: event.player_name ?? null,
+        goal_type: goalType,
+      })
+    }
+  }
+
+  if (goalRows.length === 0) {
+    console.log('✅ Función 3: sin goles para sincronizar')
+    return 0
+  }
+
+  const { error } = await supabase
+    .from('goals')
+    .upsert(goalRows, { onConflict: 'goal_id' })
+
+  if (error) throw new Error(`Error en upsert de goles: ${error.message}`)
+
+  console.log(`✅ Función 3: ${goalRows.length} goles sincronizados`)
+  return goalRows.length
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // ENTRY POINT
 // ─────────────────────────────────────────────────────────────────────────────
 Deno.serve(async () => {
   try {
-    const { synced, unresolved, apiLeagueIds } = await syncFixtures()
+    const { synced, unresolved, apiLeagueIds, allFixtures, teamMap } = await syncFixtures()
     const resolved = unresolved > 0 ? await resolveTeamIds(apiLeagueIds) : 0
+    const goals = await syncGoals(allFixtures, teamMap)
 
     return new Response(
-      JSON.stringify({ success: true, synced, resolved }),
+      JSON.stringify({ success: true, synced, resolved, goals }),
       { headers: { 'Content-Type': 'application/json' } }
     )
   } catch (err) {

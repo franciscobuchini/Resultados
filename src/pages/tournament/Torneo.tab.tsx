@@ -110,6 +110,8 @@ export default function TorneoTab({
     return isMatchday(m.match_round)
   })
 
+const mex = matches.find(m => m.match_id === '20260611INT124INT176')
+console.log('Mexico match:', mex)
   // Tabla de posiciones
   const standings = groupKeys.length > 0
     ? computeStandings(
