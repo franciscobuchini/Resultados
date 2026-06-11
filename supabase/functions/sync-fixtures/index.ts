@@ -6,6 +6,7 @@ const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const DR_KEY = Deno.env.get('DATAREDONDA_API_KEY')!
 const DR_URL = 'https://hwzddjztuezdhnevwbjx.supabase.co/rest/v1/rpc/get_fixtures_by_date'
 
+const DAYS_BACK = 2
 const DAYS_AHEAD = 40
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
@@ -45,6 +46,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
 
   const dates: string[] = []
   const cursor = new Date()
+  cursor.setDate(cursor.getDate() - DAYS_BACK)
   const limit = new Date()
   limit.setDate(limit.getDate() + DAYS_AHEAD)
   while (cursor <= limit) {
@@ -52,7 +54,6 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
     cursor.setDate(cursor.getDate() + 1)
   }
 
-  // Obtener todos los torneos activos con tournament_id_api válido
   const { data: tournaments, error: tErr } = await supabase
     .from('tournaments')
     .select('tournament_id, tournament_id_api')
@@ -60,7 +61,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
 
   if (tErr) throw new Error(`Error buscando torneos activos: ${tErr.message}`)
   if (!tournaments || tournaments.length === 0) {
-
+    console.log('No se encontraron torneos activos con ID de API')
     return { synced: 0, unresolved: 0, apiLeagueIds: [] }
   }
 
@@ -78,11 +79,11 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
     const dayFixtures = await fetchFromDataRedonda(date)
     const matches = dayFixtures.filter(f => f.leagues?.sportmonks_id && tournamentMap.has(Number(f.leagues.sportmonks_id)))
     allFixtures.push(...matches)
-
+    console.log(`📅 ${date}: ${matches.length} partidos de torneos activos`)
   }
 
   if (allFixtures.length === 0) {
-
+    console.log('No se encontraron fixtures de torneos activos en el rango')
     return { synced: 0, unresolved: 0, apiLeagueIds }
   }
 
@@ -118,7 +119,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
 
     if (!homeTeam || !awayTeam) {
       unresolved++
-
+      console.warn(`⚠️ Sin resolver: fixture ${f.id} — home: ${homeApiId}, away: ${awayApiId}`)
     }
 
     const leagueIdApi = f.leagues?.sportmonks_id ? Number(f.leagues.sportmonks_id) : null
@@ -151,7 +152,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
 
   if (error) throw new Error(`Error en upsert: ${error.message}`)
 
-
+  console.log(`✅ Función 1: ${rows.length} fixtures sincronizados (${unresolved} sin resolver)`)
   return { synced: rows.length, unresolved, apiLeagueIds }
 }
 
@@ -169,7 +170,7 @@ async function resolveTeamIds(apiLeagueIds: number[]): Promise<number> {
 
   if (error) throw new Error(`Error buscando pendientes: ${error.message}`)
   if (!pendingFull || pendingFull.length === 0) {
-
+    console.log('✅ Función 2: no hay partidos pendientes')
     return 0
   }
 
@@ -224,7 +225,7 @@ async function resolveTeamIds(apiLeagueIds: number[]): Promise<number> {
     }
   }
 
-
+  console.log(`✅ Función 2: ${resolved} partidos resueltos`)
   return resolved
 }
 
@@ -241,7 +242,7 @@ Deno.serve(async () => {
       { headers: { 'Content-Type': 'application/json' } }
     )
   } catch (err) {
-
+    console.error('❌ Error:', err)
     return new Response(
       JSON.stringify({ success: false, error: String(err) }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
