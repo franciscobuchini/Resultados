@@ -130,7 +130,7 @@ async function syncFixtures(): Promise<{ synced: number; unresolved: number; api
       match_id_api: f.sportmonks_id ?? null,
       match_date: matchDate,
       match_time_utc: matchTime,
-      match_status: f.status ?? null,
+      match_status: f.status === 'FT' ? 'Finalizado' : (f.status ?? null),
       game_time: f.minute ?? null,
       tournament_id: tournamentId,
       tournament_id_api: leagueIdApi,

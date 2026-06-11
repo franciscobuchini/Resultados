@@ -70,7 +70,7 @@ export const getMatchStatusLabel = (
   }
 
   // Si terminó
-  if (s === 'FT' || s === 'AET' || s === 'PEN') {
+  if (s === 'FT' || s === 'AET' || s === 'PEN' || s === 'FINALIZADO') {
     return '✓';
   }
 
