@@ -254,12 +254,77 @@ async function syncGoals(allFixtures: any[], teamMap: Map<string, { id: string; 
     matchIdsToSync.add(matchId)
 
     const events = f.fixture_events ?? []
-    const goalEvents = events.filter((e: any) => e.event_type === 'Goal' && e.is_valid)
-    console.log(`⚽ Fixture ${f.sportmonks_id}: ${events.length} eventos, ${goalEvents.length} goles`)
-    if (goalEvents.length === 0) continue
+    
+    // Identificar eventos de tipo Goal
+    const isGoalEvent = (e: any) => {
+      const tType = (e.event_type ?? '').toLowerCase()
+      return (tType.includes('goal') || tType.includes('penalty')) &&
+        !tType.includes('miss') &&
+        !tType.includes('disallowed') &&
+        !tType.includes('shootout') &&
+        e.is_valid
+    }
+
+    // Clasificar goles por equipo (local y visitante)
+    const homeGoalEvents = events.filter((e: any) => isGoalEvent(e) && String(e.team_id) === homeApiId)
+    const awayGoalEvents = events.filter((e: any) => isGoalEvent(e) && String(e.team_id) === awayApiId)
+
+    // Reconciliar goles con el marcador final si el marcador está disponible
+    const homeScore = f.home_score !== null && f.home_score !== undefined ? Number(f.home_score) : null
+    const awayScore = f.away_score !== null && f.away_score !== undefined ? Number(f.away_score) : null
+
+    const reconcileSide = (goalEventsList: any[], targetScore: number | null) => {
+      if (targetScore === null) return goalEventsList
+      
+      const excess = goalEventsList.length - targetScore
+      if (excess <= 0) return goalEventsList
+
+      const result = [...goalEventsList]
+      let remaining = excess
+
+      // 1er pasada: goles sin nombre de jugador
+      for (let i = result.length - 1; i >= 0 && remaining > 0; i--) {
+        const e = result[i]
+        if (!e.player_name || e.player_name.trim() === '') {
+          result.splice(i, 1)
+          remaining--
+        }
+      }
+
+      // 2da pasada: goles que ocurrieron justo antes o en el mismo minuto que un chequeo de VAR
+      for (let i = result.length - 1; i >= 0 && remaining > 0; i--) {
+        const e = result[i]
+        const hasVAR = events.some((v: any) =>
+          (v.event_type ?? '').toLowerCase().includes('var') &&
+          v.minute >= e.minute &&
+          v.minute <= e.minute + 5 &&
+          String(v.team_id) === String(e.team_id)
+        )
+
+        if (hasVAR) {
+          result.splice(i, 1)
+          remaining--
+        }
+      }
+
+      // 3ra pasada: si todavía hay exceso, quitamos los más recientes
+      for (let i = result.length - 1; i >= 0 && remaining > 0; i--) {
+        result.splice(i, 1)
+        remaining--
+      }
+
+      return result
+    }
+
+    const finalHomeGoals = reconcileSide(homeGoalEvents, homeScore)
+    const finalAwayGoals = reconcileSide(awayGoalEvents, awayScore)
+    const goalEventsToProcess = [...finalHomeGoals, ...finalAwayGoals]
+
+    console.log(`⚽ Fixture ${f.sportmonks_id}: ${events.length} eventos, ${goalEventsToProcess.length} goles reconciliados`)
+    if (goalEventsToProcess.length === 0) continue
 
     // Ordenar goles por minuto para asignar número correlativo global
-    const sorted = [...goalEvents].sort((a: any, b: any) => (a.minute ?? 0) - (b.minute ?? 0))
+    const sorted = [...goalEventsToProcess].sort((a: any, b: any) => (a.minute ?? 0) - (b.minute ?? 0))
 
     let homeCount = 0
     let awayCount = 0
