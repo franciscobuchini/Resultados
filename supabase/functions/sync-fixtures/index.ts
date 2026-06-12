@@ -6,7 +6,7 @@ const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const DR_KEY = Deno.env.get('DATAREDONDA_API_KEY')!
 const DR_URL = 'https://hwzddjztuezdhnevwbjx.supabase.co/rest/v1/rpc/get_fixtures_by_date'
 
-const DAYS_BACK = 2
+const HOURS_BACK = 1
 const DAYS_AHEAD = 40
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
@@ -44,15 +44,16 @@ const fetchFromDataRedonda = async (date: string): Promise<any[]> => {
 // ─────────────────────────────────────────────────────────────────────────────
 async function syncFixtures(): Promise<{ synced: number; unresolved: number; apiLeagueIds: number[]; allFixtures: any[]; teamMap: Map<string, { id: string; name: string }> }> {
 
-  const dates: string[] = []
-  const cursor = new Date()
-  cursor.setDate(cursor.getDate() - DAYS_BACK)
-  const limit = new Date()
-  limit.setDate(limit.getDate() + DAYS_AHEAD)
-  while (cursor <= limit) {
-    dates.push(cursor.toISOString().split('T')[0])
-    cursor.setDate(cursor.getDate() + 1)
-  }
+ const dates: string[] = []
+const cursor = new Date()
+cursor.setHours(cursor.getHours() - HOURS_BACK)
+cursor.setHours(0, 0, 0, 0) // normalizar a inicio de día para iterar por días
+const limit = new Date()
+limit.setDate(limit.getDate() + DAYS_AHEAD)
+while (cursor <= limit) {
+  dates.push(cursor.toISOString().split('T')[0])
+  cursor.setDate(cursor.getDate() + 1)
+}
 
   const { data: tournaments, error: tErr } = await supabase
     .from('tournaments')
