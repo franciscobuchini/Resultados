@@ -6,7 +6,7 @@ const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const DR_KEY = Deno.env.get('DATAREDONDA_API_KEY')!
 const DR_URL = 'https://hwzddjztuezdhnevwbjx.supabase.co/rest/v1/rpc/get_fixtures_by_date'
 
-const HOURS_BACK = 1
+const HOURS_BACK = 2
 const DAYS_AHEAD = 40
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
@@ -235,13 +235,9 @@ async function resolveTeamIds(apiLeagueIds: number[]): Promise<number> {
 // ─────────────────────────────────────────────────────────────────────────────
 async function syncGoals(allFixtures: any[], teamMap: Map<string, { id: string; name: string }>): Promise<number> {
   const goalRows: any[] = []
+  const matchIdsToSync = new Set<string>()
 
   for (const f of allFixtures) {
-    const events = f.fixture_events ?? []
-    const goalEvents = events.filter((e: any) => e.event_type === 'Goal' && e.is_valid)
-    console.log(`⚽ Fixture ${f.sportmonks_id}: ${events.length} eventos, ${goalEvents.length} goles`)
-    if (goalEvents.length === 0) continue
-
     const startTime = f.start_time ?? ''
     const matchDate = startTime ? startTime.split('T')[0]?.replace(/-/g, '') : null
     if (!matchDate) continue
@@ -255,6 +251,12 @@ async function syncGoals(allFixtures: any[], teamMap: Map<string, { id: string; 
     if (!homeTeam || !awayTeam) continue
 
     const matchId = `${matchDate}${homeTeam.id}${awayTeam.id}`
+    matchIdsToSync.add(matchId)
+
+    const events = f.fixture_events ?? []
+    const goalEvents = events.filter((e: any) => e.event_type === 'Goal' && e.is_valid)
+    console.log(`⚽ Fixture ${f.sportmonks_id}: ${events.length} eventos, ${goalEvents.length} goles`)
+    if (goalEvents.length === 0) continue
 
     // Ordenar goles por minuto para asignar número correlativo global
     const sorted = [...goalEvents].sort((a: any, b: any) => (a.minute ?? 0) - (b.minute ?? 0))
@@ -293,8 +295,21 @@ async function syncGoals(allFixtures: any[], teamMap: Map<string, { id: string; 
     }
   }
 
+  // Si hay partidos que estamos procesando en esta sincronización, eliminamos sus goles previos
+  // para limpiar cualquier gol que haya sido anulado (y por ende ya no figure en la API)
+  if (matchIdsToSync.size > 0) {
+    const { error: deleteError } = await supabase
+      .from('goals')
+      .delete()
+      .in('match_id', Array.from(matchIdsToSync))
+
+    if (deleteError) {
+      throw new Error(`Error al eliminar goles antiguos: ${deleteError.message}`)
+    }
+  }
+
   if (goalRows.length === 0) {
-    console.log('✅ Función 3: sin goles para sincronizar')
+    console.log('✅ Función 3: sin goles para sincronizar (se limpiaron los anteriores)')
     return 0
   }
 
