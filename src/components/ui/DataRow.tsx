@@ -338,7 +338,7 @@ export function FixtureRow({
             {/* Goles u Horario */}
             <div className="flex gap-1 sm:gap-2 font-bold min-w-[20px] sm:min-w-[32px] justify-center text-xs sm:text-sm">
               {isCancelled ? (
-                <div className={`${textAlert || 'text-amber-500'} flex items-center justify-center`} title="Cancelado">
+                <div className={`${textAlert} flex items-center justify-center`} title="Cancelado">
                   <Ban size={16} strokeWidth={2.5} />
                 </div>
               ) : (homeScore === null || homeScore === undefined) && (awayScore === null || awayScore === undefined) && matchTime ? (
