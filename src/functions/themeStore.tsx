@@ -199,6 +199,8 @@ interface ThemeState {
   setLastTournamentId: (id: string) => void
   showApiIds: boolean
   setShowApiIds: (show: boolean) => void
+  deleteMatchMode: boolean
+  setDeleteMatchMode: (enabled: boolean) => void
 }
 
 export const useTheme = create<ThemeState>()(
@@ -210,6 +212,8 @@ export const useTheme = create<ThemeState>()(
       setLastTournamentId: (id) => set({ lastTournamentId: id }),
       showApiIds: false,
       setShowApiIds: (show) => set({ showApiIds: show }),
+      deleteMatchMode: false,
+      setDeleteMatchMode: (enabled) => set({ deleteMatchMode: enabled }),
     }),
     {
       name: 'app-theme',

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useTheme, useThemeClasses } from '../../functions/themeStore';
 import { Button } from '../ui/Button';
-import { Eye, EyeOff, MousePointer, MousePointerBan } from 'lucide-react';
+import { Eye, EyeOff, MousePointer, MousePointerBan, Trash2 } from 'lucide-react';
 
 const STORAGE_KEY = 'admin-unrestricted';
 
 export default function ControlPanel() {
-  const { showApiIds, setShowApiIds } = useTheme();
+  const { showApiIds, setShowApiIds, deleteMatchMode, setDeleteMatchMode } = useTheme();
   const { textMuted } = useThemeClasses();
 
   const [unrestricted, setUnrestricted] = useState(
@@ -36,6 +36,12 @@ export default function ControlPanel() {
         icon={unrestricted ? MousePointer : MousePointerBan}
         label={unrestricted ? "Habilitado" : "Deshabilitado"}
         onClick={() => setUnrestricted(prev => !prev)}
+      />
+      <Button
+        icon={Trash2}
+        label={deleteMatchMode ? "Modo Borrado ON" : "Borrar Partidos"}
+        onClick={() => setDeleteMatchMode(!deleteMatchMode)}
+        variant={deleteMatchMode ? "danger" : "outline"}
       />
     </div>
   );

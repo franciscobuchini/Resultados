@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import ImageCrest from './ImageCrest';
 import { useTheme, useThemeClasses } from '../../functions/themeStore';
-import { ChevronDown, Check, Ban } from 'lucide-react';
+import { ChevronDown, Check, Ban, X } from 'lucide-react';
 import MatchEventsTimeline from '../tables/MatchEventsTimeline';
 import GoalAnimation from './GoalAnimation';
 import { LAYOUT_CONFIG } from '../../functions/layoutConfig';
@@ -238,7 +238,10 @@ export function FixtureRow({
   noBorder = false
 }: FixtureRowProps & { homeIdDM?: string | number | null; awayIdDM?: string | number | null }) {
   const { bgApp, bgSurface, border, textMuted, textProminent, textError, textAlert } = useThemeClasses();
+  const { deleteMatchMode } = useTheme();
   const [isTimelineExpanded, setIsTimelineExpanded] = useState(false);
+  const [showDeleteIcon, setShowDeleteIcon] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Componente interno para evitar repetición
   const TeamLink = ({ id, name, logo, idDM, isRight }: { id?: string; name: string; logo?: string | null; idDM?: string | number | null; isRight?: boolean }) => {
@@ -315,8 +318,21 @@ export function FixtureRow({
           title={isFinished ? 'Finalizado' : isCancelled ? 'Cancelado' : undefined}
           className={`shrink-0 w-8 sm:w-12 flex items-center justify-center text-center text-xs font-bold uppercase tracking-tighter ${isCancelledByLabel ? (textAlert || 'text-amber-500') : isLive ? `${textError} animate-pulse` : ''
             }`}
+          onMouseEnter={() => deleteMatchMode && setShowDeleteIcon(true)}
+          onMouseLeave={() => setShowDeleteIcon(false)}
         >
-          {isCancelledByLabel ? null : statusLabel}
+          {deleteMatchMode && showDeleteIcon ? (
+            <X 
+              size={16} 
+              className={`${textError} cursor-pointer hover:scale-110 transition-transform`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeleteModal(true);
+              }}
+            />
+          ) : (
+            isCancelledByLabel ? null : statusLabel
+          )}
         </div>
 
         {/* Contenido principal: Local + Marcador + Visitante */}
@@ -388,6 +404,43 @@ export function FixtureRow({
           matchNotes={matchNotes}
           statusLabel={statusLabel}
         />
+      )}
+
+      {/* Modal de confirmación para eliminar partido */}
+      {showDeleteModal && matchId && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className={`${bgSurface} rounded-2xl border ${border} p-6 max-w-sm w-full shadow-2xl`}>
+            <h3 className={`text-lg font-semibold ${textProminent} mb-2`}>
+              ¿Eliminar este partido?
+            </h3>
+            <p className={`${textMuted} text-sm mb-4`}>
+              El partido <span className="font-semibold">{homeName} vs {awayName}</span> será ocultado de la vista pública.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className={`px-4 py-2 rounded-lg ${textMuted} border ${border} hover:bg-white/5 transition-colors`}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  const { addToBlacklist } = await import('../../functions/matchBlacklist');
+                  const matchIdNum = parseInt(matchId);
+                  if (!isNaN(matchIdNum)) {
+                    await addToBlacklist(matchIdNum, `Eliminado desde admin: ${homeName} vs ${awayName}`);
+                    setShowDeleteModal(false);
+                    // Recargar la página para aplicar el filtro
+                    window.location.reload();
+                  }
+                }}
+                className={`px-4 py-2 rounded-lg ${textError} bg-red-500/10 hover:bg-red-500/20 transition-colors font-medium`}
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

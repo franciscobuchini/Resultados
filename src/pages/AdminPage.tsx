@@ -5,7 +5,6 @@ import PageContent from '../layout/PageContent';
 import FileImporter from '../components/admin/FileImporter';
 import ReadmeViewer from '../components/admin/ReadmeViewer';
 import ControlPanel from '../components/admin/ControlPanel';
-import MatchBlacklist from '../components/admin/MatchBlacklist';
 import { useAuth } from '../functions/auth';
 
 export default function AdminPage() {
@@ -24,7 +23,6 @@ export default function AdminPage() {
     <PageContent maxWidth="1600">
       <div className="flex flex-col gap-10">
         <ControlPanel />
-        <MatchBlacklist />
         <FileImporter />
         <ReadmeViewer />
       </div>
