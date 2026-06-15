@@ -289,8 +289,24 @@ export function useFixtures() {
   const changeDate = (offset: number) => {
     const d = new Date(date + 'T12:00:00')
     d.setDate(d.getDate() + offset)
-    setDate(d.toISOString().split('T')[0])
+    const newDate = d.toISOString().split('T')[0]
+
+    // Limitar a 10 días atrás de hoy
+    const now = new Date()
+    const minDate = new Date(now)
+    minDate.setDate(now.getDate() - 10)
+    const minDateStr = minDate.toISOString().split('T')[0]
+
+    if (newDate < minDateStr) return
+
+    setDate(newDate)
   }
+
+  // Flag para saber si se puede navegar hacia atrás
+  const now = new Date()
+  const minDate = new Date(now)
+  minDate.setDate(now.getDate() - 10)
+  const canGoBack = date > minDate.toISOString().split('T')[0]
 
   const adaptedLeagues = useMemo(() => {
     const filteredFixtures = fixtures.filter(f => !blacklistedIds.includes(f.id))
@@ -298,5 +314,5 @@ export function useFixtures() {
   }, [fixtures, localTeams, blacklistedIds])
   const dateLabel = formatDateLabel(date)
 
-  return { loading, date, dateLabel, adaptedLeagues, changeDate }
+  return { loading, date, dateLabel, adaptedLeagues, changeDate, canGoBack }
 }

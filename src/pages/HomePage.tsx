@@ -10,7 +10,7 @@ import WorldCupBanner from '../components/temp/WorldCupBanner'
 import Efemerides from '../components/temp/Efemerides'
 
 export default function HomePage() {
-  const { loading, date, dateLabel, adaptedLeagues, changeDate } = useFixtures()
+  const { loading, date, dateLabel, adaptedLeagues, changeDate, canGoBack } = useFixtures()
 
   return (
     <PageContent maxWidth="1600">
@@ -21,7 +21,7 @@ export default function HomePage() {
 
 
 
-      <DateNavigator dateLabel={dateLabel} onChangeDate={changeDate} />
+      <DateNavigator dateLabel={dateLabel} onChangeDate={changeDate} canGoBack={canGoBack} />
 
       <div className="relative min-h-[400px]">
         {/* Overlay de carga para evitar saltos de layout */}
