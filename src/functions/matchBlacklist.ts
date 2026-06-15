@@ -1,5 +1,13 @@
 import { supabase } from './supabase'
 
+const BLACKLIST_ID = 'match_blacklist'
+
+interface BlacklistEntry {
+  match_id: number
+  reason: string | null
+  created_at: string
+}
+
 export interface BlacklistedMatch {
   id: number
   match_id: number
@@ -9,90 +17,101 @@ export interface BlacklistedMatch {
 }
 
 /**
- * Obtiene todos los match IDs que están en la blacklist
+ * Lee el array de blacklist desde la tabla apis
  */
-export async function getBlacklistedMatchIds(): Promise<number[]> {
+async function readBlacklistData(): Promise<BlacklistEntry[]> {
   const { data, error } = await supabase
-    .from('match_blacklist')
-    .select('match_id')
+    .from('apis')
+    .select('data')
+    .eq('id', BLACKLIST_ID)
+    .maybeSingle()
 
   if (error) {
     console.error('Error fetching blacklist:', error)
     return []
   }
 
-  return data?.map(item => item.match_id) || []
+  if (data?.data && Array.isArray(data.data)) {
+    return data.data as BlacklistEntry[]
+  }
+
+  return []
+}
+
+/**
+ * Guarda el array de blacklist en la tabla apis
+ */
+async function writeBlacklistData(entries: BlacklistEntry[]): Promise<boolean> {
+  const { error } = await supabase
+    .from('apis')
+    .upsert(
+      { id: BLACKLIST_ID, data: entries, updated_at: new Date().toISOString() },
+      { onConflict: 'id' }
+    )
+
+  if (error) {
+    console.error('Error saving blacklist:', error)
+    return false
+  }
+
+  return true
+}
+
+/**
+ * Obtiene todos los match IDs que están en la blacklist
+ */
+export async function getBlacklistedMatchIds(): Promise<number[]> {
+  const entries = await readBlacklistData()
+  return entries.map(item => item.match_id)
 }
 
 /**
  * Agrega un match ID a la blacklist
  */
 export async function addToBlacklist(matchId: number, reason?: string): Promise<boolean> {
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  const { error } = await supabase
-    .from('match_blacklist')
-    .insert({
-      match_id: matchId,
-      created_by: user?.id || null,
-      reason: reason || null
-    })
+  const entries = await readBlacklistData()
 
-  if (error) {
-    console.error('Error adding to blacklist:', error)
-    return false
+  // Evitar duplicados
+  if (entries.some(e => e.match_id === matchId)) {
+    return true
   }
 
-  return true
+  const newEntry: BlacklistEntry = {
+    match_id: matchId,
+    reason: reason || null,
+    created_at: new Date().toISOString()
+  }
+
+  return writeBlacklistData([...entries, newEntry])
 }
 
 /**
  * Remueve un match ID de la blacklist
  */
 export async function removeFromBlacklist(matchId: number): Promise<boolean> {
-  const { error } = await supabase
-    .from('match_blacklist')
-    .delete()
-    .eq('match_id', matchId)
-
-  if (error) {
-    console.error('Error removing from blacklist:', error)
-    return false
-  }
-
-  return true
+  const entries = await readBlacklistData()
+  const filtered = entries.filter(e => e.match_id !== matchId)
+  return writeBlacklistData(filtered)
 }
 
 /**
  * Verifica si un match ID está en la blacklist
  */
 export async function isMatchBlacklisted(matchId: number): Promise<boolean> {
-  const { data, error } = await supabase
-    .from('match_blacklist')
-    .select('match_id')
-    .eq('match_id', matchId)
-    .single()
-
-  if (error || !data) {
-    return false
-  }
-
-  return true
+  const entries = await readBlacklistData()
+  return entries.some(e => e.match_id === matchId)
 }
 
 /**
  * Obtiene todos los registros de la blacklist con detalles
  */
 export async function getBlacklistEntries(): Promise<BlacklistedMatch[]> {
-  const { data, error } = await supabase
-    .from('match_blacklist')
-    .select('*')
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.error('Error fetching blacklist entries:', error)
-    return []
-  }
-
-  return data || []
+  const entries = await readBlacklistData()
+  return entries.map((e, idx) => ({
+    id: idx,
+    match_id: e.match_id,
+    created_at: e.created_at,
+    created_by: null,
+    reason: e.reason
+  }))
 }
