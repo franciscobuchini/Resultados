@@ -4,6 +4,7 @@ import type { Match, Goal } from './computeStandings'
 import { supabase } from './supabase'
 import { getLeaguePriority } from './leagueTiers'
 import { decryptPayload } from './crypto'
+import { getBlacklistedMatchIds } from './matchBlacklist'
 // ============================================================
 // TYPES — Datos que devuelve la Edge Function get-fixtures
 // ============================================================
@@ -209,6 +210,7 @@ const groupAndAdaptFixtures = (fixtures: Fixture[], localTeamsMap: Map<number, a
 export function useFixtures() {
   const [fixtures, setFixtures] = useState<Fixture[]>([])
   const [localTeams, setLocalTeams] = useState<Map<number, any>>(new Map())
+  const [blacklistedIds, setBlacklistedIds] = useState<number[]>([])
   const [loading, setLoading] = useState(true)
   const [date, setDate] = useState(() => {
     const now = new Date();
@@ -269,6 +271,15 @@ export function useFixtures() {
     fetchLocalTeams()
   }, [])
 
+  // Cargar IDs de partidos en blacklist
+  useEffect(() => {
+    const loadBlacklist = async () => {
+      const ids = await getBlacklistedMatchIds()
+      setBlacklistedIds(ids)
+    }
+    loadBlacklist()
+  }, [])
+
   useEffect(() => {
     fetchFixtures(date)
     const interval = setInterval(() => fetchFixtures(date, true), POLL_INTERVAL)
@@ -281,7 +292,10 @@ export function useFixtures() {
     setDate(d.toISOString().split('T')[0])
   }
 
-  const adaptedLeagues = useMemo(() => groupAndAdaptFixtures(fixtures, localTeams), [fixtures, localTeams])
+  const adaptedLeagues = useMemo(() => {
+    const filteredFixtures = fixtures.filter(f => !blacklistedIds.includes(f.id))
+    return groupAndAdaptFixtures(filteredFixtures, localTeams)
+  }, [fixtures, localTeams, blacklistedIds])
   const dateLabel = formatDateLabel(date)
 
   return { loading, date, dateLabel, adaptedLeagues, changeDate }
