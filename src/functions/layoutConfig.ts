@@ -9,7 +9,7 @@ export const LAYOUT_CONFIG = {
   /** Espaciado para rejillas (grids) */
   gapGrid: 'gap-12 lg:gap-8',
   /** Altura fija de filas de datos (48px) */
-  dataRowHeight: 'h-10 sm:h-12',
+  dataRowHeight: 'h-12',
   /** Altura mínima para filas de detalles (24px) */
   dataRowDetailsHeight: 'min-h-6'
 };
