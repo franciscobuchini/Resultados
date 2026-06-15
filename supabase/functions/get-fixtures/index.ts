@@ -1,6 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import CryptoJS from "https://esm.sh/crypto-js@4.2.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
 
 const DR_URL = 'https://hwzddjztuezdhnevwbjx.supabase.co/rest/v1/rpc/get_fixtures_by_date';
 const ENCRYPTION_KEY = Deno.env.get('ENCRYPTION_KEY') || 'dev_secret_key_change_me_in_prod';
@@ -54,10 +53,6 @@ export default {
     const url = new URL(req.url);
     const drKey = Deno.env.get('DATAREDONDA_API_KEY')!;
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
 
     const isBackendRequest =
       req.headers.get('X-Backend-Call') === 'true' ||
@@ -81,17 +76,7 @@ export default {
         let data;
 
         if (date) {
-
           data = await fetchFromDataRedonda(date, drKey);
-
-          const { data: upsertData, error: upsertError } = await supabase.from('apis').upsert(
-            { id: `dr_${date}`, data, updated_at: new Date().toISOString() },
-            { onConflict: 'id' }
-          );
-          if (upsertError) {
-
-            return new Response(JSON.stringify({ error: 'DB upsert failed', details: upsertError.message || upsertError }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-          }
 
 
         } else if (startDate && endDate) {
@@ -109,16 +94,6 @@ export default {
           for (const d of dates) {
             const dayData = await fetchFromDataRedonda(d, drKey);
             allData.push(...(Array.isArray(dayData) ? dayData : [dayData]));
-            const { data: upsertDay, error: upsertDayError } = await supabase.from('apis').upsert(
-              { id: `dr_${d}`, data: dayData, updated_at: new Date().toISOString() },
-              { onConflict: 'id' }
-            );
-            if (upsertDayError) {
-
-              // continue processing other dates even if one fails
-            } else {
-
-            }
           }
           data = allData;
         }

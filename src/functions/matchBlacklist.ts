@@ -2,18 +2,10 @@ import { supabase } from './supabase'
 
 const BLACKLIST_ID = 'match_blacklist'
 
-interface BlacklistEntry {
+export interface BlacklistEntry {
   match_id: number
-  reason: string | null
-  created_at: string
-}
-
-export interface BlacklistedMatch {
-  id: number
-  match_id: number
-  created_at: string
-  created_by: string | null
-  reason: string | null
+  teams: string
+  date: string
 }
 
 /**
@@ -66,9 +58,9 @@ export async function getBlacklistedMatchIds(): Promise<number[]> {
 }
 
 /**
- * Agrega un match ID a la blacklist
+ * Agrega un match a la blacklist
  */
-export async function addToBlacklist(matchId: number, reason?: string): Promise<boolean> {
+export async function addToBlacklist(matchId: number, teams: string, date: string): Promise<boolean> {
   const entries = await readBlacklistData()
 
   // Evitar duplicados
@@ -78,8 +70,8 @@ export async function addToBlacklist(matchId: number, reason?: string): Promise<
 
   const newEntry: BlacklistEntry = {
     match_id: matchId,
-    reason: reason || null,
-    created_at: new Date().toISOString()
+    teams,
+    date
   }
 
   return writeBlacklistData([...entries, newEntry])
@@ -92,26 +84,4 @@ export async function removeFromBlacklist(matchId: number): Promise<boolean> {
   const entries = await readBlacklistData()
   const filtered = entries.filter(e => e.match_id !== matchId)
   return writeBlacklistData(filtered)
-}
-
-/**
- * Verifica si un match ID está en la blacklist
- */
-export async function isMatchBlacklisted(matchId: number): Promise<boolean> {
-  const entries = await readBlacklistData()
-  return entries.some(e => e.match_id === matchId)
-}
-
-/**
- * Obtiene todos los registros de la blacklist con detalles
- */
-export async function getBlacklistEntries(): Promise<BlacklistedMatch[]> {
-  const entries = await readBlacklistData()
-  return entries.map((e, idx) => ({
-    id: idx,
-    match_id: e.match_id,
-    created_at: e.created_at,
-    created_by: null,
-    reason: e.reason
-  }))
 }

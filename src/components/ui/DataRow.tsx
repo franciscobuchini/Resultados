@@ -428,7 +428,7 @@ export function FixtureRow({
                   const { addToBlacklist } = await import('../../functions/matchBlacklist');
                   const matchIdNum = parseInt(matchId);
                   if (!isNaN(matchIdNum)) {
-                    await addToBlacklist(matchIdNum, `Eliminado desde admin: ${homeName} vs ${awayName}`);
+                    await addToBlacklist(matchIdNum, `${homeName} vs ${awayName}`, matchDate || '');
                     setShowDeleteModal(false);
                     // Recargar la página para aplicar el filtro
                     window.location.reload();
