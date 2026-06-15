@@ -316,7 +316,7 @@ export function FixtureRow({
         {/* Estado (Apartado extra a la izquierda para tiempo) */}
         <div
           title={isFinished ? 'Finalizado' : isCancelled ? 'Cancelado' : undefined}
-          className={`shrink-0 w-8 sm:w-12 flex items-center justify-center text-center text-xs font-bold uppercase tracking-tighter ${isCancelledByLabel ? (textAlert || 'text-amber-500') : isLive ? `${textError} animate-pulse` : ''
+          className={`shrink-0 w-8 sm:w-12 h-full flex items-center justify-center text-center text-xs font-bold uppercase tracking-tighter ${isCancelledByLabel ? (textAlert || 'text-amber-500') : isLive ? `${textError} animate-pulse` : ''
             }`}
           onMouseEnter={() => deleteMatchMode && setShowDeleteIcon(true)}
           onMouseLeave={() => setShowDeleteIcon(false)}
