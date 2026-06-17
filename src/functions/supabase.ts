@@ -12,5 +12,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true
+  },
+  global: {
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache'
+    },
+    fetch: (url, options) => {
+      return fetch(url, { ...options, cache: 'no-store' })
+    }
   }
 })

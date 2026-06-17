@@ -5,6 +5,8 @@ import EmptyState from '../../components/ui/EmptyState'
 import LoadingState from '../../components/ui/LoadingState'
 import HistoricalTable from '../../components/tables/HistoricalTable'
 import type { HistoricalTeamStanding } from '../../components/tables/HistoricalTable'
+import TopScorersTable from '../../components/tables/TopScorersTable'
+import { getTopScorers, type TopScorer } from '../../functions/topScorers'
 
 export const tabConfig: TabConfig = {
   id: 'stats',
@@ -59,6 +61,8 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
   const [historicalStandings, setHistoricalStandings] = useState<HistoricalTeamStanding[]>([])
   const [teamLookup, setTeamLookup] = useState<Record<string, TeamInfo>>({})
   const [histLoading, setHistLoading] = useState(true)
+  const [topScorers, setTopScorers] = useState<TopScorer[]>([])
+  const [scorersLoading, setScorersLoading] = useState(true)
 
   useEffect(() => {
     async function loadHistorical() {
@@ -181,18 +185,42 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
     loadHistorical()
   }, [tournamentId])
 
-  if (histLoading) return <LoadingState fullHeight />
+  // Cargar goleadores desde la tabla apis
+  useEffect(() => {
+    async function loadTopScorers() {
+      setScorersLoading(true)
+      const data = await getTopScorers()
+      setTopScorers(data)
+      setScorersLoading(false)
+    }
+    loadTopScorers()
+  }, [])
 
-  if (historicalStandings.length === 0) {
+  if (histLoading || scorersLoading) return <LoadingState fullHeight />
+
+  if (historicalStandings.length === 0 && topScorers.length === 0) {
     return <div className="py-12"><EmptyState message="Las estadísticas estarán disponibles una vez que comiencen los partidos." className="h-64" /></div>
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <HistoricalTable
-        standings={historicalStandings}
-        teamLookup={teamLookup}
-      />
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-10 lg:gap-8">
+      {topScorers.length > 0 && (
+        <div className="order-1 lg:order-2">
+          <TopScorersTable
+            scorers={topScorers}
+            teamLookup={teamLookup}
+          />
+        </div>
+      )}
+
+      {historicalStandings.length > 0 && (
+        <div className="order-2 lg:order-1">
+          <HistoricalTable
+            standings={historicalStandings}
+            teamLookup={teamLookup}
+          />
+        </div>
+      )}
     </div>
   )
 }
