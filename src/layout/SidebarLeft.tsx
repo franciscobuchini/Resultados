@@ -53,7 +53,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 my-4">
+    <div className="flex flex-col gap-4">
       <Button
         icon={BarChart3}
         label="Estadísticas Mundiales"
@@ -109,7 +109,7 @@ export default function SidebarLeft() {
     <>
       {/* Desktop sidebar */}
       <div className={`hidden 2xl:block shrink-0 border-r ${border}`} style={{ width: LAYOUT_CONFIG.sidebarWidth }}>
-        <div className="pt-6">
+        <div className="py-4">
           <SidebarContent />
         </div>
       </div>
