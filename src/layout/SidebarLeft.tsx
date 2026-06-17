@@ -17,8 +17,6 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   close: () => set({ isOpen: false }),
 }));
 import TournamentList from '../components/ui/TournamentList';
-import { Globe } from 'lucide-react';
-import { Label } from '../components/ui/Label';
 import { Button } from '../components/ui/Button';
 import { BarChart3 } from 'lucide-react';
 
