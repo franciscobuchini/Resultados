@@ -53,11 +53,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 my-4">
       <Button
         icon={BarChart3}
         label="Estadísticas Mundiales"
-        className='mx-4 mb-2'
+        className='mx-4'
         onClick={() => {
           navigate('/tournament/INT.2026.WC/stats');
           window.scrollTo(0, 0);

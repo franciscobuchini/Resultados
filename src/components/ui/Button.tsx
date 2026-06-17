@@ -1,7 +1,7 @@
 import { type ReactNode, type ElementType } from 'react';
 import { useThemeClasses } from '../../functions/themeStore';
 
-export type ButtonVariant = 'outline' | 'danger' | 'ghost';
+export type ButtonVariant = 'outline' | 'danger' | 'dangerOutline' | 'ghost';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps {
@@ -53,6 +53,7 @@ export function Button({
   const variantStylesMap: Record<ButtonVariant, string | undefined> = {
     outline: `rounded-xl border ${theme.border} ${theme.bgSurfaceHover} ${theme.textMain} hover:opacity-90`,
     danger: `${theme.textError} hover:underline border-none bg-transparent`,
+    dangerOutline: `${theme.textError} hover:underline border ${theme.border} ${theme.bgSurfaceHover} ${theme.textMain} hover:opacity-90`,
     ghost: `border-none bg-transparent ${theme.textMuted} ${theme.textHover} hover:bg-transparent`,
   };
 
@@ -69,6 +70,7 @@ export function Button({
   const iconColorMap: Record<ButtonVariant, string | undefined> = {
     outline: theme.textMuted,
     danger: theme.textError,
+    dangerOutline: theme.textError,
     ghost: 'opacity-70 group-hover:opacity-100 transition-opacity',
   };
 

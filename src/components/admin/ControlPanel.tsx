@@ -39,9 +39,9 @@ export default function ControlPanel() {
       />
       <Button
         icon={Trash2}
-        label={deleteMatchMode ? "Modo Borrado ON" : "Borrar Partidos"}
+        label={deleteMatchMode ? "Borrar Activado" : "Borrar Partidos"}
         onClick={() => setDeleteMatchMode(!deleteMatchMode)}
-        variant={deleteMatchMode ? "danger" : "outline"}
+        variant={deleteMatchMode ? "dangerOutline" : "outline"}
       />
     </div>
   );
