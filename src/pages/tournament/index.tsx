@@ -62,7 +62,8 @@ const matchdayNumber = (round: string): number => {
 // ------------------------------------------------------------
 
 export default function TournamentPage() {
-  const { tournamentId } = useParams<{ tournamentId: string }>()
+  const { tournamentId, tabId } = useParams<{ tournamentId: string; tabId?: string }>()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [tournament, setTournament] = useState<Tournament | null>(null)
   const [matches, setMatches] = useState<Match[]>([])
@@ -71,12 +72,18 @@ export default function TournamentPage() {
   const [selectedRound, setSelectedRound] = useState<string | null>(null)
   const setLastTournamentId = useTheme(state => state.setLastTournamentId)
 
-  // Tab activa — por defecto la primera descubierta
-  const [activeTab, setActiveTab] = useState(tabModules[0]?.tabConfig.id ?? 'tournament')
+  // Tab activa — leer de URL o usar la primera descubierta
+  const activeTab = tabId && tabModules.some(m => m.tabConfig.id === tabId) 
+    ? tabId 
+    : tabModules[0]?.tabConfig.id ?? 'tournament'
+
+  // Función para cambiar pestaña navegando a la URL
+  const handleTabChange = (newTabId: string) => {
+    navigate(`/tournament/${tournamentId}/${newTabId}`)
+  }
 
   // Datos para la pestaña de Ediciones
   const [historyTournaments, setHistoryTournaments] = useState<{ tournament_id: string; tournament_name: string; tournament_crest_url: string | null }[]>([])
-  const navigate = useNavigate()
 
   // Construir array de tabs para PageHeader desde los módulos descubiertos
   const headerTabs = tabModules.map(m => ({
@@ -340,7 +347,7 @@ export default function TournamentPage() {
       tournamentId,
       historyTournaments,
       navigate,
-      setActiveTab,
+      setActiveTab: handleTabChange,
     },
   }
 
@@ -358,7 +365,7 @@ export default function TournamentPage() {
         <PageHeader
           tabs={headerTabs}
           activeTabId={activeTab}
-          onChange={setActiveTab}
+          onChange={handleTabChange}
         />
       </PageBanner>
 

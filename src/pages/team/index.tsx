@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../functions/supabase'
 import PageBanner from '../../layout/PageBanner'
 import PageContent from '../../layout/PageContent'
@@ -65,15 +65,23 @@ interface TeamLookup {
 // ------------------------------------------------------------
 
 export default function TeamPage() {
-  const { teamId } = useParams<{ teamId: string }>()
+  const { teamId, tabId } = useParams<{ teamId: string; tabId?: string }>()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [team, setTeam] = useState<Team | null>(null)
   const [matches, setMatches] = useState<MatchWithTournament[]>([])
   const [goals, setGoals] = useState<Goal[]>([])
   const [teamLookup, setTeamLookup] = useState<TeamLookup>({})
 
-  // Tab activa — por defecto la primera descubierta
-  const [activeTab, setActiveTab] = useState(tabModules[0]?.tabConfig.id ?? 'matches')
+  // Tab activa — leer de URL o usar la primera descubierta
+  const activeTab = tabId && tabModules.some(m => m.tabConfig.id === tabId) 
+    ? tabId 
+    : tabModules[0]?.tabConfig.id ?? 'matches'
+
+  // Función para cambiar pestaña navegando a la URL
+  const handleTabChange = (newTabId: string) => {
+    navigate(`/team/${teamId}/${newTabId}`)
+  }
 
   // Construir array de tabs para PageHeader
   const headerTabs = tabModules.map(m => ({
@@ -332,7 +340,7 @@ export default function TeamPage() {
         <PageHeader
           tabs={headerTabs}
           activeTabId={activeTab}
-          onChange={setActiveTab}
+          onChange={handleTabChange}
         />
       </PageBanner>
 

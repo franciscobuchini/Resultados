@@ -19,6 +19,8 @@ export const useSidebarStore = create<SidebarState>((set) => ({
 import TournamentList from '../components/ui/TournamentList';
 import { Globe } from 'lucide-react';
 import { Label } from '../components/ui/Label';
+import { Button } from '../components/ui/Button';
+import { BarChart3 } from 'lucide-react';
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { tournamentId } = useParams<{ tournamentId: string }>();
@@ -54,7 +56,17 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Label content="Copas del Mundo" icon={Globe}/>
+      <Button
+        icon={BarChart3}
+        label="Estadísticas Mundiales"
+        className='mx-4 mb-2'
+        onClick={() => {
+          navigate('/tournament/INT.2026.WC/stats');
+          window.scrollTo(0, 0);
+          onNavigate?.();
+        }}
+      />
+    
 
       {loading ? (
         <div className={`text-center text-xs ${textMuted} animate-pulse`}>

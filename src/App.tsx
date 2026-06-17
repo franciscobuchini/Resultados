@@ -28,8 +28,8 @@ export default function App() {
         <MainLayout>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/tournament/:tournamentId" element={<TournamentPage />} />
-            <Route path="/team/:teamId" element={<TeamPage />} />
+            <Route path="/tournament/:tournamentId/:tabId?" element={<TournamentPage />} />
+            <Route path="/team/:teamId/:tabId?" element={<TeamPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/login" element={<LoginPage />} />
