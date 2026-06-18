@@ -7,6 +7,7 @@ import HistoricalTable from '../../components/tables/HistoricalTable'
 import type { HistoricalTeamStanding } from '../../components/tables/HistoricalTable'
 import TopScorersTable from '../../components/tables/TopScorersTable'
 import { getTopScorers, type TopScorer } from '../../functions/topScorers'
+import { LAYOUT_CONFIG } from '../../functions/layoutConfig'
 
 export const tabConfig: TabConfig = {
   id: 'stats',
@@ -203,9 +204,18 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-10 lg:gap-8">
+    <div className={`grid grid-cols-1 lg:grid-cols-[2fr_1fr] ${LAYOUT_CONFIG.gapGrid}`}>
+      {historicalStandings.length > 0 && (
+        <div className="order-1">
+          <HistoricalTable
+            standings={historicalStandings}
+            teamLookup={teamLookup}
+          />
+        </div>
+      )}
+
       {topScorers.length > 0 && (
-        <div className="order-1 lg:order-2">
+        <div className="order-2">
           <TopScorersTable
             scorers={topScorers}
             teamLookup={teamLookup}
@@ -213,14 +223,6 @@ export default function EstadisticasTab({ tournamentId }: EstadisticasTabProps) 
         </div>
       )}
 
-      {historicalStandings.length > 0 && (
-        <div className="order-2 lg:order-1">
-          <HistoricalTable
-            standings={historicalStandings}
-            teamLookup={teamLookup}
-          />
-        </div>
-      )}
     </div>
   )
 }

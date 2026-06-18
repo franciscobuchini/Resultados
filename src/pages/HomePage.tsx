@@ -19,8 +19,6 @@ export default function HomePage() {
 
       <ProfileCTA />
 
-
-
       <DateNavigator dateLabel={dateLabel} onChangeDate={changeDate} canGoBack={canGoBack} />
 
       <div className="relative min-h-[400px]">

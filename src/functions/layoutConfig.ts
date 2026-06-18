@@ -5,9 +5,9 @@
 export const LAYOUT_CONFIG = {
   sidebarWidth: '17%',
   /** Espaciado vertical entre bloques principales (tablas, secciones) */
-  gap: 'gap-10 md:gap-8',
+  gap: 'gap-12',
   /** Espaciado para rejillas (grids) */
-  gapGrid: 'gap-12 lg:gap-8',
+  gapGrid: 'gap-12',
   /** Altura fija de filas de datos (48px) */
   dataRowHeight: 'h-12',
   /** Altura mínima para filas de detalles (24px) */
