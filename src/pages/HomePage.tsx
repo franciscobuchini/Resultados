@@ -6,7 +6,6 @@ import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import { LAYOUT_CONFIG } from '../functions/layoutConfig'
 import ProfileCTA from '../components/ui/ProfileCTA'
-import WorldCupBanner from '../components/temp/WorldCupBanner'
 import Efemerides from '../components/temp/Efemerides'
 
 export default function HomePage() {
@@ -14,8 +13,6 @@ export default function HomePage() {
 
   return (
     <PageContent maxWidth="1600">
-
-      <WorldCupBanner />
 
       <ProfileCTA />
 
